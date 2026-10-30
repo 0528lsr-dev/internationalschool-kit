@@ -246,6 +246,8 @@ function ctaBand(S, up, title, lead) {
 </section>`;
 }
 
+/* 선생님 소개 문구 (선생님 수는 쓰지 않는다 — 2026-10-30 사용자 요청) */
+const T_PITCH = 'UC 버클리·옥스퍼드·임페리얼·코넬 등 해외 명문대 출신 선생님들이 아이 학교 커리큘럼에 맞춰 1:1로 가르칩니다. IB 시험관 경력 선생님부터 영어로 수학·과학을 가르쳐 온 전문 강사까지, 상담 후 우리 아이에게 꼭 맞는 선생님을 골라 드립니다.';
 function teacherCard(t, up) {
   return `<a class="t-card" href="${up}t/${t.i}.html" data-s="${esc(t.s.join(','))}" data-c="${esc(t.c)}" data-sd="${esc(t.sd || '전국')}">
   <div class="t-top">${t.p ? `<img class="t-photo" src="${up}${t.p}" alt="${esc(t.n)} 선생님" loading="lazy" width="56" height="56">` : `<span class="t-photo t-ini">${esc([...t.n][0])}</span>`}<div><div class="t-name">${esc(t.n)} 선생님</div><div class="t-meta">${[t.c, t.g, t.regions[0] || '전국 화상'].filter(Boolean).map(esc).join(' · ')}</div></div></div>
@@ -298,7 +300,7 @@ function hubPage(S, D, s, region) {
       <p>${abroad ? `${region.label}의 국제학교는 학기 중에도 결원이 생기면 편입 시험을 보는 곳이 많습니다. 부모님 발령으로 갑자기 옮기게 된 경우라면 영어 읽기·에세이와 영어로 된 수학을 먼저 점검합니다.` : `${esc(sn)}처럼 국내에 있는 국제학교·외국인학교는 학교마다 지원 자격과 시험 방식이 다릅니다. 학교 입학처 안내로 자격과 일정을 먼저 확인하고, 영어 읽기·에세이·수학·인터뷰 순서로 준비합니다.`} 자세한 준비 방법은 <a href="${s.slug}-입학준비-과외.html">${esc(sn)} 입학준비 안내</a>에 정리했습니다.</p>`;
   const teacherHtml = show.length ? `
       <h2>${esc(sn)} 과외 선생님</h2>
-      <p>${local.length ? `${esc(region.label)} 방문 가능 선생님 ${local.length}명과 화상 선생님 가운데 일부입니다.` : '화상 선생님 가운데 일부입니다.'} 전체는 <a href="${up}teachers.html">선생님 페이지</a>에서 과목별로 볼 수 있습니다.</p>
+      <p>${local.length ? `${esc(region.label)} 방문 가능 선생님과 화상 선생님 가운데 일부입니다.` : '화상 선생님 가운데 일부입니다.'} 전체는 <a href="${up}teachers.html">선생님 페이지</a>에서 과목별로 볼 수 있습니다.</p>
       <div class="t-grid" style="margin:14px 0 6px">${show.map(x => teacherCard(x, up)).join('\n')}</div>` : '';
   return page(S, { path: hubFile(s), up, active: 'tutor', ld,
     title: `${sn} 과외 | ${s.n} ${s.c} 1:1 — ${region.label} · ${S.brand}`,
@@ -469,7 +471,7 @@ function regionPage(S, D, r) {
       <div class="chips">${D.SUBJECTS_HIGH.map(sub => `<a class="chip" href="${sub}과외-전체.html">${SUBJ[sub].icon} ${sub}과외</a>`).join('')}</div>
 ${local.length ? `
       <h2>${esc(r.label)} 방문 가능 선생님</h2>
-      <p>${esc(r.label)}로 방문 수업이 가능한 선생님 ${local.length}명 가운데 일부입니다. 화상 선생님까지 포함한 전체는 <a href="${up}teachers.html">선생님 페이지</a>에서 볼 수 있습니다.</p>
+      <p>${esc(r.label)}로 방문 수업이 가능한 선생님 가운데 일부입니다. 화상 선생님까지 포함한 전체는 <a href="${up}teachers.html">선생님 페이지</a>에서 볼 수 있습니다.</p>
       <div class="t-grid" style="margin:14px 0 6px">${local.slice(0, 8).map(t => teacherCard(t, up)).join('\n')}</div>` : `
       <h2>${esc(r.label)} 수업 방식</h2>
       <p>${r.abroad ? `${esc(r.label)} 학생은 화상 수업으로 진행합니다. 현지 시간에 맞춰 수업할 수 있는 선생님을 상담 때 찾아 드립니다.` : `${esc(r.label)}은 방문 수업 가능 여부를 상담 때 일정과 함께 확인해 드립니다. 화상 수업은 바로 시작할 수 있습니다.`} <a href="${up}teachers.html">선생님 보기</a></p>`}
@@ -568,18 +570,19 @@ function teachersPage(S, D) {
   const up = '';
   const sidos = [...new Set(D.teachers.map(t => t.sd).filter(Boolean))];
   return page(S, { path: 'teachers.html', up, active: 'teachers', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['선생님', 'teachers.html']])] },
-    title: `과외 선생님 ${D.teachers.length}명 — 방문·화상 1:1 | ${S.brand}`,
-    desc: `${(profOf(S).teacherSubjects || ['수학', '영어', '과학', '사회']).join('·')} 방문 선생님 ${D.teachers.filter(t => t.visit).length}명, 화상 선생님 ${D.teachers.filter(t => t.online).length}명. 과목·수업 방식·지역으로 걸러 보고 상담을 신청하세요.`,
+    title: `국제학교 전문 선생님 — 해외 명문대 출신 1:1 과외 | ${S.brand}`,
+    desc: T_PITCH,
     kw: '과외 선생님, 방문과외 선생님, 화상과외 선생님, 수학 과외 선생님, 영어 과외 선생님' }, `
 <section class="page-hero">
   <div class="wrap">
     <div class="crumb"><a href="index.html">홈</a> › 선생님</div>
-    <h1>과외 선생님 ${D.teachers.length}명</h1>
-    <p class="lead">이름은 개인정보 보호를 위해 가려 표기합니다. 카드를 누르면 소개와 수업 정보가 나옵니다.</p>
+    <h1>국제학교 전문 선생님</h1>
+    <p class="lead">${T_PITCH}</p>
+    <p class="small muted">선생님 이름은 개인정보 보호를 위해 가려 표기합니다. 카드를 누르면 경력과 수업 정보가 나옵니다.</p>
     <div class="chips" style="margin-top:14px" data-filter="s"><button class="chip" aria-pressed="true" data-v="">전체 과목</button>${(profOf(S).teacherSubjects || ['수학', '영어', '과학', '사회']).map(x => `<button class="chip" data-v="${x}">${x}</button>`).join('')}</div>
     <div class="chips" style="margin-top:8px" data-filter="c"><button class="chip" aria-pressed="true" data-v="">방문·화상</button><button class="chip" data-v="방문">방문 가능</button><button class="chip" data-v="화상">화상 가능</button></div>
     <div class="chips" style="margin-top:8px" data-filter="sd"><button class="chip" aria-pressed="true" data-v="">전국</button>${D.SIDO_ORDER.filter(k => sidos.includes(k)).map(x => `<button class="chip" data-v="${x}">${x}</button>`).join('')}</div>
-    <p class="small muted" style="margin:10px 0 0"><span id="tcnt">${D.teachers.length}</span>명 표시 중</p>
+    <p class="small muted" style="display:none"><span id="tcnt"></span></p>
   </div>
 </section>
 <section>
@@ -773,7 +776,7 @@ function indexPage(S, D, blog) {
       <p class="hero-hint">인기 학교 ${popular.map(sn => `<a href="pages/${sn}-과외.html">${esc(sn)}</a>`).join('·')}<br>또는 <a href="${FINDER['해외'][1]}">해외 국제학교 찾기</a>·<a href="regions.html">나라·지역으로 찾기</a>·<a href="curriculum/index.html">커리큘럼별 안내</a><br><b>목록에 없는 학교도 수업 가능합니다</b> — <a href="contact.html">상담 신청</a></p>
       ${facts}`,
     teachers: () => `<div class="in">${eyebrow}${h1}${lead}${cta}${facts}</div>
-      <div class="hero-stack">${featured.slice(0, 3).map(t => teacherCard(t, up)).join('')}<p class="more"><a href="teachers.html">선생님 ${D.teachers.length}명 모두 보기 →</a></p></div>`,
+      <div class="hero-stack">${featured.slice(0, 3).map(t => teacherCard(t, up)).join('')}<p class="more"><a href="teachers.html">선생님 모두 보기 →</a></p></div>`,
     form: () => `<div class="in">${eyebrow}${S.quote ? `<p class="quote">“${esc(S.quote)}”</p>` : ''}${h1}${lead}
       <div class="hero-cta"><a href="${FINDER['국내'][1]}" class="btn btn-primary">우리 학교 찾기 →</a><a href="tel:${TELRAW}" class="btn btn-ghost">📞 ${TEL}</a></div></div>
       <div class="hero-form">
@@ -811,7 +814,7 @@ function indexPage(S, D, blog) {
       .map(([ic, h, p], i) => `<div class="card">${dark ? `<span class="no">0${i + 1}</span>` : `<span class="ico">${ic}</span>`}<h3>${h}</h3><p>${p}</p></div>`).join('')}</div>`,
     steps: () => `${head('How it works', '수업은 이렇게 시작됩니다', '처음 과외를 알아보셔도 괜찮습니다. 다섯 단계면 됩니다.')}
     <div class="steps">${[['상담 신청', '학교·학년(Grade)·과목·사는 곳을 남깁니다'], ['선생님 추천', '그 커리큘럼을 가르쳐 본 2~3명을 24시간 안에 안내'], ['첫 수업', '성적표·과제 피드백을 보고 수업 계획을 세웁니다'], ['정기 수업', '학교 과제 마감과 시험 일정에 맞춰 진행'], ['점검', '학기 성적과 피드백을 보고 계획을 조정']].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>`,
-    teachers: () => D.teachers.length ? `${head('Teachers', '선생님을 먼저 보고 싶다면', `선생님 ${D.teachers.length}명 가운데 일부입니다.`, ['teachers.html', '선생님 전체 보기'])}
+    teachers: () => D.teachers.length ? `${head('Teachers', '명문대 출신 국제학교 전문 선생님', T_PITCH, ['teachers.html', '선생님 전체 보기'])}
     <div class="t-grid">${featured.map(t => teacherCard(t, up)).join('\n')}</div>` : `${head('Teachers', '선생님을 먼저 보고 싶다면', '학교·커리큘럼에 맞는 선생님을 상담 때 2~3명 골라 소개해 드립니다.', ['teachers.html', '선생님 페이지'])}`,
     faq: () => `${head('FAQ', '학부모님이 자주 묻는 질문')}
     <div class="faq-list" style="max-width:820px;margin:0 auto">${HOME_FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>`,
