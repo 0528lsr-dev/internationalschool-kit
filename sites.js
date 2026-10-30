@@ -22,7 +22,7 @@ const SITES = [
     /* 밝음 · 버건디+로즈골드, 함렛 제목 — 기존 13곳·참고 사이트(나도 국제학교)와 색·히어로가 겹치지 않게 */
     theme: { mode: "light", bg: "#fbf7f5", surface: "#ffffff", surface2: "#f6ece8", ink: "#2a1a1f", primary: "#7a1f3d", onPrimary: "#ffffff",
              accent: "#c08a73", hl: "#b5654b", foot: "#2a1219", radius: "12px", head: "hahmlet", font: "pretendard", nav: "center", hero: "search", btn: "round" },
-    home: ["curriculum", "subjectsList", "regions", "services", "steps", "faq", "journal"]
+    home: ["curriculum", "subjectsList", "regions", "services", "teachers", "steps", "faq", "journal"]
   }
 ];
 

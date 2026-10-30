@@ -359,6 +359,10 @@ ${heroCss}
 
 /* 선생님 */
 .t-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.t-photo{width:56px;height:56px;border-radius:50%;object-fit:cover;flex:none;margin-right:12px;background:var(--line)}
+.t-ini{display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--brand,#7a1f3d)}
+.t-top{display:flex;align-items:center}
+.td-photo{width:120px;height:120px;border-radius:50%;object-fit:cover;margin-top:16px}
 .t-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px;display:block;color:var(--ink);transition:transform .2s,box-shadow .2s,border-color .2s}
 .t-card:hover{text-decoration:none;border-color:rgba(${P},.4);transform:translateY(-2px);box-shadow:0 30px 50px -36px rgba(${SH},.5)}
 .t-top{margin-bottom:10px}

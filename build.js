@@ -18,7 +18,7 @@ const LEVEL = { 국내: '국내 국제학교', 해외: '해외 국제학교' };
 /* 한국 날짜 — 데일리는 새벽 2시에 돈다. toISOString() 그대로면 세계 표준시라 전날이 찍힌다(2026-10-19 실제 발생) */
 const TODAY = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 /* 과목 → 선생님 데이터의 과목 이름(선생님 데이터에는 수학·영어·과학·사회 같은 큰 과목만 적는다) */
-const T_SUBJ = { 물리: '과학', 화학: '과학', 생물: '과학', 에세이: '영어', SAT: '영어', 입학준비: '영어', 경제: '사회' };
+const T_SUBJ = { 물리: '과학', 화학: '과학', 생물: '과학', 에세이: '영어', SAT: '영어', 입학준비: '영어' };
 const MODE = s => s.t === '해외' ? '화상 1:1' : '화상·방문 1:1';
 const josa = (w, a, b) => { const c = String(w).charCodeAt(String(w).length - 1); const has = c >= 0xAC00 && c <= 0xD7A3 ? (c - 0xAC00) % 28 !== 0 : false; return w + (has ? a : b); };
 
@@ -248,7 +248,7 @@ function ctaBand(S, up, title, lead) {
 
 function teacherCard(t, up) {
   return `<a class="t-card" href="${up}t/${t.i}.html" data-s="${esc(t.s.join(','))}" data-c="${esc(t.c)}" data-sd="${esc(t.sd || '전국')}">
-  <div class="t-top"><div><div class="t-name">${esc(t.n)} 선생님</div><div class="t-meta">${esc(t.c)} · ${esc(t.g)} · ${esc(t.regions[0] || '전국 화상')}</div></div></div>
+  <div class="t-top">${t.p ? `<img class="t-photo" src="${up}${t.p}" alt="${esc(t.n)} 선생님" loading="lazy" width="56" height="56">` : `<span class="t-photo t-ini">${esc([...t.n][0])}</span>`}<div><div class="t-name">${esc(t.n)} 선생님</div><div class="t-meta">${[t.c, t.g, t.regions[0] || '전국 화상'].filter(Boolean).map(esc).join(' · ')}</div></div></div>
   <p class="t-tag">${esc(t.tag || t.headline)}</p>
   <div class="t-sub">${t.s.map(x => `<b>${esc(x)}</b>`).join('')}${(t.gr && t.gr[0]) ? `<b>${esc(t.gr[0])}</b>` : ''}</div>
 </a>`;
@@ -608,14 +608,15 @@ function teacherPage(S, D, t) {
   <div class="wrap">
     <div class="crumb"><a href="${up}index.html">홈</a> › <a href="${up}teachers.html">선생님</a> › ${esc(t.n)} 선생님</div>
     <h1>${esc(t.n)} 선생님</h1>
-    <p class="lead">${esc(where)} · ${esc(subj)} · ${esc(t.c)}과외 · ${esc(t.g)}선생님</p>
+    <p class="lead">${esc(where)} · ${esc(subj)} · ${esc(t.c)}과외${t.g ? ` · ${esc(t.g)}선생님` : ''}</p>
+    ${t.p ? `<img class="td-photo" src="${up}${t.p}" alt="${esc(t.n)} 선생님" width="120" height="120">` : ''}
   </div>
 </section>
 <section>
   <div class="wrap td">
     <div class="article" style="margin:0;max-width:none">
       <h2>${esc(t.headline || t.tag)}</h2>
-      <p>${esc(t.intro)}</p>
+      ${t.intro ? `<p>${esc(t.intro)}</p>` : ''}${(t.b || []).length ? `<h3>경력</h3><ul>${t.b.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
       <p>${esc(t.n)} 선생님은 ${esc(t.gr.join(', '))} 학생의 ${esc(subj)} 수업을 ${t.c === '방문+화상' ? '방문과 화상 모두' : t.c + '으로'} 진행합니다. 첫 상담에서 학생의 현재 상태를 듣고 수업 계획을 세운 뒤 시작하며, 첫 수업 후 맞지 않으면 다른 선생님을 함께 안내해 드립니다.</p>
 ${schools.length ? `<h2>${esc(t.n)} 선생님 방문 지역 학교</h2>
       ${cells(schools, s => `${up}pages/${s.slug}-과외.html`, '과외')}` : ''}
@@ -629,7 +630,7 @@ ${similar.length ? `<h2>이런 선생님도 있어요</h2>
           <li><i>수업 방식</i><span>${esc(t.c)}과외</span></li>
           <li><i>과목·학년</i><span>${t.s.map((v, i) => `${esc(v)} <span class="muted">${esc(t.gr[i] || t.gr[0] || '')}</span>`).join('<br>')}</span></li>
           <li><i>수업 지역</i><span>${esc(where)}</span></li>
-          <li><i>선생님</i><span>${esc(t.g)}선생님</span></li>
+          ${t.g ? `<li><i>선생님</i><span>${esc(t.g)}선생님</span></li>` : ''}
         </ul>
         <a href="${up}contact.html?t=${t.i}" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px">${esc(t.n)} 선생님 상담 신청</a>
         <p class="small muted" style="margin:10px 0 0">신청하시면 선생님의 수업 가능 시간을 확인한 뒤 연락드립니다.</p>
