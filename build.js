@@ -254,8 +254,8 @@ const T_PITCH = 'IB·AP·IGCSE·A-Level 수업 경험이 많은 국제학교 전
 
 /* ===== 수강료·학년·차별점·진행 (2026-11-03, 같은 회사 동료 사이트와 같은 가격·구성 — 사용자 요청. 후기는 넣지 않는다) ===== */
 const PRICE = [
-  { name: '주 2회 · 1시간', won: '480,000', tag: '', items: ['실시간 1:1 화상 수업 (월 8회)', '학교 커리큘럼 기준 맞춤 학습 플랜', '수업마다 학습 리포트', '과제 첨삭 · 수업 외 질문 대응', '학부모 정기 피드백'] },
-  { name: '주 2회 · 90분', won: '720,000', tag: '시험 대비 · 심화 추천', items: ['1시간 과정 내용 모두 포함', 'IA · EE · 에세이 등 과제 심화 지도', '학기말 · IB · AP · SAT 시험 집중 대비', '취약 단원 보충 시간 확보'] }
+  { name: '주 2회 · 60분', won: '480,000', tag: '', items: ['실시간 1:1 화상 수업 (월 8회)', '학교 커리큘럼 기준 맞춤 학습 플랜', '수업마다 학습 리포트', '과제 첨삭 · 수업 외 질문 대응', '학부모 정기 피드백'] },
+  { name: '주 2회 · 90분', won: '720,000', tag: '시험 대비 · 심화 추천', items: ['60분 과정 내용 모두 포함', 'IA · EE · 에세이 등 과제 심화 지도', '학기말 · IB · AP · SAT 시험 집중 대비', '취약 단원 보충 시간 확보'] }
 ];
 const PRICE_BADGES = ['3개월 등록 시 10% 할인', '카드결제 가능', '교육비 소득공제 가능'];
 const FREE_TEST = '등록 전, 10~15분 무료 테스트 수업';
@@ -276,13 +276,13 @@ const PROCESS6 = [['상담 신청', '학교 · 학년 · 과목을 남겨 주세
 
 function pricePage(S) {
   const faq = [
-    ['수강료는 어떻게 되나요?', '주 2회 1시간 과정은 월 480,000원, 주 2회 90분 과정은 월 720,000원입니다. 3개월 등록 시 10% 할인됩니다.'],
+    ['수강료는 어떻게 되나요?', '주 2회 60분 과정은 월 480,000원, 주 2회 90분 과정은 월 720,000원입니다. 3개월 등록 시 10% 할인됩니다.'],
     ['결제는 어떻게 하나요?', '카드결제가 가능하며, 교육비 소득공제도 받을 수 있습니다.'],
     ['등록 전에 수업을 받아 볼 수 있나요?', '네. 등록 전에 10~15분 무료 테스트 수업으로 선생님과 수업 방식을 먼저 확인할 수 있습니다.'],
     ['국내에 살아도 화상 수업인가요?', '네. 모든 수업은 실시간 1:1 화상으로 진행합니다. 이동 시간이 없고, 학교 과제와 풀이를 화면에 같이 띄워 놓고 수업해 집중도가 높습니다.']
   ];
   return page(S, { path: 'price.html', up: '', active: 'price', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['수강료', 'price.html']]), faqLd(faq)] },
-    title: `국제학교 과외 수강료 — 주 2회 1시간 48만원 · 90분 72만원 | ${S.brand}`, desc: `${S.brand} 수강료 안내. 주 2회 1시간 월 48만원, 90분 월 72만원, 3개월 등록 시 10% 할인. 카드결제·소득공제 가능, 등록 전 10~15분 무료 테스트 수업.` }, `
+    title: `국제학교 과외 수강료 — 주 2회 60분 48만원 · 90분 72만원 | ${S.brand}`, desc: `${S.brand} 수강료 안내. 주 2회 60분 월 48만원, 90분 월 72만원, 3개월 등록 시 10% 할인. 카드결제·소득공제 가능, 등록 전 10~15분 무료 테스트 수업.` }, `
 <section class="page-hero">
   <div class="wrap">
     <div class="crumb"><a href="index.html">홈</a> › 수강료</div>
@@ -310,8 +310,10 @@ function pricePage(S) {
 ${formSection(S, 'f_price', { title: '무료 테스트 수업 신청', lead: '10~15분 무료 테스트 수업부터 받아 보세요. 전문 선생님이 곧 연락드립니다.' })}`);
 }
 /* 선생님 카드 띠 — 옆으로 넘겨 본다(홈·선생님 페이지 공용, 2026-11-03) */
-const tScroll = (list, up, id) => `<div class="t-scroll-wrap"><button type="button" class="t-arrow prev" aria-label="이전" onclick="this.parentNode.querySelector('.t-scroll').scrollBy({left:-300,behavior:'smooth'})">‹</button><div class="t-scroll"${id ? ` id="${id}"` : ''}>${list.map(t => teacherCard(t, up)).join('\n')}</div><button type="button" class="t-arrow next" aria-label="다음" onclick="this.parentNode.querySelector('.t-scroll').scrollBy({left:300,behavior:'smooth'})">›</button></div>
-    <p class="t-swipe">옆으로 넘겨 보세요 →</p>`;
+/* 카드 모양은 동료 사이트(internationaledu.co.kr)처럼: 위쪽 색 띠 · 이름 · 분야 알약 · 경력 점 목록, 화살표는 아래 가운데 */
+const tSlide = (t, up) => `<a class="t-slide" href="${up}t/${t.i}.html" data-s="${esc(t.s.join(','))}" data-c="${esc(t.c)}" data-sd="${esc(t.sd || '전국')}"><h3>${esc(t.n)} 선생님</h3><span class="t-pill">${esc([...t.s.slice(0, 2), '국제학교'].join(' · '))}</span><ul>${(t.b && t.b.length ? t.b : [t.tag || t.headline]).map(x => `<li>${esc(x)}</li>`).join('')}</ul></a>`;
+const tGo = d => `onclick="this.closest('.t-scroll-wrap').querySelector('.t-scroll').scrollBy({left:${d},behavior:'smooth'})"`;
+const tScroll = (list, up, id) => `<div class="t-scroll-wrap"><div class="t-scroll"${id ? ` id="${id}"` : ''}>${list.map(t => tSlide(t, up)).join('\n')}</div><div class="t-arrows"><button type="button" class="t-arrow" aria-label="이전" ${tGo(-290)}>‹</button><button type="button" class="t-arrow" aria-label="다음" ${tGo(290)}>›</button></div></div>`;
 function teacherCard(t, up) {
   return `<a class="t-card" href="${up}t/${t.i}.html" data-s="${esc(t.s.join(','))}" data-c="${esc(t.c)}" data-sd="${esc(t.sd || '전국')}">
   <div class="t-top">${t.p ? `<img class="t-photo" src="${up}${t.p}" alt="${esc(t.n)} 선생님" loading="lazy" width="56" height="56">` : `<span class="t-photo t-ini">${esc([...t.n][0])}</span>`}<div><div class="t-name">${esc(t.n)} 선생님</div><div class="t-meta">${[t.c, t.g, t.regions[0] || '전국 화상'].filter(Boolean).map(esc).join(' · ')}</div></div></div>
@@ -644,7 +646,6 @@ function teachersPage(S, D) {
     <p class="lead">${T_PITCH}</p>
     <p class="small muted">선생님 이름은 개인정보 보호를 위해 가려 표기합니다. 카드를 누르면 경력과 수업 정보가 나옵니다.</p>
     <div class="chips" style="margin-top:14px" data-filter="s"><button class="chip" aria-pressed="true" data-v="">전체 과목</button>${(profOf(S).teacherSubjects || ['수학', '영어', '과학', '사회']).map(x => `<button class="chip" data-v="${x}">${x}</button>`).join('')}</div>
-    <div class="chips" style="margin-top:8px" data-filter="sd"><button class="chip" aria-pressed="true" data-v="">전국</button>${D.SIDO_ORDER.filter(k => sidos.includes(k)).map(x => `<button class="chip" data-v="${x}">${x}</button>`).join('')}</div>
     <p class="small muted" style="display:none"><span id="tcnt"></span></p>
   </div>
 </section>
@@ -786,7 +787,7 @@ const HOME_FAQ = [
   ['학교 이름으로 찾았는데, 그 학교 선생님이 수업하나요?', '아닙니다. 그 학교의 커리큘럼과 과제 방식에 맞춰 수업할 수 있는 과외 선생님을 연결한다는 뜻입니다. 학교 소속 교사가 아니며, 학교와 제휴 관계도 아닙니다.'],
   ['해외에 사는데 수업이 되나요?', '됩니다. 모든 수업은 실시간 1:1 화상으로 진행하고, 현지 시간 기준으로 학교가 끝난 뒤나 주말에 맞춥니다. 국내 국제학교 학생도 같은 방식으로 수업합니다.'],
   ['수업은 영어로 하나요, 한국어로 하나요?', '학생에게 맞춥니다. 개념은 한국어로 정확히 잡고, 학교에서 쓰는 영어 용어와 영어 서술로 다시 정리하는 방식을 많이 씁니다. 영어로만 수업받기를 원하면 그렇게 합니다.'],
-  ['수업료는 얼마인가요?', '주 2회 1시간 과정은 월 480,000원, 주 2회 90분 과정은 월 720,000원이며 3개월 등록 시 10% 할인됩니다. 카드결제·소득공제가 가능하고, 등록 전 10~15분 무료 테스트 수업을 받아 볼 수 있습니다.'],
+  ['수업료는 얼마인가요?', '주 2회 60분 과정은 월 480,000원, 주 2회 90분 과정은 월 720,000원이며 3개월 등록 시 10% 할인됩니다. 카드결제·소득공제가 가능하고, 등록 전 10~15분 무료 테스트 수업을 받아 볼 수 있습니다.'],
   ['수업을 빠지면 보강이 되나요?', '미리 연락 주시면 선생님 일정에 맞춰 보강 날짜를 다시 잡아 드립니다.']
 ];
 
@@ -906,7 +907,7 @@ function indexPage(S, D, blog) {
     title: `${S.brand} — ${profOf(S).homeTitle}`,
     desc: `${S.tagline} 국내·해외 국제학교 학교별 과목 안내, ${profOf(S).homeExtra}. 무료 상담 ${TEL}.`,
     kw: profOf(S).homeKw }, `
-<section class="hero">
+<section class="hero${S.heroImg ? ' has-photo' : ''}">
   <div class="wrap">
     ${heroes[S.theme.hero]()}
   </div>

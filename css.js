@@ -275,6 +275,8 @@ ${heroCss}
 .steps b{display:block;margin-bottom:4px;font-size:1.04rem}
 .steps span{font-size:.9rem;color:var(--ink-soft)}
 .steps.s6{grid-template-columns:repeat(6,1fr)}
+/* 홈 첫 화면 배경 사진 (2026-11-03, img/hero-campus.jpg — Wikimedia Commons CC0) */
+.hero.has-photo{background:linear-gradient(180deg,rgba(251,247,245,.78) 0%,rgba(251,247,245,.86) 60%,rgba(251,247,245,1) 100%),url(img/hero-campus.jpg) center 40%/cover no-repeat}
 .price-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:880px;margin:0 auto}
 .price-card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:30px 28px}
 .price-card.is-pick{border:2px solid var(--primary)}
@@ -384,11 +386,18 @@ ${heroCss}
 /* 선생님 */
 .t-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
 .t-scroll-wrap{position:relative}
-.t-scroll{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding:4px 2px 14px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
-.t-scroll .t-card{flex:0 0 270px;scroll-snap-align:start}
-.t-arrow{position:absolute;top:50%;transform:translateY(-60%);z-index:2;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:1.6rem;line-height:1;cursor:pointer;box-shadow:0 8px 20px -10px rgba(0,0,0,.4)}
-.t-arrow.prev{left:-14px}.t-arrow.next{right:-14px}
-.t-swipe{text-align:right;font-size:.85rem;color:var(--ink-soft);margin:4px 0 0}
+.t-scroll{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding:6px 4px 18px;-webkit-overflow-scrolling:touch;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent 100%)}
+.t-scroll::-webkit-scrollbar{display:none}
+.t-slide{flex:0 0 250px;scroll-snap-align:start;display:block;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-top:4px solid var(--hl);border-radius:16px;padding:24px 20px 22px;box-shadow:0 10px 28px -18px rgba(0,0,0,.35);transition:transform .2s}
+.t-slide:hover{transform:translateY(-3px);text-decoration:none}
+.t-slide h3{margin:0 0 12px;font-size:1.15rem;font-weight:800}
+.t-pill{display:inline-block;font-size:.78rem;font-weight:700;padding:5px 12px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);margin-bottom:14px}
+.t-slide ul{margin:0;padding:0;list-style:none}
+.t-slide li{position:relative;padding-left:14px;margin:0 0 6px;font-size:.88rem;line-height:1.6;color:var(--ink-soft)}
+.t-slide li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--hl)}
+.t-arrows{display:flex;justify-content:center;gap:14px;margin-top:10px}
+.t-arrow{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:1.4rem;line-height:1;cursor:pointer;box-shadow:0 6px 16px -8px rgba(0,0,0,.3)}
+.t-arrow:hover{border-color:var(--hl);color:var(--hl)}
 .t-photo{width:56px;height:56px;border-radius:50%;object-fit:cover;flex:none;margin-right:12px;background:var(--line)}
 .t-ini{display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--brand,#7a1f3d)}
 .t-top{display:flex;align-items:center}
@@ -509,8 +518,7 @@ footer a:hover{color:#fff}
 @media(max-width:640px){
   section{padding:46px 0}
   .g2,.g3,.g4,.steps,.steps.s6,.price-grid{grid-template-columns:1fr}
-  .t-arrow{display:none}
-  .t-scroll .t-card{flex-basis:78%}
+  .t-slide{flex-basis:78%}
   .grade-chips{grid-template-columns:repeat(3,1fr)}
   .free-test{flex-direction:column;align-items:stretch;text-align:center}
   .tiles{grid-template-columns:repeat(2,1fr)}
