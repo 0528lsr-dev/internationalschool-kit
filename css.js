@@ -274,6 +274,30 @@ ${heroCss}
 .steps div::before{counter-increment:s;content:counter(s);position:absolute;top:0;left:0;width:46px;height:46px;border-radius:50%;background:var(--bg);border:1px solid rgba(${P},.45);color:var(--hl);display:grid;place-items:center;font-weight:800;font-family:var(--head)}
 .steps b{display:block;margin-bottom:4px;font-size:1.04rem}
 .steps span{font-size:.9rem;color:var(--ink-soft)}
+.steps.s6{grid-template-columns:repeat(6,1fr)}
+.price-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:880px;margin:0 auto}
+.price-card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:30px 28px}
+.price-card.is-pick{border:2px solid var(--primary)}
+.price-tag{position:absolute;top:-13px;left:24px;background:var(--primary);color:var(--on-primary);font-size:.78rem;font-weight:800;padding:4px 12px;border-radius:999px}
+.price-card h3{margin:0 0 6px}
+.price-won{margin:0 0 16px;color:var(--ink-soft)}
+.price-won b{font-family:var(--head);font-size:2.2rem;color:var(--primary);letter-spacing:-.03em}
+.price-card ul{margin:0;padding:0;list-style:none}
+.price-card li{padding:6px 0 6px 24px;position:relative;font-size:.95rem;border-top:1px solid var(--line)}
+.price-card li::before{content:"✓";position:absolute;left:2px;color:var(--primary);font-weight:800}
+.price-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:22px 0 0}
+.price-badges span{font-size:.88rem;font-weight:700;padding:7px 14px;border-radius:999px;background:var(--surface2);border:1px solid var(--line)}
+.free-test{display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:880px;margin:22px auto 0;padding:20px 24px;border-radius:var(--r);background:var(--surface);border:1px dashed var(--primary)}
+.free-test b{display:block;font-size:1.05rem;margin-bottom:4px}
+.free-test span{font-size:.9rem;color:var(--ink-soft)}
+.grade-chips{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.grade-chips a{display:block;text-align:center;padding:16px 8px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);color:var(--ink)}
+.grade-chips a:hover{border-color:var(--primary);text-decoration:none;transform:translateY(-2px)}
+.grade-chips b{display:block;font-family:var(--head);font-size:1.3rem;color:var(--primary)}
+.grade-chips span{font-size:.8rem;color:var(--ink-soft)}
+.agree{display:flex;gap:8px;align-items:flex-start;font-size:.85rem;color:var(--ink-soft);margin:4px 0 14px;line-height:1.5}
+.agree input{margin-top:3px;flex:none}
+.float-cta .btn-test{background:var(--surface)}
 
 /* 숫자 띠 */
 .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
@@ -462,6 +486,8 @@ footer a:hover{color:#fff}
 
 @media(max-width:900px){
   .g3,.g4,.steps,.stat-strip{grid-template-columns:repeat(2,1fr)}
+  .steps.s6{grid-template-columns:repeat(3,1fr)}
+  .grade-chips{grid-template-columns:repeat(4,1fr)}
   .tiles{grid-template-columns:repeat(3,1fr)}
   .slist{grid-template-columns:1fr}
   .slist a:nth-child(odd){border-right:0;padding-right:8px}
@@ -476,7 +502,9 @@ footer a:hover{color:#fff}
 }
 @media(max-width:640px){
   section{padding:46px 0}
-  .g2,.g3,.g4,.steps{grid-template-columns:1fr}
+  .g2,.g3,.g4,.steps,.steps.s6,.price-grid{grid-template-columns:1fr}
+  .grade-chips{grid-template-columns:repeat(3,1fr)}
+  .free-test{flex-direction:column;align-items:stretch;text-align:center}
   .tiles{grid-template-columns:repeat(2,1fr)}
   .nav-links{display:none}
   .menu-btn{display:inline-block}

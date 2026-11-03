@@ -93,6 +93,7 @@ function navFor(S) {
   return [
     ['국제학교 과외', 'tutor', null, [...finders, ['regions.html', '나라·지역별'], [`pages/${firstSub}과외-전체.html`, '과목별 과외']]],
     [sp.menu, 'conv', `${sp.dir}/index.html`, sp.pages.map(p => [`${sp.dir}/${p.key}.html`, p.name])],
+    ['수강료', 'price', 'price.html', null],
     ['선생님', 'teachers', 'teachers.html', null],
     ['수업 이야기', 'blog', 'blog.html', null],
     ['유학·입시정보', 'admissions', 'admissions.html', null]
@@ -139,6 +140,7 @@ function foot(S, up) {
         ${specOf(S).pages.map(p => [`${specOf(S).dir}/${p.key}.html`, p.title]).map(([h, t]) => `<li><a href="${up}${h}">${esc(t)}</a></li>`).join('\n        ')}
       </ul></div>
       <div><h5>정보</h5><ul>
+        <li><a href="${up}price.html">수강료</a></li>
         <li><a href="${up}blog.html">수업 이야기</a></li>
         <li><a href="${up}admissions.html">유학·입시정보</a></li>
         <li><a href="${up}contact.html">상담 신청</a></li>
@@ -147,7 +149,7 @@ function foot(S, up) {
     <div class="copy-bar"><span>© ${new Date().getFullYear()} ${esc(S.brand)}. 선생님 이름은 개인정보 보호를 위해 가려 표기합니다.</span><span><a href="${up}sitemap.xml">사이트맵</a></span></div>
   </div>
 </footer>
-<div class="float-cta">${kakao}<a href="tel:${TELRAW}" class="btn btn-primary">📞 ${TEL}</a></div>
+<div class="float-cta">${kakao}<a href="tel:${TELRAW}" class="btn btn-primary">📞 ${TEL}</a><a href="${up}contact.html#apply" class="btn btn-ghost btn-test">🎁 무료 테스트</a></div>
 <script src="${up}app.js" defer></script>
 ${o_scripts(S, up)}
 </body>
@@ -224,7 +226,8 @@ function formSection(S, id, opt = {}) {
             <select id="${id}_gender"><option>상관없음</option><option>여선생님</option><option>남선생님</option></select></div>
         </div>
         <div class="field"><label for="${id}_memo">남기실 말씀</label><textarea id="${id}_memo" placeholder="지금 어려워하는 부분, 원하는 수업 시간 등을 적어주세요."></textarea></div>
-        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">무료 상담 신청하기</button>
+        <label class="agree"><input type="checkbox" required /> 상담을 위한 개인정보(이름·연락처·학년·상담 내용) 수집·이용에 동의합니다. 상담 후 1년 보관 뒤 파기합니다.</label>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">무료 상담 · 테스트 수업 신청하기</button>
         <div class="ok" id="${id}_ok">신청이 접수되었습니다. 곧 연락드리겠습니다. 급하시면 ${TEL} 로 전화 주세요.</div>
       </form>
       <p class="small muted center" style="margin:14px 0 0">전화 상담 — <a href="tel:${TELRAW}"><b>${TEL}</b></a></p>
@@ -248,6 +251,64 @@ function ctaBand(S, up, title, lead) {
 
 /* 선생님 소개 문구 (선생님 수는 쓰지 않는다 — 2026-10-30 사용자 요청) */
 const T_PITCH = 'UC 버클리·옥스퍼드·임페리얼·코넬 등 해외 명문대 출신 선생님들이 아이 학교 커리큘럼에 맞춰 1:1로 가르칩니다. IB 시험관 경력 선생님부터 영어로 수학·과학을 가르쳐 온 전문 강사까지, 상담 후 우리 아이에게 꼭 맞는 선생님을 골라 드립니다.';
+
+/* ===== 수강료·학년·차별점·진행 (2026-11-03, 같은 회사 동료 사이트와 같은 가격·구성 — 사용자 요청. 후기는 넣지 않는다) ===== */
+const PRICE = [
+  { name: '주 2회 · 1시간', won: '480,000', tag: '', items: ['실시간 1:1 화상 수업 (월 8회)', '학교 커리큘럼 기준 맞춤 학습 플랜', '수업마다 학습 리포트', '과제 첨삭 · 수업 외 질문 대응', '학부모 정기 피드백'] },
+  { name: '주 2회 · 90분', won: '720,000', tag: '시험 대비 · 심화 추천', items: ['1시간 과정 내용 모두 포함', 'IA · EE · 에세이 등 과제 심화 지도', '학기말 · IB · AP · SAT 시험 집중 대비', '취약 단원 보충 시간 확보'] }
+];
+const PRICE_BADGES = ['3개월 등록 시 10% 할인', '카드결제 가능', '교육비 소득공제 가능'];
+const FREE_TEST = '등록 전, 10~15분 무료 테스트 수업';
+function priceBlock(up) {
+  return `<div class="price-grid">${PRICE.map(p => `<div class="price-card${p.tag ? ' is-pick' : ''}">${p.tag ? `<span class="price-tag">${p.tag}</span>` : ''}<h3>${p.name}</h3><p class="price-won"><b>${p.won}</b>원 <span>/ 월</span></p><ul>${p.items.map(i => `<li>${i}</li>`).join('')}</ul></div>`).join('')}</div>
+    <div class="price-badges">${PRICE_BADGES.map(b => `<span>${b}</span>`).join('')}</div>
+    <div class="free-test"><div><b>🎁 ${FREE_TEST}</b><span>선생님과 직접 수업해 보고, 아이 수준을 확인한 뒤 결정하세요. 테스트 수업은 비용이 없습니다.</span></div><a href="${up}contact.html#apply" class="btn btn-primary">무료 테스트 신청</a></div>
+    <p class="small muted center" style="margin:14px 0 0">국내 방문 수업은 지역과 이동 거리에 따라 상담 때 따로 안내드립니다.</p>`;
+}
+const GRADE_STAGES = [['G1', '기초 적응'], ['G2', '기초 적응'], ['G3', '읽기 · 쓰기 기초'], ['G4', 'PYP · 영어 읽기'], ['G5', 'PYP 마무리'], ['G6', 'MYP · 중등 진입'], ['G7', 'MYP · 수학 기초'], ['G8', 'MYP · 과학 심화'], ['G9', 'IGCSE · MYP 마무리'], ['G10', 'IGCSE 시험 · DP 준비'], ['G11', 'DP · AP · SAT'], ['G12', 'DP · 대학 지원']];
+const WHY4 = [
+  ['🎓', '해외 명문대 출신 선생님', '국제학교 수업 방식을 직접 겪어 본 해외 명문대 출신 선생님이 영어 용어 그대로 가르칩니다.'],
+  ['📚', '학교 커리큘럼 100% 맞춤', 'IB · AP · IGCSE · A-Level, 아이 학교의 과제와 시험 일정에 맞춰 수업 계획을 짭니다.'],
+  ['💻', '시차 맞춘 실시간 1:1', '녹화 강의가 아닌 100% 실시간 화상 수업입니다. 해외 어디서든, 국내는 방문 수업도 가능합니다.'],
+  ['📝', '수업 리포트 · 학부모 피드백', '수업마다 무엇을 했고 다음에 무엇을 할지 정리해 학부모님께 알려 드립니다.']
+];
+const PROCESS6 = [['상담 신청', '학교 · 학년 · 과목을 남겨 주세요'], ['무료 테스트 수업', '10~15분 동안 아이 수준을 확인합니다'], ['선생님 매칭 · 시간표', '커리큘럼에 맞는 선생님과 시간을 정합니다'], ['진단 · 커리큘럼 설계', '성적표와 과제를 보고 계획을 세웁니다'], ['주 2회 실시간 1:1', '학교 진도와 시험 일정에 맞춰 수업합니다'], ['리포트 · 정기 점검', '수업 기록과 학기 성적으로 계획을 조정합니다']];
+
+function pricePage(S) {
+  const faq = [
+    ['수강료는 어떻게 되나요?', '주 2회 1시간 과정은 월 480,000원, 주 2회 90분 과정은 월 720,000원입니다. 3개월 등록 시 10% 할인됩니다.'],
+    ['결제는 어떻게 하나요?', '카드결제가 가능하며, 교육비 소득공제도 받을 수 있습니다.'],
+    ['등록 전에 수업을 받아 볼 수 있나요?', '네. 등록 전에 10~15분 무료 테스트 수업으로 선생님과 수업 방식을 먼저 확인할 수 있습니다.'],
+    ['방문 수업도 같은 가격인가요?', '국내 방문 수업은 지역과 이동 거리에 따라 달라서 상담 때 따로 안내드립니다.']
+  ];
+  return page(S, { path: 'price.html', up: '', active: 'price', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['수강료', 'price.html']]), faqLd(faq)] },
+    title: `국제학교 과외 수강료 — 주 2회 1시간 48만원 · 90분 72만원 | ${S.brand}`, desc: `${S.brand} 수강료 안내. 주 2회 1시간 월 48만원, 90분 월 72만원, 3개월 등록 시 10% 할인. 카드결제·소득공제 가능, 등록 전 10~15분 무료 테스트 수업.` }, `
+<section class="page-hero">
+  <div class="wrap">
+    <div class="crumb"><a href="index.html">홈</a> › 수강료</div>
+    <h1>수강료 안내 <em>주 2회 기준</em></h1>
+    <p class="lead">숨은 비용 없이, 수업에 필요한 것을 모두 포함한 금액입니다.</p>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    ${priceBlock('')}
+  </div>
+</section>
+<section class="soft">
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">Included</span><h2>수강료에 포함된 것</h2></div>
+    <div class="grid g4">${[['💻', '실시간 1:1 수업', '녹화가 아닌 실시간 화상 수업'], ['🗂️', '맞춤 학습 플랜', '학교 커리큘럼 기준으로 설계'], ['📝', '수업 리포트', '수업마다 학습 기록 공유'], ['✏️', '과제 첨삭 · 질문', '수업 밖 질문도 대응']].map(([i, h, p]) => `<div class="card"><span class="ico">${i}</span><h3>${h}</h3><p>${p}</p></div>`).join('')}</div>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">FAQ</span><h2>수강료 자주 묻는 질문</h2></div>
+    <div class="faq-list" style="max-width:820px;margin:0 auto">${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>
+  </div>
+</section>
+${formSection(S, 'f_price', { title: '무료 테스트 수업 신청', lead: '10~15분 무료 테스트 수업부터 받아 보세요. 전문 선생님이 곧 연락드립니다.' })}`);
+}
 function teacherCard(t, up) {
   return `<a class="t-card" href="${up}t/${t.i}.html" data-s="${esc(t.s.join(','))}" data-c="${esc(t.c)}" data-sd="${esc(t.sd || '전국')}">
   <div class="t-top">${t.p ? `<img class="t-photo" src="${up}${t.p}" alt="${esc(t.n)} 선생님" loading="lazy" width="56" height="56">` : `<span class="t-photo t-ini">${esc([...t.n][0])}</span>`}<div><div class="t-name">${esc(t.n)} 선생님</div><div class="t-meta">${[t.c, t.g, t.regions[0] || '전국 화상'].filter(Boolean).map(esc).join(' · ')}</div></div></div>
@@ -723,7 +784,8 @@ const HOME_FAQ = [
   ['학교 이름으로 찾았는데, 그 학교 선생님이 수업하나요?', '아닙니다. 그 학교의 커리큘럼과 과제 방식에 맞춰 수업할 수 있는 과외 선생님을 연결한다는 뜻입니다. 학교 소속 교사가 아니며, 학교와 제휴 관계도 아닙니다.'],
   ['해외에 사는데 수업이 되나요?', '됩니다. 해외 학생은 화상 수업으로 진행하고, 현지 시간 기준으로 학교가 끝난 뒤나 주말에 맞춥니다. 국내 국제학교 학생은 방문 수업도 상담할 수 있습니다.'],
   ['수업은 영어로 하나요, 한국어로 하나요?', '학생에게 맞춥니다. 개념은 한국어로 정확히 잡고, 학교에서 쓰는 영어 용어와 영어 서술로 다시 정리하는 방식을 많이 씁니다. 영어로만 수업받기를 원하면 그렇게 합니다.'],
-  ['수업료는 어떻게 정해지나요?', '학년·과목·주당 횟수·수업 방식에 따라 다릅니다. 상담 때 조건을 듣고 정확한 금액을 안내드리며, 안내 전에는 비용이 생기지 않습니다.']
+  ['수업료는 얼마인가요?', '주 2회 1시간 과정은 월 480,000원, 주 2회 90분 과정은 월 720,000원이며 3개월 등록 시 10% 할인됩니다. 카드결제·소득공제가 가능하고, 등록 전 10~15분 무료 테스트 수업을 받아 볼 수 있습니다.'],
+  ['수업을 빠지면 보강이 되나요?', '미리 연락 주시면 선생님 일정에 맞춰 보강 날짜를 다시 잡아 드립니다.']
 ];
 
 function indexPage(S, D, blog) {
@@ -814,6 +876,14 @@ function indexPage(S, D, blog) {
       .map(([ic, h, p], i) => `<div class="card">${dark ? `<span class="no">0${i + 1}</span>` : `<span class="ico">${ic}</span>`}<h3>${h}</h3><p>${p}</p></div>`).join('')}</div>`,
     steps: () => `${head('How it works', '수업은 이렇게 시작됩니다', '처음 과외를 알아보셔도 괜찮습니다. 다섯 단계면 됩니다.')}
     <div class="steps">${[['상담 신청', '학교·학년(Grade)·과목·사는 곳을 남깁니다'], ['선생님 추천', '그 커리큘럼을 가르쳐 본 2~3명을 24시간 안에 안내'], ['첫 수업', '성적표·과제 피드백을 보고 수업 계획을 세웁니다'], ['정기 수업', '학교 과제 마감과 시험 일정에 맞춰 진행'], ['점검', '학기 성적과 피드백을 보고 계획을 조정']].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>`,
+    price: () => `${head('Tuition', '수강료 안내', '주 2회 기준, 수업에 필요한 것을 모두 포함한 금액입니다.', ['price.html', '수강료 자세히 보기'])}
+    ${priceBlock(up)}`,
+    grades: () => `${head('G1–G12', '전 학년 관리', '학년을 누르면 그 학년에 맞춘 무료 테스트 수업을 신청할 수 있습니다.')}
+    <div class="grade-chips">${GRADE_STAGES.map(([g, s]) => `<a href="contact.html#apply"><b>${g}</b><span>${s}</span></a>`).join('')}</div>`,
+    why: () => `${head('Why us', `${esc(josa(S.brand, '이', '가'))} 다르게 하는 네 가지`)}
+    <div class="grid g4">${WHY4.map(([ic, h, p]) => `<div class="card"><span class="ico">${ic}</span><h3>${h}</h3><p>${p}</p></div>`).join('')}</div>`,
+    process: () => `${head('Process', '상담부터 첫 수업까지, 평균 3일', '처음 과외를 알아보셔도 괜찮습니다. 여섯 단계로 진행됩니다.')}
+    <div class="steps s6">${PROCESS6.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>`,
     teachers: () => D.teachers.length ? `${head('Teachers', '명문대 출신 국제학교 전문 선생님', T_PITCH, ['teachers.html', '선생님 전체 보기'])}
     <div class="t-grid">${featured.map(t => teacherCard(t, up)).join('\n')}</div>` : `${head('Teachers', '선생님을 먼저 보고 싶다면', '학교·커리큘럼에 맞는 선생님을 상담 때 2~3명 골라 소개해 드립니다.', ['teachers.html', '선생님 페이지'])}`,
     faq: () => `${head('FAQ', '학부모님이 자주 묻는 질문')}
@@ -921,5 +991,5 @@ function specPage(S, L) {
 ${formSection(S, 'f_spec', { title: `${L.name} 무료 상담 신청`, lead: '전문 선생님이 곧 연락드립니다.' })}`);
 }
 
-module.exports = { hubPage, subjectPage, regionPage, schoolFinderPage, subjectIndexPage, regionsIndexPage, teachersPage, teacherPage, specIndexPage, specPage, FINDER, listPage, postPage, contactPage, indexPage, notFoundPage,
+module.exports = { hubPage, subjectPage, regionPage, schoolFinderPage, subjectIndexPage, regionsIndexPage, teachersPage, teacherPage, specIndexPage, specPage, FINDER, listPage, postPage, contactPage, pricePage, indexPage, notFoundPage,
   hubFile, subFile, regionFile, subjIndexFile, encPath, TODAY, BLOG, ADMISSIONS };

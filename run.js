@@ -416,6 +416,7 @@ function buildSite(S) {
   W(path.join(dir, 'admissions.html'), B.listPage(S, 'admissions', adm)); add('main', 'admissions.html');
   for (const p of adm) { W(path.join(dir, `admissions/${p.slug}.html`), B.postPage(S, 'admissions', p, adm)); add('main', `admissions/${p.slug}.html`); }
   full && W(path.join(dir, 'contact.html'), B.contactPage(S)); add('main', 'contact.html');
+  full && W(path.join(dir, 'price.html'), B.pricePage(S)); add('main', 'price.html');
   full && W(path.join(dir, '404.html'), B.notFoundPage(S));
 
   /* 공용 파일 */
