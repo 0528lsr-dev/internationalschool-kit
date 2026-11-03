@@ -238,6 +238,7 @@ const appJs = `/* 공용 동작 — 모바일 메뉴 · 학교 검색 · 선생�
 })();
 `;
 
+const VISIT_SKIP_IPS = ['121.128.108.11'];   // 이 IP(사용자 컴퓨터, 2026-11-03)에서 들어오면 알림 안 보냄
 const VISIT_HOOK = "https://script.google.com/macros/s/AKfycbzpQIZERcfJP0aKF15sZFpIo0-HPvARnnyhlaORN0PCk1bf8j5F0Q5fHRZZ7rkABi5E/exec";   // 텔레그램 방문 알림 Apps Script (2026-11-03)
 const analyticsJs = S => `// Google Analytics 4 — 측정 ID 를 발급받으면 sites.js 의 gaId 에 넣고 재생성 ()
 (function () {
@@ -260,7 +261,7 @@ const analyticsJs = S => `// Google Analytics 4 — 측정 ID 를 발급받으�
 // 방문 알림 → 텔레그램 (2026-11-03, Apps Script 웹 앱 경유. 코드: Desktop/국제학교사이트_복제키트/텔레그램_방문알림_코드.gs)
 //   내 방문 빼기: 주소 끝에 ?novisit 붙여 한 번 열면 그 브라우저는 알림 안 감 (?visit 로 되돌림)
 (function () {
-  var HOOK = ${JSON.stringify(VISIT_HOOK)}, SITE = ${JSON.stringify(S.brand)};
+  var HOOK = ${JSON.stringify(VISIT_HOOK)}, SITE = ${JSON.stringify(S.brand)}, SKIP = ${JSON.stringify(VISIT_SKIP_IPS)};
   var ls = {}, ss = {};
   try { ls = localStorage; ss = sessionStorage; } catch (e) {}
   try { if (/[?&]novisit/.test(location.search)) ls.setItem('novisit', '1'); if (/[?&]visit(&|$)/.test(location.search)) ls.removeItem('novisit'); } catch (e) {}
@@ -316,10 +317,11 @@ const analyticsJs = S => `// Google Analytics 4 — 측정 ID 를 발급받으�
     var done = false;
     var go = function (geo) { if (done) return; done = true; info.geo = geo || ''; set('geo', info.geo); post(info); };
     setTimeout(function () { go(''); }, 2500);
-    try { fetch('https://ipapi.co/json/').then(function (r) { return r.json(); }).then(function (d) { go(region(d)); }, function () { go(''); }); } catch (e) { go(''); }
+    try { fetch('https://ipapi.co/json/').then(function (r) { return r.json(); }).then(function (d) { if (d && SKIP.indexOf(d.ip) >= 0) { done = true; try { ls.setItem('novisit', '1'); } catch (e) {} return; } go(region(d)); }, function () { go(''); }); } catch (e) { go(''); }
   }
   function hot() {
     if (get('hot')) return;
+    try { if (ls.getItem && ls.getItem('novisit')) return; } catch (e) {}
     var sec = Math.round((Date.now() - +(get('start') || Date.now())) / 1000), pages = +(get('pages') || 1);
     if (sec < 60 && pages < 3) return;
     set('hot', '1');
