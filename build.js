@@ -645,7 +645,7 @@ function teachersPage(S, D) {
     <h1>국제학교 전문 선생님</h1>
     <p class="lead">${T_PITCH}</p>
     <p class="small muted">선생님 이름은 개인정보 보호를 위해 가려 표기합니다. 카드를 누르면 경력과 수업 정보가 나옵니다.</p>
-    <div class="chips" style="margin-top:14px" data-filter="s"><button class="chip" aria-pressed="true" data-v="">전체 과목</button>${(profOf(S).teacherSubjects || ['수학', '영어', '과학', '사회']).map(x => `<button class="chip" data-v="${x}">${x}</button>`).join('')}</div>
+    <div class="chips" style="margin-top:14px" data-filter="s"><button class="chip" aria-pressed="true" data-v="">전체 과목</button>${(profOf(S).teacherSubjects || ['수학', '영어', '과학', '사회', '국어', '코딩', '제2외국어', '에세이', 'SAT']).map(x => `<button class="chip" data-v="${x}">${x}</button>`).join('')}</div>
     <p class="small muted" style="display:none"><span id="tcnt"></span></p>
   </div>
 </section>
@@ -797,6 +797,7 @@ function indexPage(S, D, blog) {
   const kr = D.schools.filter(s => s.t === '국내').length, ab = D.schools.length - kr;
   const nations = new Set(D.schools.filter(s => s.t === '해외').map(s => s.sido)).size;
   const featured = D.teachers.filter(t => t.intro).concat(D.teachers.filter(t => !t.intro && !t.k)).slice(0, 6);
+/* 홈 띠: 국제학교 전담 선생님 전부 + 동료 사이트 선생님(x) 과목마다 몇 명씩 (2026-11-03) */  const homeTeachers = D => { const own = D.teachers.filter(t => !t.x), pick = []; for (const sub of ['사회', '과학', '수학', '영어', '코딩', '제2외국어', '국어']) pick.push(...D.teachers.filter(t => t.x && t.s[0] === sub).slice(0, 4)); return own.concat(pick); };
   const ld = { '@context': 'https://schema.org', '@graph': [
     { '@type': 'EducationalOrganization', name: S.brand, url: S.siteUrl + '/', telephone: '+82-' + TELRAW.replace(/^0/, ''), description: S.tagline, areaServed: '대한민국 및 해외' },
     { '@type': 'WebSite', name: S.brand, url: S.siteUrl + '/' }
@@ -889,7 +890,7 @@ function indexPage(S, D, blog) {
     <div class="steps s6">${PROCESS6.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>`,
     /* 2026-11-03: 메뉴에서 선생님을 빼고, 홈 아래쪽에 옆으로 넘기는 띠로만 보여 준다 */
     teachers: () => D.teachers.length ? `${head('Teachers', '국제학교 전문 선생님', T_PITCH)}
-    ${tScroll(D.teachers, up)}
+    ${tScroll(homeTeachers(D), up)}
 ` : `${head('Teachers', '선생님을 먼저 보고 싶다면', '학교·커리큘럼에 맞는 선생님을 상담 때 2~3명 골라 소개해 드립니다.', ['teachers.html', '선생님 페이지'])}`,
     faq: () => `${head('FAQ', '학부모님이 자주 묻는 질문')}
     <div class="faq-list" style="max-width:820px;margin:0 auto">${HOME_FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>`,
