@@ -250,7 +250,7 @@ function ctaBand(S, up, title, lead) {
 }
 
 /* 선생님 소개 문구 (선생님 수는 쓰지 않는다 — 2026-10-30 사용자 요청) */
-const T_PITCH = 'UC 버클리·옥스퍼드·임페리얼·코넬 등 해외 명문대 출신 선생님들이 아이 학교 커리큘럼에 맞춰 1:1로 가르칩니다. IB 시험관 경력 선생님부터 영어로 수학·과학을 가르쳐 온 전문 강사까지, 상담 후 우리 아이에게 꼭 맞는 선생님을 골라 드립니다.';
+const T_PITCH = 'IB·AP·IGCSE·A-Level 수업 경험이 많은 국제학교 전문 선생님들이 아이 학교 커리큘럼에 맞춰 1:1로 가르칩니다. 영어로 수학·과학을 가르치는 선생님부터 에세이·SAT 전문 선생님까지, 상담 후 우리 아이에게 꼭 맞는 선생님을 골라 드립니다.';   // 2026-11-03: 명문대 출신 문구 빼기(사용자 요청)
 
 /* ===== 수강료·학년·차별점·진행 (2026-11-03, 같은 회사 동료 사이트와 같은 가격·구성 — 사용자 요청. 후기는 넣지 않는다) ===== */
 const PRICE = [
@@ -267,7 +267,7 @@ function priceBlock(up) {
 }
 const GRADE_STAGES = [['G1', '기초 적응'], ['G2', '기초 적응'], ['G3', '읽기 · 쓰기 기초'], ['G4', 'PYP · 영어 읽기'], ['G5', 'PYP 마무리'], ['G6', 'MYP · 중등 진입'], ['G7', 'MYP · 수학 기초'], ['G8', 'MYP · 과학 심화'], ['G9', 'IGCSE · MYP 마무리'], ['G10', 'IGCSE 시험 · DP 준비'], ['G11', 'DP · AP · SAT'], ['G12', 'DP · 대학 지원']];
 const WHY4 = [
-  ['🎓', '해외 명문대 출신 선생님', '국제학교 수업 방식을 직접 겪어 본 해외 명문대 출신 선생님이 영어 용어 그대로 가르칩니다.'],
+  ['🎓', '국제학교 전문 선생님', '국제학교 수업 방식을 잘 아는 선생님이 학교에서 쓰는 영어 용어 그대로 가르칩니다.'],
   ['📚', '학교 커리큘럼 100% 맞춤', 'IB · AP · IGCSE · A-Level, 아이 학교의 과제와 시험 일정에 맞춰 수업 계획을 짭니다.'],
   ['💻', '시차 맞춘 실시간 1:1', '녹화 강의가 아닌 100% 실시간 화상 수업입니다. 국내든 해외든 집에서 바로, 현지 시간에 맞춰 수업합니다.'],
   ['📝', '수업 리포트 · 학부모 피드백', '수업마다 무엇을 했고 다음에 무엇을 할지 정리해 학부모님께 알려 드립니다.']
@@ -365,7 +365,7 @@ function hubPage(S, D, s, region) {
   const teacherHtml = show.length ? `
       <h2>${esc(sn)} 과외 선생님</h2>
       <p>화상 수업 선생님 가운데 일부입니다. 전체는 <a href="${up}teachers.html">선생님 페이지</a>에서 과목별로 볼 수 있습니다.</p>
-      <div class="t-grid" style="margin:14px 0 6px">${show.map(x => teacherCard(x, up)).join('\n')}</div>` : '';
+      ${tScroll(show, up)}` : '';
   return page(S, { path: hubFile(s), up, active: 'tutor', ld,
     title: `${sn} 과외 | ${s.n} ${s.c} 1:1 — ${region.label} · ${S.brand}`,
     desc: `${sn}(${s.n}, ${s.e}) 과외. ${s.c} 과정에 맞춘 수학·영어·에세이·과학·SAT·입학준비 1:1 수업. ${abroad ? '해외 현지 시차에 맞춘 화상 수업' : '실시간 1:1 화상 수업'}, 무료 상담 ${TEL}.`,
@@ -536,7 +536,7 @@ function regionPage(S, D, r) {
 ${local.length ? `
       <h2>${esc(r.label)} 방문 가능 선생님</h2>
       <p>${esc(r.label)}로 방문 수업이 가능한 선생님 가운데 일부입니다. 화상 선생님까지 포함한 전체는 <a href="${up}teachers.html">선생님 페이지</a>에서 볼 수 있습니다.</p>
-      <div class="t-grid" style="margin:14px 0 6px">${local.slice(0, 8).map(t => teacherCard(t, up)).join('\n')}</div>` : `
+      ${tScroll(local.slice(0, 8), up)}` : `
       <h2>${esc(r.label)} 수업 방식</h2>
       <p>${r.abroad ? `${esc(r.label)} 학생은 화상 수업으로 진행합니다. 현지 시간에 맞춰 수업할 수 있는 선생님을 상담 때 찾아 드립니다.` : `${esc(r.label)} 학생도 실시간 1:1 화상 수업으로 진행합니다. 상담 후 바로 시작할 수 있습니다.`} <a href="${up}teachers.html">선생님 보기</a></p>`}
 ${siblings.length ? `
@@ -634,7 +634,7 @@ function teachersPage(S, D) {
   const up = '';
   const sidos = [...new Set(D.teachers.map(t => t.sd).filter(Boolean))];
   return page(S, { path: 'teachers.html', up, active: 'teachers', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['선생님', 'teachers.html']])] },
-    title: `국제학교 전문 선생님 — 해외 명문대 출신 1:1 과외 | ${S.brand}`,
+    title: `국제학교 전문 선생님 — 1:1 화상 과외 | ${S.brand}`,
     desc: T_PITCH,
     kw: '과외 선생님, 화상과외 선생님, 국제학교 화상과외, 수학 과외 선생님, 영어 과외 선생님' }, `
 <section class="page-hero">
@@ -687,7 +687,7 @@ function teacherPage(S, D, t) {
 ${schools.length ? `<h2>${esc(t.n)} 선생님 방문 지역 학교</h2>
       ${cells(schools, s => `${up}pages/${s.slug}-과외.html`, '과외')}` : ''}
 ${similar.length ? `<h2>이런 선생님도 있어요</h2>
-      <div class="t-grid">${similar.map(x => teacherCard(x, up)).join('\n')}</div>` : ''}
+      ${tScroll(similar, up)}` : ''}
     </div>
     <aside>
       <div class="card">
@@ -887,7 +887,7 @@ function indexPage(S, D, blog) {
     process: () => `${head('Process', '상담부터 첫 수업까지, 평균 3일', '처음 과외를 알아보셔도 괜찮습니다. 여섯 단계로 진행됩니다.')}
     <div class="steps s6">${PROCESS6.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>`,
     /* 2026-11-03: 메뉴에서 선생님을 빼고, 홈 아래쪽에 옆으로 넘기는 띠로만 보여 준다 */
-    teachers: () => D.teachers.length ? `${head('Teachers', '명문대 출신 국제학교 전문 선생님', T_PITCH)}
+    teachers: () => D.teachers.length ? `${head('Teachers', '국제학교 전문 선생님', T_PITCH)}
     ${tScroll(D.teachers, up)}
 ` : `${head('Teachers', '선생님을 먼저 보고 싶다면', '학교·커리큘럼에 맞는 선생님을 상담 때 2~3명 골라 소개해 드립니다.', ['teachers.html', '선생님 페이지'])}`,
     faq: () => `${head('FAQ', '학부모님이 자주 묻는 질문')}
