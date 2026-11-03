@@ -275,8 +275,8 @@ ${heroCss}
 .steps b{display:block;margin-bottom:4px;font-size:1.04rem}
 .steps span{font-size:.9rem;color:var(--ink-soft)}
 .steps.s6{grid-template-columns:repeat(6,1fr)}
-/* 홈 첫 화면 배경 사진 (2026-11-03, img/hero-campus.jpg — Wikimedia Commons CC0) */
-.hero.has-photo{background:linear-gradient(180deg,rgba(251,247,245,.78) 0%,rgba(251,247,245,.86) 60%,rgba(251,247,245,1) 100%),url(img/hero-campus.jpg) center 40%/cover no-repeat}
+/* 홈 첫 화면 배경 사진 (2026-11-03, img/hero-field.jpg — Wikimedia Commons CC0, Peak to Peak 학교 운동장) */
+.hero.has-photo{background:linear-gradient(180deg,rgba(251,247,245,.70) 0%,rgba(251,247,245,.82) 60%,rgba(251,247,245,1) 100%),url(img/hero-field.jpg) center 40%/cover no-repeat}
 .price-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:880px;margin:0 auto}
 .price-card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:30px 28px}
 .price-card.is-pick{border:2px solid var(--primary)}

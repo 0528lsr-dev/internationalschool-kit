@@ -20,7 +20,7 @@ const LEVEL = { 국내: '국내 국제학교', 해외: '해외 국제학교' };
 const ASSET_V = require('crypto').createHash('md5').update(['css.js', 'build.js', 'run.js', '공용/quick-intl.js'].map(f => require('fs').readFileSync(require('path').join(__dirname, f), 'utf8')).join('')).digest('hex').slice(0, 8);
 const TODAY = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 /* 과목 → 선생님 데이터의 과목 이름(선생님 데이터에는 수학·영어·과학·사회 같은 큰 과목만 적는다) */
-const T_SUBJ = { 물리: '과학', 화학: '과학', 생물: '과학', 에세이: '영어', SAT: '영어', 입학준비: '영어' };
+const T_SUBJ = { 물리: '과학', 화학: '과학', 생물: '과학', 에세이: '영어', SAT: '영어', 입학준비: '영어', 경제: '사회' };   // 경제 과외 = 사회 선생님 (2026-11-03)
 const MODE = s => '화상 1:1';   // 2026-11-03: 화상 수업만 한다(방문 없음)
 const josa = (w, a, b) => { const c = String(w).charCodeAt(String(w).length - 1); const has = c >= 0xAC00 && c <= 0xD7A3 ? (c - 0xAC00) % 28 !== 0 : false; return w + (has ? a : b); };
 
@@ -332,7 +332,7 @@ function teachersFor(D, s, sub) {
   const online = D.teachers.filter(t => t.online && ok(t) && !local.includes(t));
   const h = hash(s.slug + (sub || ''));
   const rot = online.length ? online.slice(h % online.length).concat(online.slice(0, h % online.length)) : [];
-  return { local, show: local.slice(0, 3).concat(rot).slice(0, 4) };
+  return { local, show: local.slice(0, 3).concat(rot).slice(0, 8) };
 }
 
 /* ---------- 학교 허브 ---------- */
@@ -483,7 +483,7 @@ function subjectPage(S, D, s, sub, region) {
 ${show.length ? `
       <h2>${esc(sn)} ${sub}과외 선생님</h2>
       <p>${josa(T_SUBJ[sub] || sub, '을', '를')} 가르치는 선생님 가운데 일부입니다. 전체는 <a href="${up}teachers.html">선생님 페이지</a>에서 볼 수 있습니다.</p>
-      <ul>${show.map(x => `<li><a href="${up}t/${x.i}.html"><b>${esc(x.n)} 선생님</b></a> (${esc(x.c)}) — ${esc(x.tag || x.headline)}</li>`).join('')}</ul>` : ''}
+      ${tScroll(show, up)}` : ''}
 
       <h2>💡 공부 팁 한 가지</h2>
       <h3>${esc(g1[0])}</h3><p>${esc(g1[1])}</p>
