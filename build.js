@@ -836,6 +836,7 @@ function indexPage(S, D, blog) {
     search: () => `${eyebrow}${h1}${lead}
       <form class="hero-search" action="${FINDER['국내'][1]}" method="get"><input name="q" placeholder="국제학교 이름을 입력하세요 (예: 채드윅, NLCS, UWCSEA)" aria-label="학교 이름" /><button type="submit">학교 찾기</button></form>
       <p class="hero-hint">인기 학교 ${popular.map(sn => `<a href="pages/${sn}-과외.html">${esc(sn)}</a>`).join('·')}<br>또는 <a href="${FINDER['해외'][1]}">해외 국제학교 찾기</a>·<a href="regions.html">나라·지역으로 찾기</a>·<a href="curriculum/index.html">커리큘럼별 안내</a><br><b>목록에 없는 학교도 수업 가능합니다</b> — <a href="contact.html">상담 신청</a></p>
+      <button type="button" class="q-open-btn" id="quickOpen">⚡ 어떤 도움이 필요하세요? — 간편 상담 시작</button>
       ${facts}`,
     teachers: () => `<div class="in">${eyebrow}${h1}${lead}${cta}${facts}</div>
       <div class="hero-stack">${featured.slice(0, 3).map(t => teacherCard(t, up)).join('')}<p class="more"><a href="teachers.html">선생님 모두 보기 →</a></p></div>`,

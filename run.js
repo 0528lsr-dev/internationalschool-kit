@@ -115,7 +115,41 @@ function quickJs(S, D) {
     grades: ['K~G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10', 'G11', 'G12', '입학 예정'],
     links: [['국제학교 찾기', `${S.siteUrl}/pages/국내국제학교찾기.html`], ['선생님 보기', `${S.siteUrl}/teachers.html`], [sp.menu, `${S.siteUrl}/${sp.dir}/index.html`]] };
   /* 주소에 ?nopop 이 있으면 자동 팝업을 띄우지 않는다(미리보기 캡처용) */
-  return `/* ${S.brand} — 간편선택 팝업 (생성기 출력물: 생성기 폴더, 본문은 지역과외/quickpick.js 공용). 손으로 고치지 말 것. */\nwindow.QCFG=${JSON.stringify(cfg)};\ntry { if (/[?&]nopop/.test(location.search)) sessionStorage.setItem('qpick', '1'); } catch (_) {}\n${m[1]}`;
+  const nopop = `try { if (/[?&]nopop/.test(location.search)) sessionStorage.setItem('qpick', '1'); } catch (_) {}`;
+  if (S.profile === 'intl') return quickIntlJs(S, cfg, nopop);
+  return `/* ${S.brand} — 간편선택 팝업 (생성기 출력물: 생성기 폴더, 본문은 지역과외/quickpick.js 공용). 손으로 고치지 말 것. */\nwindow.QCFG=${JSON.stringify(cfg)};\n${nopop}\n${m[1]}`;
+}
+/* 국제학교튜터 — 동료 사이트(internationaledu.co.kr)와 같은 간편 상담 팝업 (2026-11-03 사용자 요청). 본문은 공용/quick-intl.js */
+function quickIntlJs(S, base, nopop) {
+  const U = p => `${S.siteUrl}/${p}`;
+  const tiles = [
+    ['에세이 과외', '✍️', '영어 에세이 첨삭 전문 선생님이 배정됩니다'],
+    ['SAT 과외', '📝', '디지털 SAT 실전 전문 선생님이 배정됩니다'],
+    ['수학 과외', '📐', '알지브라·지오메트리부터 IB·AP 미적분까지 커리큘럼별 배정'],
+    ['과학 과외', '🧪', 'Biology·Chemistry·Physics 전문 선생님 배정'],
+    ['일본 EJU 과외', '🇯🇵', '일본 대학 진학 EJU(수학·종합·이과)와 JLPT 준비를 안내해 드립니다'],
+    ['중국어 HSK 과외', '🇨🇳', '중화권 진학·HSK 급수(3~5급) 대비 중국어 과외를 안내해 드립니다'],
+    ['일상 영어회화', '💬', '원어민급 회화 전문 선생님과 1:1 화상·방문 수업'],
+    ['주재원 준비', '✈️', '출국 전 준비부터 현지 화상수업까지 안내해 드립니다'],
+    ['국제학교 입학 준비', '🎓', '배치고사·에세이·면접 준비를 안내해 드립니다']
+  ];
+  const T = ['선생님 보기', U('teachers.html')], P = ['수강료 안내', U('price.html')], F = ['우리 학교 찾기', U('pages/국내국제학교찾기.html')];
+  const links = {
+    '에세이 과외': [['에세이 과외 안내', U('pages/에세이과외-전체.html')], T, P],
+    'SAT 과외': [['SAT 준비 안내', U('curriculum/sat.html')], T, P],
+    '수학 과외': [['수학 과외 안내', U('pages/수학과외-전체.html')], T, P],
+    '과학 과외': [['과학 과외 안내', U('pages/과학과외-전체.html')], T, P],
+    '일본 EJU 과외': [['해외 국제학교 찾기', U('pages/해외국제학교찾기.html')], T, P],
+    '중국어 HSK 과외': [['해외 국제학교 찾기', U('pages/해외국제학교찾기.html')], T, P],
+    '일상 영어회화': [T, P, ['유학·입시정보', U('admissions.html')]],
+    '주재원 준비': [['나라·지역별 국제학교', U('regions.html')], ['유학·입시정보', U('admissions.html')], P],
+    '국제학교 입학 준비': [['입학 준비 안내', U('curriculum/admission.html')], F, ['유학·입시정보', U('admissions.html')]],
+    '기타': [F, T, P]
+  };
+  const cfg = { ep: base.ep, tab: base.tab, site: base.site, tel: base.tel, telRaw: base.telRaw, tiles,
+    grades: ['초등 저학년', '초등 고학년', '중등 (G7~8)', 'G9~10', 'G11~12', '학부모·기타'], links };
+  const { BODY } = require('./공용/quick-intl');
+  return `/* ${S.brand} — 간편 상담 팝업 (생성기 출력물: 생성기/공용/quick-intl.js). 손으로 고치지 말 것. */\nwindow.QCFG=${JSON.stringify(cfg)};\n${nopop}\n${BODY}`;
 }
 
 const appJs = `/* 공용 동작 — 모바일 메뉴 · 학교 검색 · 선생님 필터 (생성기 출력물, 손으로 고치지 말 것) */
