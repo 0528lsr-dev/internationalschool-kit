@@ -94,6 +94,7 @@ function navFor(S) {
     ['국제학교 과외', 'tutor', null, [...finders, ['regions.html', '나라·지역별'], [`pages/${firstSub}과외-전체.html`, '과목별 과외']]],
     [sp.menu, 'conv', `${sp.dir}/index.html`, sp.pages.map(p => [`${sp.dir}/${p.key}.html`, p.name])],
     ['수강료', 'price', 'price.html', null],
+    ['선생님', 'teachers', 'teachers.html', null],
     ['수업 이야기', 'blog', 'blog.html', null],
     ['유학·입시정보', 'admissions', 'admissions.html', null]
   ];
@@ -308,6 +309,9 @@ function pricePage(S) {
 </section>
 ${formSection(S, 'f_price', { title: '무료 테스트 수업 신청', lead: '10~15분 무료 테스트 수업부터 받아 보세요. 전문 선생님이 곧 연락드립니다.' })}`);
 }
+/* 선생님 카드 띠 — 옆으로 넘겨 본다(홈·선생님 페이지 공용, 2026-11-03) */
+const tScroll = (list, up, id) => `<div class="t-scroll-wrap"><button type="button" class="t-arrow prev" aria-label="이전" onclick="this.parentNode.querySelector('.t-scroll').scrollBy({left:-300,behavior:'smooth'})">‹</button><div class="t-scroll"${id ? ` id="${id}"` : ''}>${list.map(t => teacherCard(t, up)).join('\n')}</div><button type="button" class="t-arrow next" aria-label="다음" onclick="this.parentNode.querySelector('.t-scroll').scrollBy({left:300,behavior:'smooth'})">›</button></div>
+    <p class="t-swipe">옆으로 넘겨 보세요 →</p>`;
 function teacherCard(t, up) {
   return `<a class="t-card" href="${up}t/${t.i}.html" data-s="${esc(t.s.join(','))}" data-c="${esc(t.c)}" data-sd="${esc(t.sd || '전국')}">
   <div class="t-top">${t.p ? `<img class="t-photo" src="${up}${t.p}" alt="${esc(t.n)} 선생님" loading="lazy" width="56" height="56">` : `<span class="t-photo t-ini">${esc([...t.n][0])}</span>`}<div><div class="t-name">${esc(t.n)} 선생님</div><div class="t-meta">${[t.c, t.g, t.regions[0] || '전국 화상'].filter(Boolean).map(esc).join(' · ')}</div></div></div>
@@ -640,14 +644,13 @@ function teachersPage(S, D) {
     <p class="lead">${T_PITCH}</p>
     <p class="small muted">선생님 이름은 개인정보 보호를 위해 가려 표기합니다. 카드를 누르면 경력과 수업 정보가 나옵니다.</p>
     <div class="chips" style="margin-top:14px" data-filter="s"><button class="chip" aria-pressed="true" data-v="">전체 과목</button>${(profOf(S).teacherSubjects || ['수학', '영어', '과학', '사회']).map(x => `<button class="chip" data-v="${x}">${x}</button>`).join('')}</div>
-    <div class="chips" style="margin-top:8px" data-filter="c"><button class="chip" aria-pressed="true" data-v="">전체</button></div>
     <div class="chips" style="margin-top:8px" data-filter="sd"><button class="chip" aria-pressed="true" data-v="">전국</button>${D.SIDO_ORDER.filter(k => sidos.includes(k)).map(x => `<button class="chip" data-v="${x}">${x}</button>`).join('')}</div>
     <p class="small muted" style="display:none"><span id="tcnt"></span></p>
   </div>
 </section>
 <section>
   <div class="wrap">
-    <div class="t-grid" id="tgrid">${D.teachers.map(t => teacherCard(t, up)).join('\n')}</div>
+    ${tScroll(D.teachers, up, 'tgrid')}
   </div>
 </section>
 ${formSection(S, 'f_teachers', { title: '선생님 상담 신청', lead: '원하는 선생님이 있으면 남기실 말씀에 이름을 적어 주세요. 일정이 맞지 않으면 비슷한 선생님을 함께 안내합니다.' })}`);
@@ -885,8 +888,8 @@ function indexPage(S, D, blog) {
     <div class="steps s6">${PROCESS6.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>`,
     /* 2026-11-03: 메뉴에서 선생님을 빼고, 홈 아래쪽에 옆으로 넘기는 띠로만 보여 준다 */
     teachers: () => D.teachers.length ? `${head('Teachers', '명문대 출신 국제학교 전문 선생님', T_PITCH)}
-    <div class="t-scroll-wrap"><button type="button" class="t-arrow prev" aria-label="이전" onclick="this.parentNode.querySelector('.t-scroll').scrollBy({left:-300,behavior:'smooth'})">‹</button><div class="t-scroll">${D.teachers.map(t => teacherCard(t, up)).join('\n')}</div><button type="button" class="t-arrow next" aria-label="다음" onclick="this.parentNode.querySelector('.t-scroll').scrollBy({left:300,behavior:'smooth'})">›</button></div>
-    <p class="t-swipe">옆으로 넘겨 보세요 →</p>` :`${head('Teachers', '선생님을 먼저 보고 싶다면', '학교·커리큘럼에 맞는 선생님을 상담 때 2~3명 골라 소개해 드립니다.', ['teachers.html', '선생님 페이지'])}`,
+    ${tScroll(D.teachers, up)}
+` : `${head('Teachers', '선생님을 먼저 보고 싶다면', '학교·커리큘럼에 맞는 선생님을 상담 때 2~3명 골라 소개해 드립니다.', ['teachers.html', '선생님 페이지'])}`,
     faq: () => `${head('FAQ', '학부모님이 자주 묻는 질문')}
     <div class="faq-list" style="max-width:820px;margin:0 auto">${HOME_FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>`,
     journal: () => blog.length ? `${head('Journal', '수업 이야기', '', ['blog.html', '글 더 보기'])}
