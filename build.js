@@ -94,7 +94,6 @@ function navFor(S) {
     ['국제학교 과외', 'tutor', null, [...finders, ['regions.html', '나라·지역별'], [`pages/${firstSub}과외-전체.html`, '과목별 과외']]],
     [sp.menu, 'conv', `${sp.dir}/index.html`, sp.pages.map(p => [`${sp.dir}/${p.key}.html`, p.name])],
     ['수강료', 'price', 'price.html', null],
-    ['선생님', 'teachers', 'teachers.html', null],
     ['수업 이야기', 'blog', 'blog.html', null],
     ['유학·입시정보', 'admissions', 'admissions.html', null]
   ];
@@ -884,8 +883,10 @@ function indexPage(S, D, blog) {
     <div class="grid g4">${WHY4.map(([ic, h, p]) => `<div class="card"><span class="ico">${ic}</span><h3>${h}</h3><p>${p}</p></div>`).join('')}</div>`,
     process: () => `${head('Process', '상담부터 첫 수업까지, 평균 3일', '처음 과외를 알아보셔도 괜찮습니다. 여섯 단계로 진행됩니다.')}
     <div class="steps s6">${PROCESS6.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>`,
-    teachers: () => D.teachers.length ? `${head('Teachers', '명문대 출신 국제학교 전문 선생님', T_PITCH, ['teachers.html', '선생님 전체 보기'])}
-    <div class="t-grid">${featured.map(t => teacherCard(t, up)).join('\n')}</div>` : `${head('Teachers', '선생님을 먼저 보고 싶다면', '학교·커리큘럼에 맞는 선생님을 상담 때 2~3명 골라 소개해 드립니다.', ['teachers.html', '선생님 페이지'])}`,
+    /* 2026-11-03: 메뉴에서 선생님을 빼고, 홈 아래쪽에 옆으로 넘기는 띠로만 보여 준다 */
+    teachers: () => D.teachers.length ? `${head('Teachers', '명문대 출신 국제학교 전문 선생님', T_PITCH)}
+    <div class="t-scroll-wrap"><button type="button" class="t-arrow prev" aria-label="이전" onclick="this.parentNode.querySelector('.t-scroll').scrollBy({left:-300,behavior:'smooth'})">‹</button><div class="t-scroll">${D.teachers.map(t => teacherCard(t, up)).join('\n')}</div><button type="button" class="t-arrow next" aria-label="다음" onclick="this.parentNode.querySelector('.t-scroll').scrollBy({left:300,behavior:'smooth'})">›</button></div>
+    <p class="t-swipe">옆으로 넘겨 보세요 →</p>` :`${head('Teachers', '선생님을 먼저 보고 싶다면', '학교·커리큘럼에 맞는 선생님을 상담 때 2~3명 골라 소개해 드립니다.', ['teachers.html', '선생님 페이지'])}`,
     faq: () => `${head('FAQ', '학부모님이 자주 묻는 질문')}
     <div class="faq-list" style="max-width:820px;margin:0 auto">${HOME_FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>`,
     journal: () => blog.length ? `${head('Journal', '수업 이야기', '', ['blog.html', '글 더 보기'])}

@@ -383,6 +383,12 @@ ${heroCss}
 
 /* 선생님 */
 .t-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.t-scroll-wrap{position:relative}
+.t-scroll{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding:4px 2px 14px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.t-scroll .t-card{flex:0 0 270px;scroll-snap-align:start}
+.t-arrow{position:absolute;top:50%;transform:translateY(-60%);z-index:2;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:1.6rem;line-height:1;cursor:pointer;box-shadow:0 8px 20px -10px rgba(0,0,0,.4)}
+.t-arrow.prev{left:-14px}.t-arrow.next{right:-14px}
+.t-swipe{text-align:right;font-size:.85rem;color:var(--ink-soft);margin:4px 0 0}
 .t-photo{width:56px;height:56px;border-radius:50%;object-fit:cover;flex:none;margin-right:12px;background:var(--line)}
 .t-ini{display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--brand,#7a1f3d)}
 .t-top{display:flex;align-items:center}
@@ -503,6 +509,8 @@ footer a:hover{color:#fff}
 @media(max-width:640px){
   section{padding:46px 0}
   .g2,.g3,.g4,.steps,.steps.s6,.price-grid{grid-template-columns:1fr}
+  .t-arrow{display:none}
+  .t-scroll .t-card{flex-basis:78%}
   .grade-chips{grid-template-columns:repeat(3,1fr)}
   .free-test{flex-direction:column;align-items:stretch;text-align:center}
   .tiles{grid-template-columns:repeat(2,1fr)}
