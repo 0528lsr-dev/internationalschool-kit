@@ -74,8 +74,14 @@ const BODY = String.raw`
     modal.addEventListener('click', function(e){ if (e.target === modal) close(); });
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
 
-    /* 처음 들어온 방문자에게 한 번 자동으로 연다(같은 방문 중 페이지를 옮겨도 다시 열지 않음) */
-    try { if (!sessionStorage.getItem('qpick')) { sessionStorage.setItem('qpick', '1'); setTimeout(open, 900); } } catch (_) {}
+    /* 첫 화면(홈)은 들어올 때마다 자동으로 연다(2026-11-03 사용자 요청). 다른 페이지는 한 방문에 한 번만. ?nopop 이면 열지 않음 */
+    var pth = location.pathname, home = pth === '/' || pth === '/index.html' || (location.protocol === 'file:' && pth.slice(-10) === 'index.html');
+    try {
+      if (!/[?&]nopop/.test(location.search)) {
+        if (home) setTimeout(open, 900);
+        else if (!sessionStorage.getItem('qpick2')) { sessionStorage.setItem('qpick2', '1'); setTimeout(open, 900); }
+      }
+    } catch (_) {}
 
     box.querySelectorAll('[data-s]').forEach(function(b){
       b.addEventListener('click', function(){

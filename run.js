@@ -115,7 +115,7 @@ function quickJs(S, D) {
     grades: ['K~G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10', 'G11', 'G12', '입학 예정'],
     links: [['국제학교 찾기', `${S.siteUrl}/pages/국내국제학교찾기.html`], ['선생님 보기', `${S.siteUrl}/teachers.html`], [sp.menu, `${S.siteUrl}/${sp.dir}/index.html`]] };
   /* 주소에 ?nopop 이 있으면 자동 팝업을 띄우지 않는다(미리보기 캡처용) */
-  const nopop = `try { if (/[?&]nopop/.test(location.search)) sessionStorage.setItem('qpick', '1'); } catch (_) {}`;
+  const nopop = `try { if (/[?&]nopop/.test(location.search)) sessionStorage.setItem('qpick2', '1'); } catch (_) {}`;
   if (S.profile === 'intl') return quickIntlJs(S, cfg, nopop);
   return `/* ${S.brand} — 간편선택 팝업 (생성기 출력물: 생성기 폴더, 본문은 지역과외/quickpick.js 공용). 손으로 고치지 말 것. */\nwindow.QCFG=${JSON.stringify(cfg)};\n${nopop}\n${m[1]}`;
 }
