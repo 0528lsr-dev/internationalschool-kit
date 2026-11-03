@@ -166,18 +166,18 @@ const page = (S, o, body) => slim(head(S, o) + '\n' + (S.topbar ? `<div class="t
 /* 학교 칸 격자: 같은 크기 칸에 약칭 + 작은 꼬리말 */
 const cells = (list, hrefOf, tail, cls = '') => `<div class="sgrid${cls}">${list.map(s => `<a href="${hrefOf(s)}"><b>${esc(s.sn)}</b> <span>${esc(tail)}</span></a>`).join('')}</div>`;
 /* 지역 칸 격자: "상하이 · 6개교" */
-const regionCells = (regions, hrefOf) => `<div class="rgrid">${regions.map(r => `<a href="${hrefOf(r)}"><b>${esc(r.city)}</b> <span>${r.schools.length}개교</span></a>`).join('')}</div>`;
+const regionCells = (regions, hrefOf) => `<div class="rgrid">${regions.map(r => `<a href="${hrefOf(r)}"><b>${esc(r.city)}</b></a>`).join('')}</div>`;
 const bySido = (D, items) => { const m = new Map(); for (const x of items) { if (!m.has(x.sido)) m.set(x.sido, []); m.get(x.sido).push(x); } return D.SIDO_ORDER.filter(k => m.has(k)).map(k => [k, m.get(k)]); };
 /* 시도 → 시군구 줄 → 학교 칸 (학교찾기·과목 전체 페이지). pages/ 안에서 쓰는 상대 주소 기준 */
 function cityGroups(D, list, hrefOf, tail, idPrefix = '') {
   const groups = bySido(D, list);
-  const navH = `<div class="sido-nav">${groups.map(([k, ss]) => `<a href="#${idPrefix}${k}">${k}<em>${ss.length}</em></a>`).join('')}</div>`;
+  const navH = `<div class="sido-nav">${groups.map(([k, ss]) => `<a href="#${idPrefix}${k}">${k}</a>`).join('')}</div>`;
   const blocks = groups.map(([k, ss]) => {
     const cities = new Map();
     for (const s of ss) { if (!cities.has(s.regionKey)) cities.set(s.regionKey, []); cities.get(s.regionKey).push(s); }
     return `<div class="sido-block" id="${idPrefix}${k}" data-block>
-<div class="sido-head"><h2>${D.FLAG[k] ? D.FLAG[k] + ' ' : ''}${k}</h2><span>${ss.length.toLocaleString()}개교${cities.size > 1 ? ` · ${cities.size}개 도시` : ''}</span></div>
-${[...cities].map(([key, cs]) => `<div class="city" data-city><h3><a href="${regionLink(key)}">${esc(cs[0].city)}</a><em>${cs.length}개교</em></h3>${cells(cs, hrefOf, tail)}</div>`).join('\n')}
+<div class="sido-head"><h2>${D.FLAG[k] ? D.FLAG[k] + ' ' : ''}${k}</h2></div>
+${[...cities].map(([key, cs]) => `<div class="city" data-city><h3><a href="${regionLink(key)}">${esc(cs[0].city)}</a></h3>${cells(cs, hrefOf, tail)}</div>`).join('\n')}
 </div>`;
   }).join('\n');
   return { navH, blocks };
@@ -185,8 +185,8 @@ ${[...cities].map(([key, cs]) => `<div class="city" data-city><h3><a href="${reg
 /* 시도별 지역 상자 (지역과외·홈) */
 function regionBoxes(D, up, tabs) {
   const groups = bySido(D, D.regions);
-  const box = ([k, rs], i) => `<div class="region-box${tabs && i ? ' is-off' : ''}"${tabs ? ` data-panel="${k}"` : ''} id="r-${k}"><h3>${D.FLAG[k] ? D.FLAG[k] + ' ' : ''}${k}<span>${rs.length > 1 ? `${rs.length}개 도시 · ` : ''}학교 ${rs.reduce((a, r) => a + r.schools.length, 0).toLocaleString()}곳</span></h3>${regionCells(rs, r => `${up}${regionFile(r)}`)}</div>`;
-  if (!tabs) return `<div class="sido-nav" style="margin:0 0 22px">${groups.map(([k, rs]) => `<a href="#r-${k}">${k}<em>${rs.length}</em></a>`).join('')}</div>\n` + groups.map(box).join('\n');
+  const box = ([k, rs], i) => `<div class="region-box${tabs && i ? ' is-off' : ''}"${tabs ? ` data-panel="${k}"` : ''} id="r-${k}"><h3>${D.FLAG[k] ? D.FLAG[k] + ' ' : ''}${k}</h3>${regionCells(rs, r => `${up}${regionFile(r)}`)}</div>`;
+  if (!tabs) return `<div class="sido-nav" style="margin:0 0 22px">${groups.map(([k, rs]) => `<a href="#r-${k}">${k}</a>`).join('')}</div>\n` + groups.map(box).join('\n');
   return `<div class="rtabs" data-tabs>${groups.map(([k], i) => `<button type="button" data-tab="${k}" aria-pressed="${i ? 'false' : 'true'}">${k}</button>`).join('')}</div>\n${groups.map(box).join('\n')}`;
 }
 
@@ -418,7 +418,7 @@ ${near.length ? `
       <h2>❓ 자주 묻는 질문</h2>
       <div class="faq-list">${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('\n')}</div>
 
-      <div class="hl-box">💡 <b>${esc(S.brand)}</b>는 ${esc(josa(sn, '과', '와'))} 같은 국내·해외 국제학교 ${D.schools.length.toLocaleString()}곳의 학생을 학교별로 1:1 과외에 연결해 드립니다. 상담 비용은 없습니다 — 📞 <a href="tel:${TELRAW}"><b>${TEL}</b></a></div>
+      <div class="hl-box">💡 <b>${esc(S.brand)}</b>는 ${esc(josa(sn, '과', '와'))} 같은 국내·해외 국제학교 학생을 학교별로 1:1 과외에 연결해 드립니다. 상담 비용은 없습니다 — 📞 <a href="tel:${TELRAW}"><b>${TEL}</b></a></div>
       <p class="small muted">※ 이 페이지는 ${esc(S.brand)}의 과외 안내이며 ${esc(s.n)}의 공식 페이지가 아닙니다. 입학 자격·일정·학비는 학교 공식 안내로 확인해 주세요.</p>
     </div>
   </div>
@@ -508,14 +508,14 @@ function regionPage(S, D, r) {
   const ld = { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['나라·지역별', 'regions.html'], [`${r.label} 국제학교 과외`, regionFile(r)]]),
     { '@type': 'Service', serviceType: `${r.label} 국제학교 1:1 과외`, areaServed: r.full, provider: { '@type': 'EducationalOrganization', name: S.brand, url: S.siteUrl + '/' } }] };
   return page(S, { path: regionFile(r), og: 'regions', up, active: 'tutor', ld,
-    title: `${r.label} 국제학교 과외 | ${r.schools.length}개교 학교별 1:1 — ${S.brand}`,
-    desc: `${r.full} 국제학교 과외. ${r.schools.slice(0, 5).map(s => s.sn).join('·')}${r.schools.length > 5 ? ' 등' : ''} ${r.schools.length}개교 학교별 1:1 수업. ${curs.join('·')} 커리큘럼, 수학·영어·에세이·과학·SAT·입학준비. ${r.abroad ? '현지 시차에 맞춘 화상 수업' : '실시간 1:1 화상 수업'}, 무료 상담 ${TEL}.`,
+    title: `${r.label} 국제학교 과외 | 학교별 1:1 화상 과외 — ${S.brand}`,
+    desc: `${r.full} 국제학교 과외. ${r.schools.slice(0, 5).map(s => s.sn).join('·')}${r.schools.length > 5 ? ' 등' : ''} 학교별 1:1 수업. ${curs.join('·')} 커리큘럼, 수학·영어·에세이·과학·SAT·입학준비. ${r.abroad ? '현지 시차에 맞춘 화상 수업' : '실시간 1:1 화상 수업'}, 무료 상담 ${TEL}.`,
     kw: [`${r.label} 국제학교 과외`, `${r.city} 국제학교`, `${r.city} 국제학교 수학과외`, `${r.city} 국제학교 영어과외`, `${r.city} IB 과외`, `${r.city} 화상과외`, `${r.label} 국제학교 입학`].join(', ') }, `
 <section class="page-hero">
   <div class="wrap">
     <div class="crumb"><a href="${up}index.html">홈</a> › <a href="${up}regions.html">나라·지역별</a> › ${esc(r.sido)}${r.city !== r.sido ? ` › ${esc(r.city)}` : ''}</div>
     <h1>${r.flag ? r.flag + ' ' : ''}${esc(r.label)} 국제학교 과외 — 학교별 1:1 맞춤 수업</h1>
-    <p class="lead">${esc(r.full)} 국제학교 ${r.schools.length}곳 · ${curs.join('·')} · 화상 1:1</p>
+    <p class="lead">${esc(r.full)} 국제학교 · ${curs.join('·')} · 화상 1:1</p>
   </div>
 </section>
 <section>
@@ -523,7 +523,7 @@ function regionPage(S, D, r) {
     <div class="article" style="max-width:960px">
       <p>${esc(r.full)}의 국제학교 학생·학부모님께 드리는 안내입니다. 같은 지역 안에서도 학교마다 커리큘럼(IB·AP·IGCSE·A-Level)과 과제 방식이 다릅니다. 아래에서 학교를 누르면 그 학교에 맞춘 과목별 안내로 이어집니다.${r.abroad ? ' 해외에 있는 학생은 현지 시차에 맞춘 화상 수업으로 진행합니다.' : ''}</p>
 
-      <h2>${esc(r.label)} 국제학교 <span class="muted" style="font-size:.9rem;font-weight:500">${r.schools.length}곳</span></h2>
+      <h2>${esc(r.label)} 국제학교</h2>
       <div class="school-grid" style="margin:14px 0">
         ${r.schools.map(s => `<a class="school-item" href="${s.slug}-과외.html">🏫 ${esc(s.sn)} 과외<i>${esc(s.n)} · ${esc(s.c)}</i></a>`).join('\n        ')}
       </div>
@@ -552,17 +552,17 @@ function schoolFinderPage(S, D, level) {
   const list = D.schools.filter(s => s.t === level);
   const [fname, file] = FINDER[level];
   const lvName = LEVEL[level];
-  const chips = LV_KEYS.map(k => `<a class="chip"${k === level ? ' aria-pressed="true"' : ''} href="${FINDER[k][0]}.html">${LEVEL[k]} ${D.schools.filter(s => s.t === k).length.toLocaleString()}</a>`).join('');
+  const chips = LV_KEYS.map(k => `<a class="chip"${k === level ? ' aria-pressed="true"' : ''} href="${FINDER[k][0]}.html">${LEVEL[k]}</a>`).join('');
   const other = LV_KEYS.find(k => k !== level);
   const G = cityGroups(D, list, s => `${s.slug}-과외.html`, '과외');
   return page(S, { path: file, up, active: 'tutor', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], [fname, file]])] },
-    title: `${lvName} 찾기 — ${list.length.toLocaleString()}개교 학교별 과외 | ${S.brand}`,
-    desc: `${lvName} ${list.length.toLocaleString()}곳을 ${level === '국내' ? '지역' : '나라·도시'}별로 모았습니다. 학교 이름을 누르면 그 학교 커리큘럼에 맞춘 과목별 1:1 과외 안내로 이동합니다.`,
+    title: `${lvName} 찾기 — 학교별 1:1 화상 과외 | ${S.brand}`,
+    desc: `${lvName}를 ${level === '국내' ? '지역' : '나라·도시'}별로 모았습니다. 학교 이름을 누르면 그 학교 커리큘럼에 맞춘 과목별 1:1 과외 안내로 이동합니다.`,
     kw: `${lvName} 과외, 국제학교 과외, 국제학교 찾기, ${level === '국내' ? '외국인학교 과외, 제주 국제학교, 송도 국제학교' : '해외 국제학교, 주재원 자녀 과외, 보딩스쿨 과외'}, ${S.brand}` }, `
 <section class="page-hero">
   <div class="wrap">
     <div class="crumb"><a href="${up}index.html">홈</a> › ${lvName} 찾기</div>
-    <h1>${lvName} 찾기 — ${list.length.toLocaleString()}개교</h1>
+    <h1>${lvName} 찾기</h1>
     <p class="lead">${level === '국내' ? '제주영어교육도시·송도·서울·판교 등 국내 국제학교와 외국인학교입니다.' : '한국 학생이 많이 다니는 해외 국제학교와 보딩스쿨입니다.'} 학교 이름을 누르면 과목별 과외 안내로 갑니다.</p>
     <p class="lead"><b>여기 없는 학교도 수업할 수 있습니다.</b> <a href="${up}contact.html">상담 신청</a>을 남기시거나 <a href="tel:${TELRAW}">${TEL}</a>로 연락 주세요.</p>
     <div class="chips" style="margin-top:16px">${chips}<a class="chip" href="../regions.html">나라·지역으로 찾기</a></div>
@@ -583,8 +583,8 @@ function subjectIndexPage(S, D, sub) {
   const list = D.schools.filter(s => s.subjects.includes(sub));
   const kr = list.filter(s => s.t === '국내'), ab = list.filter(s => s.t === '해외');
   return page(S, { path: subjIndexFile(sub), up, active: 'tutor', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], [`국제학교 ${sub}과외`, subjIndexFile(sub)]])] },
-    title: `국제학교 ${sub}과외 — 학교별 ${sub} 1:1 ${list.length.toLocaleString()}곳 | ${S.brand}`,
-    desc: `국제학교 ${sub}과외를 학교 이름으로 찾습니다. 국내 ${kr.length}곳·해외 ${ab.length}곳 국제학교의 커리큘럼(IB·AP·IGCSE·A-Level)에 맞춘 ${sub} 1:1 안내. 실시간 화상 1:1, 무료 상담 ${TEL}.`,
+    title: `국제학교 ${sub}과외 — 학교별 ${sub} 1:1 화상 과외 | ${S.brand}`,
+    desc: `국제학교 ${sub}과외를 학교 이름으로 찾습니다. 국내·해외 국제학교의 커리큘럼(IB·AP·IGCSE·A-Level)에 맞춘 ${sub} 1:1 안내. 실시간 화상 1:1, 무료 상담 ${TEL}.`,
     kw: `국제학교 ${sub}과외, 국제학교 ${sub}, IB ${sub}, AP ${sub}, 학교별 ${sub}과외, ${sub} 화상과외` }, `
 <section class="page-hero">
   <div class="wrap">
@@ -607,8 +607,8 @@ ${ctaBand(S, up, `국제학교 ${sub}과외, 학교 이름만 알려 주세요`,
 function regionsIndexPage(S, D) {
   const up = '';
   return page(S, { path: 'regions.html', up, active: 'tutor', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['나라·지역별', 'regions.html']])] },
-    title: `나라·지역별 국제학교 과외 — ${D.regions.length}개 지역 학교별 1:1 | ${S.brand}`,
-    desc: `국내(제주·송도·서울·판교)와 해외(싱가포르·홍콩·중국·일본·베트남·태국·미국·영국 등) ${D.regions.length}개 지역의 국제학교별 1:1 과외 안내. 국내·해외 모두 실시간 1:1 화상 수업.`,
+    title: `나라·지역별 국제학교 과외 — 학교별 1:1 화상 과외 | ${S.brand}`,
+    desc: `국내(제주·송도·서울·판교)와 해외(싱가포르·홍콩·중국·일본·베트남·태국·미국·영국 등) 지역별 국제학교별 1:1 과외 안내. 국내·해외 모두 실시간 1:1 화상 수업.`,
     kw: '국제학교 과외, 해외 국제학교 과외, 주재원 자녀 과외, 싱가포르 국제학교 과외, 홍콩 국제학교 과외, 상하이 국제학교 과외, 제주 국제학교 과외' }, `
 <section class="page-hero">
   <div class="wrap">
@@ -801,8 +801,8 @@ function indexPage(S, D, blog) {
   const [l1, l2] = S.slogan;
   const h1 = `<h1>${esc(l1)}<br><em>${esc(l2)}</em></h1>`;
   const lead = `<p class="lead">${S.taglineLines.map(esc).join('<br class="pc"> ')}</p>`;
-  const eyebrow = `<span class="eyebrow">${esc(S.en)} · ${profOf(S).tagSchools} ${D.schools.length.toLocaleString()}개교</span>`;
-  const facts = `<div class="hero-facts"><div><b>${kr}</b><span>국내 국제학교</span></div><div><b>${ab}</b><span>해외 국제학교</span></div><div><b>${nations}</b><span>나라</span></div><div><b>${D.SUBJECTS_ALL.length}</b><span>과목</span></div></div>`;
+  const eyebrow = `<span class="eyebrow">${esc(S.en)} · IB · AP · IGCSE · A-Level</span>`;
+  const facts = '';   // 학교 수·나라 수 숫자는 보이지 않게 (2026-11-03 사용자 요청)
   const cta = `<div class="hero-cta"><a href="${FINDER['국내'][1]}" class="btn btn-primary">우리 학교 찾기 →</a><a href="contact.html" class="btn btn-ghost">무료 상담 신청</a></div>`;
   const helpCard = `<div class="hero-side">
       <h3>어떤 도움이 필요하세요?</h3>
@@ -822,8 +822,7 @@ function indexPage(S, D, blog) {
         <li><b>어디서든 실시간 화상 1:1</b><span>국내든 해외든 집에서 바로, 현지 시간에 맞춰 수업합니다.</span></li>
       </ol>`,
     poster: () => `<div class="in">${eyebrow}${h1}${lead}${cta}${facts}</div>`,
-    stats: () => `${eyebrow}${h1}${lead}${cta}
-      <div class="hero-nums"><div><b>${kr}</b><span>국내 국제학교</span></div><div><b>${ab}</b><span>해외 국제학교</span></div><div><b>${nations}</b><span>나라</span></div><div><b>${D.SUBJECTS_ALL.length}</b><span>과목</span></div></div>`,
+    stats: () => `${eyebrow}${h1}${lead}${cta}`,
     tilesHero: () => `<div class="in">${eyebrow}${h1}${lead}${cta}${facts}</div>
       <div class="hero-tiles">${D.SUBJECTS_HIGH.map(sub => `<a href="pages/${sub}과외-전체.html"><b>${SUBJ[sub].icon}</b>${sub}과외</a>`).join('')}<a class="all" href="${FINDER['국내'][1]}">우리 학교로 바로 찾기 →</a></div>`,
     band: () => `<div class="in">${eyebrow}${h1}${lead}${cta}</div>${facts}`,
@@ -869,7 +868,7 @@ function indexPage(S, D, blog) {
     <div class="slist">${D.SUBJECTS_HIGH.map((sub, i) => `<a href="pages/${sub}과외-전체.html"><span class="no">${String(i + 1).padStart(2, '0')}</span><span><b>${sub}과외</b><em>${SUBJ_DESC[sub] || ''}</em></span><i>→</i></a>`).join('')}</div>`,
     curriculum: () => `${head('Curriculum', '커리큘럼별로 준비가 다릅니다', '아이 학교의 과정을 고르면 그에 맞춘 준비법이 나옵니다.', [`${sp.dir}/index.html`, '커리큘럼 전체 보기'])}
     <div class="grid g3">${sp.pages.map(p => `<a class="card" href="${sp.dir}/${p.key}.html" style="color:inherit"><h3>${esc(p.title)}</h3><p>${esc(p.lead)}</p></a>`).join('')}</div>`,
-    stats: () => `<div class="stat-strip"><div class="stat"><b>${kr}</b><span>국내 국제학교</span></div><div class="stat"><b>${ab}</b><span>해외 국제학교</span></div><div class="stat"><b>${nations}</b><span>나라</span></div><div class="stat"><b>${D.regions.length}</b><span>지역</span></div></div>`,
+    stats: () => '',
     regions: () => `${head('Regions', '나라·지역별 국제학교 과외', '아이가 있는 나라를 고르고 도시를 누르세요.', ['regions.html', '지역 전체 보기'])}
     ${regionBoxes(D, up, true)}`,
     services: () => `${head('Services', `${esc(josa(S.brand, '이', '가'))} 하는 일`)}
@@ -901,7 +900,7 @@ function indexPage(S, D, blog) {
 
   return page(S, { path: 'index.html', up, active: 'home', ld,
     title: `${S.brand} — ${profOf(S).homeTitle}`,
-    desc: `${S.tagline} 국내 국제학교 ${kr}곳·해외 ${nations}개 나라 ${ab}곳 학교별 과목 안내, ${profOf(S).homeExtra}. 무료 상담 ${TEL}.`,
+    desc: `${S.tagline} 국내·해외 국제학교 학교별 과목 안내, ${profOf(S).homeExtra}. 무료 상담 ${TEL}.`,
     kw: profOf(S).homeKw }, `
 <section class="hero">
   <div class="wrap">
