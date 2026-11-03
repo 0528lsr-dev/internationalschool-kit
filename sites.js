@@ -17,7 +17,7 @@ const SITES = [
   {
     /* 국제학교튜터 — internationalschool.kr (2026-10-28 브랜드·도메인 확정) */
     repo: "internationalschool", domain: "internationalschool.kr", brand: "국제학교튜터", en: "INTL SCHOOL TUTOR", profile: "intl",
-    slogan: ["아이 학교의 커리큘럼으로,", "국제학교 1:1 과외"], tagline: "IB·AP·IGCSE·A-Level — 학교마다 다른 과정에 맞춰 수업합니다.|해외는 시차에 맞춘 화상 수업, 국내는 방문 수업도 가능합니다.",
+    slogan: ["우리 아이 학교 커리큘럼 그대로,", "국제학교 1:1 화상 과외"], tagline: "IB·AP·IGCSE·A-Level, 아이 학교 과제와 시험 일정에 맞춰 해외 명문대 출신 선생님이 실시간으로 가르칩니다.|국내든 해외든 집에서 바로 — 10~15분 무료 테스트 수업으로 먼저 확인해 보세요.",
     sheetTab: "국제학교", channelKey: "", kakao: "", gaId: "", naverWa: "", naverVerify: "308b7cbdc818430a177d9d011dbddc68e6b3e3ce", googleVerify: "TFvQgLhPTPvZXCuH4RrMWeH5_2rhiXK3ALJ6D9mDE18", favicon: "mark14",
     /* 밝음 · 버건디+로즈골드, 함렛 제목 — 기존 13곳·참고 사이트(나도 국제학교)와 색·히어로가 겹치지 않게 */
     theme: { mode: "light", bg: "#fbf7f5", surface: "#ffffff", surface2: "#f6ece8", ink: "#2a1a1f", primary: "#7a1f3d", onPrimary: "#ffffff",

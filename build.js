@@ -19,7 +19,7 @@ const LEVEL = { 국내: '국내 국제학교', 해외: '해외 국제학교' };
 const TODAY = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 /* 과목 → 선생님 데이터의 과목 이름(선생님 데이터에는 수학·영어·과학·사회 같은 큰 과목만 적는다) */
 const T_SUBJ = { 물리: '과학', 화학: '과학', 생물: '과학', 에세이: '영어', SAT: '영어', 입학준비: '영어' };
-const MODE = s => s.t === '해외' ? '화상 1:1' : '화상·방문 1:1';
+const MODE = s => '화상 1:1';   // 2026-11-03: 화상 수업만 한다(방문 없음)
 const josa = (w, a, b) => { const c = String(w).charCodeAt(String(w).length - 1); const has = c >= 0xAC00 && c <= 0xD7A3 ? (c - 0xAC00) % 28 !== 0 : false; return w + (has ? a : b); };
 
 /* 주소 — 파일명은 한글 그대로, canonical·사이트맵은 퍼센트 인코딩 */
@@ -129,7 +129,7 @@ function foot(S, up) {
       <div>
         <a href="${up}index.html" class="brand">${esc(S.brand)}</a>
         <p style="margin:12px 0 6px">${esc(S.tagline)}</p>
-        <p class="small">상담 ${TEL} · 해외 화상 · 국내 방문 1:1 과외</p>
+        <p class="small">상담 ${TEL} · 국내·해외 어디서든 1:1 실시간 화상 과외</p>
       </div>
       <div><h5>국제학교 과외</h5><ul>
         ${LV_KEYS.map(k => `<li><a href="${up}${FINDER[k][1]}">${LEVEL[k]} 찾기</a></li>`).join('\n        ')}
@@ -218,7 +218,7 @@ function formSection(S, id, opt = {}) {
           <div class="field"><label for="${id}_subject">과목 *</label>
             <select id="${id}_subject" required><option value="">선택</option>${formSubjectsOf(S).map(s => `<option${s === opt.subject ? ' selected' : ''}>${s}</option>`).join('')}</select></div>
           <div class="field"><label for="${id}_mode">수업 방식</label>
-            <select id="${id}_mode"><option>상관없음</option><option>화상수업</option><option>방문수업(국내)</option></select></div>
+            <select id="${id}_mode"><option>화상수업</option></select></div>
         </div>
         <div class="row2">
           <div class="field"><label for="${id}_area">사는 곳 (나라·도시)</label><input id="${id}_area" placeholder="예: ${esc(opt.area || '싱가포르 / 인천 송도')}" /></div>
@@ -263,13 +263,13 @@ function priceBlock(up) {
   return `<div class="price-grid">${PRICE.map(p => `<div class="price-card${p.tag ? ' is-pick' : ''}">${p.tag ? `<span class="price-tag">${p.tag}</span>` : ''}<h3>${p.name}</h3><p class="price-won"><b>${p.won}</b>원 <span>/ 월</span></p><ul>${p.items.map(i => `<li>${i}</li>`).join('')}</ul></div>`).join('')}</div>
     <div class="price-badges">${PRICE_BADGES.map(b => `<span>${b}</span>`).join('')}</div>
     <div class="free-test"><div><b>🎁 ${FREE_TEST}</b><span>선생님과 직접 수업해 보고, 아이 수준을 확인한 뒤 결정하세요. 테스트 수업은 비용이 없습니다.</span></div><a href="${up}contact.html#apply" class="btn btn-primary">무료 테스트 신청</a></div>
-    <p class="small muted center" style="margin:14px 0 0">국내 방문 수업은 지역과 이동 거리에 따라 상담 때 따로 안내드립니다.</p>`;
+    <p class="small muted center" style="margin:14px 0 0">모든 수업은 실시간 1:1 화상으로 진행합니다. 국내·해외 어디서든 같은 금액입니다.</p>`;
 }
 const GRADE_STAGES = [['G1', '기초 적응'], ['G2', '기초 적응'], ['G3', '읽기 · 쓰기 기초'], ['G4', 'PYP · 영어 읽기'], ['G5', 'PYP 마무리'], ['G6', 'MYP · 중등 진입'], ['G7', 'MYP · 수학 기초'], ['G8', 'MYP · 과학 심화'], ['G9', 'IGCSE · MYP 마무리'], ['G10', 'IGCSE 시험 · DP 준비'], ['G11', 'DP · AP · SAT'], ['G12', 'DP · 대학 지원']];
 const WHY4 = [
   ['🎓', '해외 명문대 출신 선생님', '국제학교 수업 방식을 직접 겪어 본 해외 명문대 출신 선생님이 영어 용어 그대로 가르칩니다.'],
   ['📚', '학교 커리큘럼 100% 맞춤', 'IB · AP · IGCSE · A-Level, 아이 학교의 과제와 시험 일정에 맞춰 수업 계획을 짭니다.'],
-  ['💻', '시차 맞춘 실시간 1:1', '녹화 강의가 아닌 100% 실시간 화상 수업입니다. 해외 어디서든, 국내는 방문 수업도 가능합니다.'],
+  ['💻', '시차 맞춘 실시간 1:1', '녹화 강의가 아닌 100% 실시간 화상 수업입니다. 국내든 해외든 집에서 바로, 현지 시간에 맞춰 수업합니다.'],
   ['📝', '수업 리포트 · 학부모 피드백', '수업마다 무엇을 했고 다음에 무엇을 할지 정리해 학부모님께 알려 드립니다.']
 ];
 const PROCESS6 = [['상담 신청', '학교 · 학년 · 과목을 남겨 주세요'], ['무료 테스트 수업', '10~15분 동안 아이 수준을 확인합니다'], ['선생님 매칭 · 시간표', '커리큘럼에 맞는 선생님과 시간을 정합니다'], ['진단 · 커리큘럼 설계', '성적표와 과제를 보고 계획을 세웁니다'], ['주 2회 실시간 1:1', '학교 진도와 시험 일정에 맞춰 수업합니다'], ['리포트 · 정기 점검', '수업 기록과 학기 성적으로 계획을 조정합니다']];
@@ -279,7 +279,7 @@ function pricePage(S) {
     ['수강료는 어떻게 되나요?', '주 2회 1시간 과정은 월 480,000원, 주 2회 90분 과정은 월 720,000원입니다. 3개월 등록 시 10% 할인됩니다.'],
     ['결제는 어떻게 하나요?', '카드결제가 가능하며, 교육비 소득공제도 받을 수 있습니다.'],
     ['등록 전에 수업을 받아 볼 수 있나요?', '네. 등록 전에 10~15분 무료 테스트 수업으로 선생님과 수업 방식을 먼저 확인할 수 있습니다.'],
-    ['방문 수업도 같은 가격인가요?', '국내 방문 수업은 지역과 이동 거리에 따라 달라서 상담 때 따로 안내드립니다.']
+    ['국내에 살아도 화상 수업인가요?', '네. 모든 수업은 실시간 1:1 화상으로 진행합니다. 이동 시간이 없고, 학교 과제와 풀이를 화면에 같이 띄워 놓고 수업해 집중도가 높습니다.']
   ];
   return page(S, { path: 'price.html', up: '', active: 'price', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['수강료', 'price.html']]), faqLd(faq)] },
     title: `국제학교 과외 수강료 — 주 2회 1시간 48만원 · 90분 72만원 | ${S.brand}`, desc: `${S.brand} 수강료 안내. 주 2회 1시간 월 48만원, 90분 월 72만원, 3개월 등록 시 10% 할인. 카드결제·소득공제 가능, 등록 전 10~15분 무료 테스트 수업.` }, `
@@ -339,7 +339,7 @@ function hubPage(S, D, s, region) {
   const kw = [`${sn} 과외`, ...s.subjects.slice(0, 5).map(v => `${sn} ${v}과외`), `${s.n} 과외`, `${s.e.replace(/\s*\(.*\)$/, '')} 과외`, `${region.label} 국제학교 과외`, `${sn} 입학`, `${sn} 화상과외`];
   const faq = [
     [`${sn} 학생만 신청할 수 있나요?`, `아닙니다. ${s.n} 학생이 쉽게 찾도록 따로 만든 안내일 뿐, ${region.label}의 다른 국제학교나 같은 커리큘럼(${s.c})을 쓰는 학교 학생도 똑같이 수업받을 수 있습니다.`],
-    [abroad ? '해외에 있는데 시차는 어떻게 맞추나요?' : '방문 수업과 화상 수업 중 무엇이 맞을까요?', abroad ? `${region.label} 현지 시간 기준으로 학교가 끝난 뒤나 주말에 맞춥니다. 상담 때 가능한 시간대를 알려 주시면 그 시간에 수업할 수 있는 선생님을 찾습니다.` : '저학년이거나 혼자 집중하기 어렵다면 방문이, 더 많은 선생님 가운데 고르거나 늦은 시간에 수업하려면 화상이 맞습니다. 지역에 따라 방문 가능 여부가 달라 상담 때 확인해 드립니다.'],
+    [abroad ? '해외에 있는데 시차는 어떻게 맞추나요?' : '화상 수업으로도 집중이 잘 되나요?', abroad ? `${region.label} 현지 시간 기준으로 학교가 끝난 뒤나 주말에 맞춥니다. 상담 때 가능한 시간대를 알려 주시면 그 시간에 수업할 수 있는 선생님을 찾습니다.` : '네. 1:1 실시간 수업이라 선생님이 아이 풀이를 화면으로 바로 보며 막힌 곳을 짚어 줍니다. 이동 시간이 없어 학교가 끝난 뒤나 주말에도 부담 없이 수업할 수 있습니다.'],
     ['선생님은 어떻게 정해지나요?', `학교·학년(Grade)·과목·커리큘럼을 알려 주시면 ${s.c} 과정을 가르쳐 본 선생님 가운데 2~3명을 골라 소개합니다. 첫 수업을 해 보고 맞지 않으면 다른 선생님으로 바꿔 드립니다.`],
     ['수업료는 얼마인가요?', '학년, 과목, 일주일 수업 횟수, 수업 방식에 따라 달라집니다. 상담에서 조건을 확인한 뒤 정확한 금액을 알려 드리고, 그 전까지는 어떤 비용도 들지 않습니다.'],
     ['상담에 비용이 드나요?', `들지 않습니다. ${TEL}로 전화하시거나 아래 신청서를 남겨 주시면 24시간 안에 연락드립니다.`]
@@ -361,11 +361,11 @@ function hubPage(S, D, s, region) {
       <p>${abroad ? `${region.label}의 국제학교는 학기 중에도 결원이 생기면 편입 시험을 보는 곳이 많습니다. 부모님 발령으로 갑자기 옮기게 된 경우라면 영어 읽기·에세이와 영어로 된 수학을 먼저 점검합니다.` : `${esc(sn)}처럼 국내에 있는 국제학교·외국인학교는 학교마다 지원 자격과 시험 방식이 다릅니다. 학교 입학처 안내로 자격과 일정을 먼저 확인하고, 영어 읽기·에세이·수학·인터뷰 순서로 준비합니다.`} 자세한 준비 방법은 <a href="${s.slug}-입학준비-과외.html">${esc(sn)} 입학준비 안내</a>에 정리했습니다.</p>`;
   const teacherHtml = show.length ? `
       <h2>${esc(sn)} 과외 선생님</h2>
-      <p>${local.length ? `${esc(region.label)} 방문 가능 선생님과 화상 선생님 가운데 일부입니다.` : '화상 선생님 가운데 일부입니다.'} 전체는 <a href="${up}teachers.html">선생님 페이지</a>에서 과목별로 볼 수 있습니다.</p>
+      <p>화상 수업 선생님 가운데 일부입니다. 전체는 <a href="${up}teachers.html">선생님 페이지</a>에서 과목별로 볼 수 있습니다.</p>
       <div class="t-grid" style="margin:14px 0 6px">${show.map(x => teacherCard(x, up)).join('\n')}</div>` : '';
   return page(S, { path: hubFile(s), up, active: 'tutor', ld,
     title: `${sn} 과외 | ${s.n} ${s.c} 1:1 — ${region.label} · ${S.brand}`,
-    desc: `${sn}(${s.n}, ${s.e}) 과외. ${s.c} 과정에 맞춘 수학·영어·에세이·과학·SAT·입학준비 1:1 수업. ${abroad ? '해외 현지 시차에 맞춘 화상 수업' : '화상·방문 수업'}, 무료 상담 ${TEL}.`,
+    desc: `${sn}(${s.n}, ${s.e}) 과외. ${s.c} 과정에 맞춘 수학·영어·에세이·과학·SAT·입학준비 1:1 수업. ${abroad ? '해외 현지 시차에 맞춘 화상 수업' : '실시간 1:1 화상 수업'}, 무료 상담 ${TEL}.`,
     kw: kw.join(', ') }, `
 <section class="page-hero">
   <div class="wrap">
@@ -404,8 +404,8 @@ function hubPage(S, D, s, region) {
         <tr><td>시간</td><td>정해진 시간표</td><td>${abroad ? '현지 시차에 맞춰 조정' : '학생 일정에 맞춰 조정'}</td></tr>
       </table>
 
-      <h2>${esc(sn)} ${abroad ? '화상 수업' : '방문 수업 · 화상 수업'}</h2>
-      <p>${abroad ? `${esc(region.label)}에 있는 학생은 <b>화상 수업</b>으로 진행합니다. 학교 과제와 풀이를 화면에 같이 띄워 놓고 수업하고, 수업 기록이 남아 복습하기 좋습니다. 현지 시간 기준으로 학교가 끝난 뒤나 주말에 맞춥니다.` : `${esc(s.area)} 지역은 선생님이 찾아가는 <b>방문 수업</b>을 상담할 수 있습니다. 더 많은 선생님 가운데 고르거나 늦은 시간에 수업하려면 <b>화상 수업</b>이 편합니다.`}</p>
+      <h2>${esc(sn)} 화상 수업</h2>
+      <p>${abroad ? `${esc(region.label)}에 있는 학생은 <b>화상 수업</b>으로 진행합니다. 학교 과제와 풀이를 화면에 같이 띄워 놓고 수업하고, 수업 기록이 남아 복습하기 좋습니다. 현지 시간 기준으로 학교가 끝난 뒤나 주말에 맞춥니다.` : `국내 국제학교 학생도 <b>실시간 1:1 화상 수업</b>으로 진행합니다. 이동 시간 없이 집에서 바로 시작하고, 학교 과제와 풀이를 화면에 같이 띄워 놓고 수업합니다. 수업 기록이 남아 복습하기도 좋습니다.`}</p>
 ${teacherHtml}
       <h2>💡 국제학교 공부 팁</h2>
       <h3>${esc(g1[0])}</h3><p>${esc(g1[1])}</p>
@@ -444,7 +444,7 @@ function subjectPage(S, D, s, sub, region) {
   const prep = sub === 'SAT' ? 'SAT 준비' : sub === '입학준비' ? '입학·편입 준비' : '과제·시험 준비';
   return page(S, { path: subFile(s, sub), up, active: 'tutor', ld,
     title: `${sn} ${sub}과외 | ${s.n} ${sub} ${prep} 1:1 — ${S.brand}`,
-    desc: `${sn}(${s.n}) ${sub}과외. ${s.c} 과정에 맞춘 ${sub} ${prep}를 1:1로 합니다. ${abroad ? '현지 시차에 맞춘 화상 수업' : '화상·방문 수업'}, 무료 상담 ${TEL}.` }, `
+    desc: `${sn}(${s.n}) ${sub}과외. ${s.c} 과정에 맞춘 ${sub} ${prep}를 1:1로 합니다. ${abroad ? '현지 시차에 맞춘 화상 수업' : '실시간 1:1 화상 수업'}, 무료 상담 ${TEL}.` }, `
 <section class="page-hero">
   <div class="wrap">
     <div class="crumb"><a href="${up}index.html">홈</a> › <a href="${regionLink(region.key)}">${esc(region.label)}</a> › <a href="${s.slug}-과외.html">${esc(sn)}</a> › ${sub}</div>
@@ -471,8 +471,8 @@ function subjectPage(S, D, s, sub, region) {
       <h2>${sub} 1:1 과외를 고르는 이유</h2>
       <p>${esc(K.why)}</p>
 
-      <h2>${esc(sn)} ${sub}과외 ${abroad ? '화상 수업' : '방문·화상 수업'}</h2>
-      <p>${abroad ? `${esc(region.label)}에 있는 학생은 <b>화상 수업</b>으로 진행합니다. 학교 과제와 학생의 풀이를 화면에 함께 띄워 두기 때문에 어느 줄에서 막혔는지 바로 보입니다. 현지 시차에 맞춰 시간을 잡습니다.` : `${esc(s.area)} 지역은 <b>방문 수업</b>을 상담할 수 있고, 더 많은 선생님 가운데 고르려면 <b>화상 수업</b>이 편합니다. 화상에서는 풀이와 과제를 화면에 같이 띄워 놓고 수업합니다.`}</p>
+      <h2>${esc(sn)} ${sub}과외 화상 수업</h2>
+      <p>${abroad ? `${esc(region.label)}에 있는 학생은 <b>화상 수업</b>으로 진행합니다. 학교 과제와 학생의 풀이를 화면에 함께 띄워 두기 때문에 어느 줄에서 막혔는지 바로 보입니다. 현지 시차에 맞춰 시간을 잡습니다.` : `국내 국제학교 학생도 <b>실시간 1:1 화상 수업</b>으로 진행합니다. 학교 과제와 학생의 풀이를 화면에 함께 띄워 두기 때문에 어느 줄에서 막혔는지 바로 보입니다.`}</p>
 ${show.length ? `
       <h2>${esc(sn)} ${sub}과외 선생님</h2>
       <p>${josa(T_SUBJ[sub] || sub, '을', '를')} 가르치는 선생님 가운데 일부입니다. 전체는 <a href="${up}teachers.html">선생님 페이지</a>에서 볼 수 있습니다.</p>
@@ -509,13 +509,13 @@ function regionPage(S, D, r) {
     { '@type': 'Service', serviceType: `${r.label} 국제학교 1:1 과외`, areaServed: r.full, provider: { '@type': 'EducationalOrganization', name: S.brand, url: S.siteUrl + '/' } }] };
   return page(S, { path: regionFile(r), og: 'regions', up, active: 'tutor', ld,
     title: `${r.label} 국제학교 과외 | ${r.schools.length}개교 학교별 1:1 — ${S.brand}`,
-    desc: `${r.full} 국제학교 과외. ${r.schools.slice(0, 5).map(s => s.sn).join('·')}${r.schools.length > 5 ? ' 등' : ''} ${r.schools.length}개교 학교별 1:1 수업. ${curs.join('·')} 커리큘럼, 수학·영어·에세이·과학·SAT·입학준비. ${r.abroad ? '현지 시차에 맞춘 화상 수업' : '화상·방문 수업'}, 무료 상담 ${TEL}.`,
+    desc: `${r.full} 국제학교 과외. ${r.schools.slice(0, 5).map(s => s.sn).join('·')}${r.schools.length > 5 ? ' 등' : ''} ${r.schools.length}개교 학교별 1:1 수업. ${curs.join('·')} 커리큘럼, 수학·영어·에세이·과학·SAT·입학준비. ${r.abroad ? '현지 시차에 맞춘 화상 수업' : '실시간 1:1 화상 수업'}, 무료 상담 ${TEL}.`,
     kw: [`${r.label} 국제학교 과외`, `${r.city} 국제학교`, `${r.city} 국제학교 수학과외`, `${r.city} 국제학교 영어과외`, `${r.city} IB 과외`, `${r.city} 화상과외`, `${r.label} 국제학교 입학`].join(', ') }, `
 <section class="page-hero">
   <div class="wrap">
     <div class="crumb"><a href="${up}index.html">홈</a> › <a href="${up}regions.html">나라·지역별</a> › ${esc(r.sido)}${r.city !== r.sido ? ` › ${esc(r.city)}` : ''}</div>
     <h1>${r.flag ? r.flag + ' ' : ''}${esc(r.label)} 국제학교 과외 — 학교별 1:1 맞춤 수업</h1>
-    <p class="lead">${esc(r.full)} 국제학교 ${r.schools.length}곳 · ${curs.join('·')} · ${r.abroad ? '화상 1:1' : '화상·방문 1:1'}</p>
+    <p class="lead">${esc(r.full)} 국제학교 ${r.schools.length}곳 · ${curs.join('·')} · 화상 1:1</p>
   </div>
 </section>
 <section>
@@ -535,7 +535,7 @@ ${local.length ? `
       <p>${esc(r.label)}로 방문 수업이 가능한 선생님 가운데 일부입니다. 화상 선생님까지 포함한 전체는 <a href="${up}teachers.html">선생님 페이지</a>에서 볼 수 있습니다.</p>
       <div class="t-grid" style="margin:14px 0 6px">${local.slice(0, 8).map(t => teacherCard(t, up)).join('\n')}</div>` : `
       <h2>${esc(r.label)} 수업 방식</h2>
-      <p>${r.abroad ? `${esc(r.label)} 학생은 화상 수업으로 진행합니다. 현지 시간에 맞춰 수업할 수 있는 선생님을 상담 때 찾아 드립니다.` : `${esc(r.label)}은 방문 수업 가능 여부를 상담 때 일정과 함께 확인해 드립니다. 화상 수업은 바로 시작할 수 있습니다.`} <a href="${up}teachers.html">선생님 보기</a></p>`}
+      <p>${r.abroad ? `${esc(r.label)} 학생은 화상 수업으로 진행합니다. 현지 시간에 맞춰 수업할 수 있는 선생님을 상담 때 찾아 드립니다.` : `${esc(r.label)} 학생도 실시간 1:1 화상 수업으로 진행합니다. 상담 후 바로 시작할 수 있습니다.`} <a href="${up}teachers.html">선생님 보기</a></p>`}
 ${siblings.length ? `
       <h2>${esc(r.sido)} 다른 도시 국제학교 과외</h2>
       ${regionCells(siblings, x => regionLink(x.key))}` : ''}
@@ -584,7 +584,7 @@ function subjectIndexPage(S, D, sub) {
   const kr = list.filter(s => s.t === '국내'), ab = list.filter(s => s.t === '해외');
   return page(S, { path: subjIndexFile(sub), up, active: 'tutor', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], [`국제학교 ${sub}과외`, subjIndexFile(sub)]])] },
     title: `국제학교 ${sub}과외 — 학교별 ${sub} 1:1 ${list.length.toLocaleString()}곳 | ${S.brand}`,
-    desc: `국제학교 ${sub}과외를 학교 이름으로 찾습니다. 국내 ${kr.length}곳·해외 ${ab.length}곳 국제학교의 커리큘럼(IB·AP·IGCSE·A-Level)에 맞춘 ${sub} 1:1 안내. 화상·방문, 무료 상담 ${TEL}.`,
+    desc: `국제학교 ${sub}과외를 학교 이름으로 찾습니다. 국내 ${kr.length}곳·해외 ${ab.length}곳 국제학교의 커리큘럼(IB·AP·IGCSE·A-Level)에 맞춘 ${sub} 1:1 안내. 실시간 화상 1:1, 무료 상담 ${TEL}.`,
     kw: `국제학교 ${sub}과외, 국제학교 ${sub}, IB ${sub}, AP ${sub}, 학교별 ${sub}과외, ${sub} 화상과외` }, `
 <section class="page-hero">
   <div class="wrap">
@@ -608,7 +608,7 @@ function regionsIndexPage(S, D) {
   const up = '';
   return page(S, { path: 'regions.html', up, active: 'tutor', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['나라·지역별', 'regions.html']])] },
     title: `나라·지역별 국제학교 과외 — ${D.regions.length}개 지역 학교별 1:1 | ${S.brand}`,
-    desc: `국내(제주·송도·서울·판교)와 해외(싱가포르·홍콩·중국·일본·베트남·태국·미국·영국 등) ${D.regions.length}개 지역의 국제학교별 1:1 과외 안내. 해외는 화상, 국내는 화상·방문.`,
+    desc: `국내(제주·송도·서울·판교)와 해외(싱가포르·홍콩·중국·일본·베트남·태국·미국·영국 등) ${D.regions.length}개 지역의 국제학교별 1:1 과외 안내. 국내·해외 모두 실시간 1:1 화상 수업.`,
     kw: '국제학교 과외, 해외 국제학교 과외, 주재원 자녀 과외, 싱가포르 국제학교 과외, 홍콩 국제학교 과외, 상하이 국제학교 과외, 제주 국제학교 과외' }, `
 <section class="page-hero">
   <div class="wrap">
@@ -633,7 +633,7 @@ function teachersPage(S, D) {
   return page(S, { path: 'teachers.html', up, active: 'teachers', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['선생님', 'teachers.html']])] },
     title: `국제학교 전문 선생님 — 해외 명문대 출신 1:1 과외 | ${S.brand}`,
     desc: T_PITCH,
-    kw: '과외 선생님, 방문과외 선생님, 화상과외 선생님, 수학 과외 선생님, 영어 과외 선생님' }, `
+    kw: '과외 선생님, 화상과외 선생님, 국제학교 화상과외, 수학 과외 선생님, 영어 과외 선생님' }, `
 <section class="page-hero">
   <div class="wrap">
     <div class="crumb"><a href="index.html">홈</a> › 선생님</div>
@@ -641,7 +641,7 @@ function teachersPage(S, D) {
     <p class="lead">${T_PITCH}</p>
     <p class="small muted">선생님 이름은 개인정보 보호를 위해 가려 표기합니다. 카드를 누르면 경력과 수업 정보가 나옵니다.</p>
     <div class="chips" style="margin-top:14px" data-filter="s"><button class="chip" aria-pressed="true" data-v="">전체 과목</button>${(profOf(S).teacherSubjects || ['수학', '영어', '과학', '사회']).map(x => `<button class="chip" data-v="${x}">${x}</button>`).join('')}</div>
-    <div class="chips" style="margin-top:8px" data-filter="c"><button class="chip" aria-pressed="true" data-v="">방문·화상</button><button class="chip" data-v="방문">방문 가능</button><button class="chip" data-v="화상">화상 가능</button></div>
+    <div class="chips" style="margin-top:8px" data-filter="c"><button class="chip" aria-pressed="true" data-v="">전체</button></div>
     <div class="chips" style="margin-top:8px" data-filter="sd"><button class="chip" aria-pressed="true" data-v="">전국</button>${D.SIDO_ORDER.filter(k => sidos.includes(k)).map(x => `<button class="chip" data-v="${x}">${x}</button>`).join('')}</div>
     <p class="small muted" style="display:none"><span id="tcnt"></span></p>
   </div>
@@ -782,7 +782,7 @@ ${formSection(S, 'f_contact', {})}`);
 const SUBJ_DESC = { 수학: 'IB Math·AP Calculus·IGCSE·A-Level', 영어: '문학 분석과 영어 에세이', 에세이: '과제 에세이부터 EE·원서 에세이까지', 과학: '랩 리포트와 영어 서술형', 물리: '역학·전자기, IA·AP Physics', 화학: '몰 계산부터 IB·AP Chemistry', 생물: '영어 용어와 자료 해석', 경제: '그래프·사례·평가 서술', SAT: '디지털 SAT 영역별 진단', 입학준비: '배치고사·MAP·인터뷰 준비' };
 const HOME_FAQ = [
   ['학교 이름으로 찾았는데, 그 학교 선생님이 수업하나요?', '아닙니다. 그 학교의 커리큘럼과 과제 방식에 맞춰 수업할 수 있는 과외 선생님을 연결한다는 뜻입니다. 학교 소속 교사가 아니며, 학교와 제휴 관계도 아닙니다.'],
-  ['해외에 사는데 수업이 되나요?', '됩니다. 해외 학생은 화상 수업으로 진행하고, 현지 시간 기준으로 학교가 끝난 뒤나 주말에 맞춥니다. 국내 국제학교 학생은 방문 수업도 상담할 수 있습니다.'],
+  ['해외에 사는데 수업이 되나요?', '됩니다. 모든 수업은 실시간 1:1 화상으로 진행하고, 현지 시간 기준으로 학교가 끝난 뒤나 주말에 맞춥니다. 국내 국제학교 학생도 같은 방식으로 수업합니다.'],
   ['수업은 영어로 하나요, 한국어로 하나요?', '학생에게 맞춥니다. 개념은 한국어로 정확히 잡고, 학교에서 쓰는 영어 용어와 영어 서술로 다시 정리하는 방식을 많이 씁니다. 영어로만 수업받기를 원하면 그렇게 합니다.'],
   ['수업료는 얼마인가요?', '주 2회 1시간 과정은 월 480,000원, 주 2회 90분 과정은 월 720,000원이며 3개월 등록 시 10% 할인됩니다. 카드결제·소득공제가 가능하고, 등록 전 10~15분 무료 테스트 수업을 받아 볼 수 있습니다.'],
   ['수업을 빠지면 보강이 되나요?', '미리 연락 주시면 선생님 일정에 맞춰 보강 날짜를 다시 잡아 드립니다.']
@@ -819,7 +819,7 @@ function indexPage(S, D, blog) {
       <ol class="hero-list">
         <li><b>학교 커리큘럼 기준으로</b><span>IB·AP·IGCSE·A-Level은 배우는 순서도 평가도 다릅니다. 학교 이름으로 찾으면 그 과정에 맞춰 수업을 짭니다.</span></li>
         <li><b>24시간 안에 선생님을 답합니다</b><span>학교·학년·과목을 남기면 그 커리큘럼을 가르쳐 본 선생님 2~3명을 추려 드립니다.</span></li>
-        <li><b>해외는 화상, 국내는 방문까지</b><span>현지 시차에 맞춰 화상으로, 국내 국제학교는 방문 수업도 상담할 수 있습니다.</span></li>
+        <li><b>어디서든 실시간 화상 1:1</b><span>국내든 해외든 집에서 바로, 현지 시간에 맞춰 수업합니다.</span></li>
       </ol>`,
     poster: () => `<div class="in">${eyebrow}${h1}${lead}${cta}${facts}</div>`,
     stats: () => `${eyebrow}${h1}${lead}${cta}
@@ -948,7 +948,7 @@ ${formSection(S, 'f_spec', { title: '무료 상담 신청', lead: '전문 선생
 function specPage(S, L) {
   const P = specOf(S), up = '../';
   const ld = { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], [P.menu, `${P.dir}/index.html`], [L.title, `${P.dir}/${L.key}.html`]]), faqLd(L.faq)] };
-  return page(S, { path: `${P.dir}/${L.key}.html`, up, active: 'conv', ld, title: `${L.title} — 1:1 방문·화상 | ${S.brand}`, desc: L.lead, kw: L.kw }, `
+  return page(S, { path: `${P.dir}/${L.key}.html`, up, active: 'conv', ld, title: `${L.title} — 1:1 화상 과외 | ${S.brand}`, desc: L.lead, kw: L.kw }, `
 <section class="page-hero">
   <div class="wrap">
     <div class="crumb"><a href="${up}index.html">홈</a> › <a href="index.html">${esc(P.menu)}</a> › ${esc(L.name)}</div>
@@ -967,7 +967,7 @@ function specPage(S, L) {
 <section class="soft">
   <div class="wrap">
     <h2>어떻게 수업하나요?</h2>
-    <p class="lead">학생 환경에 맞춰 방문 또는 화상 중 하나를 고릅니다. 섞어서 진행해도 됩니다.</p>
+    <p class="lead">모든 수업은 실시간 1:1 화상으로 진행합니다. 국내·해외 어디서든 시간만 맞추면 됩니다.</p>
     <div class="grid g2">${SPEC.HOW.map(([h, p]) => `<div class="card"><h3>${h}</h3><p>${esc(p)}</p></div>`).join('')}</div>
   </div>
 </section>
