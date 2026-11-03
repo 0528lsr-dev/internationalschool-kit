@@ -16,6 +16,8 @@ const { esc, coversLevel } = require('./data');
 
 const LEVEL = { 국내: '국내 국제학교', 해외: '해외 국제학교' };
 /* 한국 날짜 — 데일리는 새벽 2시에 돈다. toISOString() 그대로면 세계 표준시라 전날이 찍힌다(2026-10-19 실제 발생) */
+/* 디자인·스크립트 파일 버전 — 생성기 코드가 바뀌면 값이 바뀌어 브라우저가 새 파일을 받는다(2026-11-03, 예전 style.css 가 남아 카드가 깨져 보이던 문제) */
+const ASSET_V = require('crypto').createHash('md5').update(['css.js', 'build.js', 'run.js', '공용/quick-intl.js'].map(f => require('fs').readFileSync(require('path').join(__dirname, f), 'utf8')).join('')).digest('hex').slice(0, 8);
 const TODAY = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 /* 과목 → 선생님 데이터의 과목 이름(선생님 데이터에는 수학·영어·과학·사회 같은 큰 과목만 적는다) */
 const T_SUBJ = { 물리: '과학', 화학: '과학', 생물: '과학', 에세이: '영어', SAT: '영어', 입학준비: '영어' };
@@ -79,8 +81,8 @@ ${o.kw ? `<meta name="keywords" content="${esc(o.kw)}" />\n` : ''}${o.noindex ? 
 <link rel="icon" href="${o.up}favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="${o.up}style.css?v=4" />
-<script src="${o.up}analytics.js" defer></script>
+<link rel="stylesheet" href="${o.up}style.css?v=${ASSET_V}" />
+<script src="${o.up}analytics.js?v=${ASSET_V}" defer></script>
 ${o.ld ? `<script type="application/ld+json">${JSON.stringify(o.ld)}</script>\n` : ''}</head>
 <body>`;
 }
@@ -150,13 +152,13 @@ function foot(S, up) {
   </div>
 </footer>
 <div class="float-cta">${kakao}<a href="tel:${TELRAW}" class="btn btn-primary">📞 ${TEL}</a><a href="${up}contact.html#apply" class="btn btn-ghost btn-test">🎁 무료 테스트</a></div>
-<script src="${up}app.js" defer></script>
+<script src="${up}app.js?v=${ASSET_V}" defer></script>
 ${o_scripts(S, up)}
 </body>
 </html>`;
 }
 function o_scripts(S, up) {
-  return `<script src="${up}form.js" defer></script>\n<script src="${up}quick.js" defer></script>` + (S.channelKey ? `\n<script src="${up}channeltalk.js" defer></script>` : '');
+  return `<script src="${up}form.js?v=${ASSET_V}" defer></script>\n<script src="${up}quick.js?v=${ASSET_V}" defer></script>` + (S.channelKey ? `\n<script src="${up}channeltalk.js" defer></script>` : '');
 }
 /* 줄 앞 공백·빈 줄 제거 — 페이지 5만 장이라 용량이 곧 호스팅 한도(GitHub Pages 1GB)다. <pre>/<textarea> 안에 내용이 없으므로 안전 */
 const slim = html => html.split('\n').map(l => l.replace(/^\s+/, '')).filter(l => l.length).join('\n');
