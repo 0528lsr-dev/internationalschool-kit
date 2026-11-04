@@ -914,7 +914,7 @@ function indexPage(S, D, blog) {
   <div class="wrap">
     ${heroes[S.theme.hero]()}
   </div>
-  ${S.heroImg ? `<span class="hero-credit">사진: <a href="https://commons.wikimedia.org/wiki/File:Shekou_International_School_Bay_Campus_2023.jpg" target="_blank" rel="noopener">Ahuangsis</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a></span>` : ''}
+  ${S.heroImg ? `<span class="hero-credit">사진: <a href="https://commons.wikimedia.org/wiki/File:Regents-Bangkok.jpg" target="_blank" rel="noopener">Aliciaregents</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a></span>` : ''}
 </section>
 ${body}
 ${formSection(S, 'f_home', {})}`);

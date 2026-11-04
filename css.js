@@ -275,8 +275,8 @@ ${heroCss}
 .steps b{display:block;margin-bottom:4px;font-size:1.04rem}
 .steps span{font-size:.9rem;color:var(--ink-soft)}
 .steps.s6{grid-template-columns:repeat(6,1fr)}
-/* 홈 첫 화면 배경 사진 (2026-11-03, img/hero-school.jpg — Wikimedia Commons, Ahuangsis, CC BY-SA 4.0 — 출처 표기 필수) */
-.hero.has-photo{background:linear-gradient(180deg,rgba(251,247,245,.70) 0%,rgba(251,247,245,.82) 60%,rgba(251,247,245,1) 100%),url(img/hero-school.jpg) center 55%/cover no-repeat;position:relative}
+/* 홈 첫 화면 배경 사진 (2026-11-03, img/hero-regents.jpg — Wikimedia Commons Regents-Bangkok.jpg, Aliciaregents, CC BY-SA 4.0 — 출처 표기 필수) */
+.hero.has-photo{background:linear-gradient(180deg,rgba(251,247,245,.70) 0%,rgba(251,247,245,.82) 60%,rgba(251,247,245,1) 100%),url(img/hero-regents.jpg) center 45%/cover no-repeat;position:relative}
 .hero-credit{position:absolute;right:10px;bottom:6px;font-size:.66rem;color:rgba(0,0,0,.45)}
 .hero-credit a{color:inherit}
 .price-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:880px;margin:0 auto}
