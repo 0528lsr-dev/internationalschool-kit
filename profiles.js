@@ -11,7 +11,7 @@ const PROFILES = {
     services: [['💻', '화상 1:1', '해외 어디서든 시차에 맞춰 수업합니다. 화면에 과제와 풀이를 같이 띄워 놓고 진행합니다.'], ['🏠', '국내도 화상으로', '제주·송도·서울·판교 등 국내 국제학교 학생도 이동 없이 집에서 화상으로 수업합니다.'], ['📚', '커리큘럼별 내신', 'IB·AP·IGCSE·A-Level 과제와 시험 일정에 맞춰 학기 계획을 세웁니다.'], ['🎓', '입학·진학', '국제학교 입학·편입부터 SAT·TOEFL, 대학 원서 에세이까지 단계별로 준비합니다.']],
     tagSchools: '국내·해외 국제학교',
     subjectsNote: '수학·영어·에세이·과학부터 SAT·입학준비까지, 학교 커리큘럼(IB·AP·IGCSE·A-Level)에 맞춰 준비합니다.',
-    homeTitle: '국제학교 학교별 1:1 과외 · IB·AP·IGCSE · 1:1 화상 과외',
+    homeTitle: '국제학교 1:1 화상 과외 · IB·AP·IGCSE·A-Level 학교별 맞춤',
     homeExtra: 'IB·AP·IGCSE·A-Level 내신, SAT·TOEFL, 입학·편입 준비',
     homeKw: '국제학교 과외, 국제학교 수학과외, 국제학교 영어과외, IB 과외, AP 과외, IGCSE 과외, A-Level 과외, SAT 과외, 국제학교 입학, 화상과외',
     desc: '국내·해외 국제학교 학교별 1:1 화상 과외 — IB·AP·IGCSE·A-Level 내신, 에세이, SAT, 입학·편입 준비'
