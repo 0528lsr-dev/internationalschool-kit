@@ -466,6 +466,7 @@ footer a:hover{color:#fff}
 .float-cta{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;gap:8px}
 .float-cta .btn{box-shadow:0 18px 40px -16px rgba(0,0,0,.5)}
 .btn-kakao{background:#fee500;color:#191919}
+.float-cta .tel-s{display:none}
 
 /* 간편선택 팝업(quick.js) */
 .q-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:18px}
@@ -543,6 +544,7 @@ footer a:hover{color:#fff}
   .q-fab{bottom:74px;left:12px;font-size:.85rem;padding:10px 15px}
   .float-cta{left:12px;right:12px;bottom:12px}
   .float-cta .btn{flex:1;justify-content:center;white-space:nowrap;padding:12px 10px;font-size:.92rem}
+  .float-cta .tel-n{display:none}.float-cta .tel-s{display:inline}
   br.pc{display:none}
   .topbar{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.78rem}
 }

@@ -151,7 +151,7 @@ function foot(S, up) {
     <div class="copy-bar"><span>© ${new Date().getFullYear()} ${esc(S.brand)}. 선생님 이름은 개인정보 보호를 위해 가려 표기합니다.</span><span><a href="${up}sitemap.xml">사이트맵</a></span></div>
   </div>
 </footer>
-<div class="float-cta">${kakao}<a href="tel:${TELRAW}" class="btn btn-primary">📞 ${TEL}</a><a href="${up}contact.html#apply" class="btn btn-ghost btn-test">🎁 무료 테스트</a></div>
+<div class="float-cta">${kakao}<a href="tel:${TELRAW}" class="btn btn-primary">📞 <span class="tel-n">${TEL}</span><span class="tel-s">전화</span></a><a href="${up}contact.html#apply" class="btn btn-ghost btn-test">🎁 무료 테스트</a></div>
 <script src="${up}app.js?v=${ASSET_V}" defer></script>
 ${o_scripts(S, up)}
 </body>
