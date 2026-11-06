@@ -888,7 +888,7 @@ function indexPage(S, D, blog) {
     <div class="grade-chips">${GRADE_STAGES.map(([g, s]) => `<a href="contact.html#apply"><b>${g}</b><span>${s}</span></a>`).join('')}</div>`,
     why: () => `${head('Why us', `${esc(josa(S.brand, '이', '가'))} 다르게 하는 네 가지`)}
     <div class="grid g4">${WHY4.map(([ic, h, p]) => `<div class="card"><span class="ico">${ic}</span><h3>${h}</h3><p>${p}</p></div>`).join('')}</div>`,
-    process: () => `${head('Process', '상담부터 첫 수업까지', '처음 과외를 알아보셔도 괜찮습니다. 여섯 단계로 진행됩니다.')}
+    process: () => `${head('Process', '상담부터 첫 수업까지', '처음 과외를 알아보셔도 괜찮습니다.')}
     <div class="steps s6">${PROCESS6.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>`,
     /* 2026-11-03: 메뉴에서 선생님을 빼고, 홈 아래쪽에 옆으로 넘기는 띠로만 보여 준다 */
     teachers: () => D.teachers.length ? `${head('Teachers', '국제학교 전문 선생님', T_PITCH)}
