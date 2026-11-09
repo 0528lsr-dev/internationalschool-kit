@@ -1,0 +1,59 @@
+/* 국제학교튜터 → 스레드 자동 게시 (2026-11-09)
+   - GitHub Actions(.github/workflows/threads.yml)가 하루 두 번 실행한다.
+   - 사이트 rss.xml 에서 최근 3일 글 중 아직 스레드에 안 올린 글 1편을 골라 올린다.
+     (올렸는지는 내 스레드 최근 게시물에 그 글 주소가 있는지로 판단 — 따로 기록 파일 없음)
+   - 토큰(THREADS_TOKEN)은 60일짜리라 매번 갱신해서 $RUNNER_TEMP/new_token 에 써 두면 워크플로가 저장한다. */
+import fs from 'node:fs';
+import path from 'node:path';
+
+const TOKEN = process.env.THREADS_TOKEN;
+const RSS = 'https://internationalschool.kr/rss.xml';
+const API = 'https://graph.threads.net/v1.0';
+const DAYS = 3;
+if (!TOKEN) throw new Error('THREADS_TOKEN 이 없습니다');
+
+const api = async (p, opt = {}) => {
+  const r = await fetch(API + p, { ...opt, headers: { Authorization: 'Bearer ' + TOKEN } });
+  const j = await r.json();
+  if (j.error) throw new Error(p.split('?')[0] + ': ' + j.error.message);
+  return j;
+};
+const unx = s => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+
+/* 1. 사이트 최근 글 */
+const xml = await (await fetch(RSS)).text();
+const tag = (s, t) => { const m = s.match(new RegExp('<' + t + '>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?</' + t + '>')); return m ? unx(m[1].trim()) : ''; };
+const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)]
+  .map(m => ({ title: tag(m[1], 'title'), link: tag(m[1], 'link'), desc: tag(m[1], 'description'), date: new Date(tag(m[1], 'pubDate')) }))
+  .filter(i => i.link && Date.now() - i.date < DAYS * 864e5)
+  .reverse();   // 오래된 글부터
+
+/* 2. 이미 올린 글 빼기 */
+const mine = await api('/me/threads?fields=text&limit=30');
+const posted = (mine.data || []).map(x => x.text || '').join('\n');
+const next = items.find(i => !posted.includes(i.link));
+
+if (!next) console.log('올릴 새 글 없음');
+else {
+  const url = next.link + '?utm_source=threads';
+  let desc = next.desc;
+  const tail = `\n\n👉 자세히 보기\n${url}\n\n국제학교 1:1 화상 과외 · 10~15분 무료 테스트 수업 #국제학교`;
+  const room = 490 - next.title.length - tail.length - 2;
+  if (desc.length > room) desc = desc.slice(0, room - 1) + '…';
+  const text = `${next.title}\n\n${desc}${tail}`;
+
+  /* 3. 만들기 → 30초 기다렸다 게시 (Threads API 권장) */
+  const c = await api('/me/threads?' + new URLSearchParams({ media_type: 'TEXT', text }), { method: 'POST' });
+  await new Promise(r => setTimeout(r, 30000));
+  const p = await api('/me/threads_publish?' + new URLSearchParams({ creation_id: c.id }), { method: 'POST' });
+  console.log('게시 완료:', next.title, p.id);
+}
+
+/* 4. 토큰 갱신 (발급 24시간 안이면 실패하는데, 그건 괜찮다) */
+try {
+  const r = await (await fetch('https://graph.threads.net/refresh_access_token?grant_type=th_refresh_token&access_token=' + TOKEN)).json();
+  if (r.access_token && process.env.RUNNER_TEMP) {
+    fs.writeFileSync(path.join(process.env.RUNNER_TEMP, 'new_token'), r.access_token);
+    console.log('토큰 갱신: ' + Math.round(r.expires_in / 86400) + '일');
+  } else console.log('토큰 갱신 건너뜀:', r.error ? r.error.message : '');
+} catch (e) { console.log('토큰 갱신 실패:', e.message); }

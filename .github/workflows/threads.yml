@@ -1,0 +1,24 @@
+# 국제학교튜터 → 스레드 자동 게시 (sns/threads-post.mjs)
+# 비밀값: THREADS_TOKEN(스레드 토큰), GH_PAT(갱신된 토큰을 다시 저장할 때 쓰는 GitHub 토큰)
+name: 스레드 자동 게시
+on:
+  schedule:
+    - cron: '0 3 * * *'    # 매일 12:00 KST
+    - cron: '0 11 * * *'   # 매일 20:00 KST
+  workflow_dispatch:
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node sns/threads-post.mjs
+        env:
+          THREADS_TOKEN: ${{ secrets.THREADS_TOKEN }}
+      - name: 갱신된 토큰 저장
+        if: always()
+        run: if [ -s "$RUNNER_TEMP/new_token" ]; then gh secret set THREADS_TOKEN --repo "$GITHUB_REPOSITORY" < "$RUNNER_TEMP/new_token"; fi
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
