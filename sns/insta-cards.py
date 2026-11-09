@@ -221,6 +221,9 @@ run('git', 'clone', '-q', '--depth', '1', f'https://x-access-token:{pat}@github.
 os.makedirs(f'site/{rel}', exist_ok=True)
 for k in range(1, len(cards) + 1):
     run('cp', f'{OUT}/{k}.jpg', f'site/{rel}/{k}.jpg')
+# 네이버 블로그 초안 루틴이 오늘 카드뉴스가 어떤 글인지 알 수 있게 (sns/cards/날짜/info.json)
+json.dump({'title': nxt['title'], 'link': nxt['link'], 'desc': nxt['desc'], 'cards': len(cards),
+           'points': [h for h, _ in points]}, open(f'site/{rel}/info.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 run('git', '-C', 'site', 'add', rel)
 run('git', '-C', 'site', '-c', 'user.name=card-news-bot', '-c', 'user.email=actions@users.noreply.github.com', 'commit', '-qm', f'카드뉴스 이미지 {day}')
 for _ in range(3):
