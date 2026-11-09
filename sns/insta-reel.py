@@ -18,7 +18,10 @@ SITE = 'https://internationalschool.kr'
 DRY = os.environ.get('DRY') == '1'
 OUT = 'out'
 W, H = 1080, 1920
-WINE, ROSE, CREAM, INK = (122, 31, 61), (192, 138, 115), (251, 247, 245), (42, 26, 31)
+import style                       # 날마다 색·배경·표지 문구·배치를 바꾼다 (sns/style.py)
+S = style.pick(0)
+P = S['pal']
+WINE, ROSE, CREAM, INK = P['dark'], P['accent'], P['light'], P['ink']
 FONT = {k: f'{OUT}/Pretendard-{k}.otf' for k in ('Bold', 'ExtraBold', 'Medium')}
 
 
@@ -109,7 +112,7 @@ def brand(d, fill):
     d.text(((W - d.textlength(t, font=f)) / 2, H - 190), t, font=f, fill=fill)
 
 
-photo = Image.open(__import__('io').BytesIO(get(f'{SITE}/img/hero-regents.jpg'))).convert('RGB')
+photo = Image.open(S['bg']).convert('RGB')
 r = max(W / photo.width, H / photo.height)
 photo = photo.resize((int(photo.width * r) + 1, int(photo.height * r) + 1))
 photo = photo.crop(((photo.width - W) // 2, (photo.height - H) // 2, (photo.width - W) // 2 + W, (photo.height - H) // 2 + H))
@@ -119,30 +122,36 @@ scenes = []
 # 첫 장면: 사진 + 제목
 im = photo.copy()
 d = ImageDraw.Draw(im)
-d.rounded_rectangle((W / 2 - 230, 560, W / 2 + 230, 640), 40, fill=ROSE)
 f = font('Bold', 44)
-t = '국제학교 부모님 필독'
+t = S['chip']
+d.rounded_rectangle((W / 2 - d.textlength(t, font=f) / 2 - 50, 560, W / 2 + d.textlength(t, font=f) / 2 + 50, 640), 40, fill=ROSE)
 d.text(((W - d.textlength(t, font=f)) / 2, 575), t, font=f, fill='white')
 block(d, nxt['title'], font('ExtraBold', 92), 720, W - 180, 'white')
-f = font('Medium', 26)
-t = 'Photo: Aliciaregents, CC BY-SA 4.0'
-d.text((W - d.textlength(t, font=f) - 40, H - 60), t, font=f, fill=(220, 220, 220))
-brand(d, (240, 225, 220))
+if S['credit']:
+    f = font('Medium', 26)
+    d.text((W - d.textlength(S['credit'], font=f) - 40, H - 60), S['credit'], font=f, fill=(220, 220, 220))
+brand(d, P['soft'])
 scenes.append((im, 3.2))
 
 # 요점 장면
 for n, h in enumerate(heads, 1):
-    im = Image.new('RGB', (W, H), CREAM if n % 2 else (246, 236, 232))
+    im = Image.new('RGB', (W, H), CREAM)
     d = ImageDraw.Draw(im)
-    d.rectangle((0, 0, W, 18), fill=WINE)
-    f = font('ExtraBold', 230)
     t = f'{n:02d}'
-    d.text(((W - d.textlength(t, font=f)) / 2, 470), t, font=f, fill=ROSE)
-    d.rounded_rectangle((W / 2 - 60, 760, W / 2 + 60, 770), 5, fill=WINE)
+    if S['layout'] == 0:      # 위 띠 + 큰 번호
+        d.rectangle((0, 0, W, 18), fill=WINE)
+        f = font('ExtraBold', 230)
+        d.text(((W - d.textlength(t, font=f)) / 2, 470), t, font=f, fill=ROSE)
+        d.rounded_rectangle((W / 2 - 60, 760, W / 2 + 60, 770), 5, fill=WINE)
+    else:                     # 진한 동그라미 안 번호 + 아래 띠
+        d.rectangle((0, H - 18, W, H), fill=ROSE)
+        d.ellipse((W / 2 - 130, 520, W / 2 + 130, 780), fill=WINE)
+        f = font('ExtraBold', 130)
+        d.text(((W - d.textlength(t, font=f)) / 2, 572), t, font=f, fill='white')
     block(d, h, font('ExtraBold', 84), 850, W - 200, INK)
     f = font('Medium', 38)
     t = f'{n} / {len(heads)}'
-    d.text(((W - d.textlength(t, font=f)) / 2, 1500), t, font=f, fill=(150, 120, 120))
+    d.text(((W - d.textlength(t, font=f)) / 2, 1500), t, font=f, fill=P['mute'])
     brand(d, WINE)
     scenes.append((im, 2.6))
 
@@ -150,13 +159,13 @@ for n, h in enumerate(heads, 1):
 im = Image.new('RGB', (W, H), WINE)
 d = ImageDraw.Draw(im)
 y = block(d, '국제학교 1:1 화상 과외', font('ExtraBold', 88), 620, W - 160, 'white')
-y = block(d, 'IB · AP · IGCSE · A-Level', font('Bold', 52), y + 30, W - 160, (240, 210, 195))
+y = block(d, 'IB · AP · IGCSE · A-Level', font('Bold', 52), y + 30, W - 160, P['soft'])
 d.rounded_rectangle((140, y + 90, W - 140, y + 250), 80, fill=CREAM)
 f = font('ExtraBold', 58)
 t = '10~15분 무료 테스트 수업'
 d.text(((W - d.textlength(t, font=f)) / 2, y + 133), t, font=f, fill=WINE)
 block(d, '프로필 링크에서 신청하세요', font('Bold', 50), y + 320, W - 160, 'white')
-brand(d, (240, 210, 195))
+brand(d, P['soft'])
 scenes.append((im, 3.6))
 
 # 3. 영상 만들기 (장면마다 살짝 확대 + 앞뒤 페이드) ------------------------------

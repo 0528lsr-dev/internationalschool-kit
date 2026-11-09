@@ -19,7 +19,10 @@ SITE = 'https://internationalschool.kr'
 DRY = os.environ.get('DRY') == '1'
 OUT = 'out/cards'
 W, H = 1080, 1350
-WINE, ROSE, CREAM, INK, MUTE = (122, 31, 61), (192, 138, 115), (251, 247, 245), (42, 26, 31), (110, 90, 95)
+import style                       # 날마다 색·배경·표지 문구·배치를 바꾼다 — 같은 날 릴스와도 다르게(offset 3)
+S = style.pick(3)
+P = S['pal']
+WINE, ROSE, CREAM, INK, MUTE = P['dark'], P['accent'], P['light'], P['ink'], P['mute']
 FONT = {k: f'out/Pretendard-{k}.otf' for k in ('Bold', 'ExtraBold', 'Medium')}
 
 
@@ -139,31 +142,38 @@ def foot(d, fill, page=''):
 
 total = len(points) + 2
 cards = []
-photo = Image.open(io.BytesIO(get(f'{SITE}/img/hero-regents.jpg'))).convert('RGB')
+photo = Image.open(S['bg']).convert('RGB')
 r = max(W / photo.width, H / photo.height)
 photo = photo.resize((int(photo.width * r) + 1, int(photo.height * r) + 1))
 photo = photo.crop(((photo.width - W) // 2, (photo.height - H) // 2, (photo.width - W) // 2 + W, (photo.height - H) // 2 + H))
 im = ImageEnhance.Brightness(photo.filter(ImageFilter.GaussianBlur(2))).enhance(0.40)
 d = ImageDraw.Draw(im)
-d.rounded_rectangle((W / 2 - 210, 380, W / 2 + 210, 452), 36, fill=ROSE)
 f = font('Bold', 40)
-d.text(((W - d.textlength('국제학교 부모님 필독', font=f)) / 2, 393), '국제학교 부모님 필독', font=f, fill='white')
+t = S['chip']
+d.rounded_rectangle((W / 2 - d.textlength(t, font=f) / 2 - 45, 380, W / 2 + d.textlength(t, font=f) / 2 + 45, 452), 36, fill=ROSE)
+d.text(((W - d.textlength(t, font=f)) / 2, 393), t, font=f, fill='white')
 block(d, nxt['title'], font('ExtraBold', 80), 510, W - 160, 'white')
 f = font('Bold', 36)
 t = '옆으로 넘겨 보세요  →'
-d.text(((W - d.textlength(t, font=f)) / 2, H - 230), t, font=f, fill=(245, 225, 215))
-f = font('Medium', 22)
-t = 'Photo: Aliciaregents, CC BY-SA 4.0'
-d.text((W - d.textlength(t, font=f) - 30, H - 40), t, font=f, fill=(210, 210, 210))
-foot(d, (240, 225, 220))
+d.text(((W - d.textlength(t, font=f)) / 2, H - 230), t, font=f, fill=P['soft'])
+if S['credit']:
+    f = font('Medium', 22)
+    d.text((W - d.textlength(S['credit'], font=f) - 30, H - 40), S['credit'], font=f, fill=(210, 210, 210))
+foot(d, P['soft'])
 cards.append(im)
 
 for n, (head, lines) in enumerate(points, 1):
     im = Image.new('RGB', (W, H), CREAM)
     d = ImageDraw.Draw(im)
-    d.rectangle((0, 0, W, 16), fill=WINE)
-    d.text((80, 120), f'{n:02d}', font=font('ExtraBold', 150), fill=ROSE)
-    y = block(d, head, font('ExtraBold', 66), 330, W - 160, INK, x=80)
+    if S['layout'] == 0:      # 위 띠 + 큰 번호
+        d.rectangle((0, 0, W, 16), fill=WINE)
+        d.text((80, 120), f'{n:02d}', font=font('ExtraBold', 150), fill=ROSE)
+    else:                     # 왼쪽 세로 띠 + 동그라미 번호
+        d.rectangle((0, 0, 16, H), fill=ROSE)
+        d.ellipse((80, 140, 250, 310), fill=WINE)
+        f = font('ExtraBold', 84)
+        d.text((165 - d.textlength(f'{n:02d}', font=f) / 2, 175), f'{n:02d}', font=f, fill='white')
+    y = block(d, head, font('ExtraBold', 66), 360, W - 160, INK, x=80)
     d.rectangle((80, y + 30, 200, y + 38), fill=WINE)
     y += 90
     fb = font('Medium', 40)
@@ -176,14 +186,14 @@ for n, (head, lines) in enumerate(points, 1):
 im = Image.new('RGB', (W, H), WINE)
 d = ImageDraw.Draw(im)
 y = block(d, '국제학교 1:1 화상 과외', font('ExtraBold', 80), 380, W - 160, 'white')
-y = block(d, 'IB · AP · IGCSE · A-Level', font('Bold', 46), y + 24, W - 160, (240, 210, 195))
+y = block(d, 'IB · AP · IGCSE · A-Level', font('Bold', 46), y + 24, W - 160, P['soft'])
 d.rounded_rectangle((120, y + 70, W - 120, y + 210), 70, fill=CREAM)
 f = font('ExtraBold', 52)
 t = '10~15분 무료 테스트 수업'
 d.text(((W - d.textlength(t, font=f)) / 2, y + 108), t, font=f, fill=WINE)
 y = block(d, '프로필 링크에서 신청하세요', font('Bold', 44), y + 270, W - 160, 'white')
-block(d, '저장해 두고 필요할 때 다시 보세요', font('Medium', 36), y + 20, W - 160, (240, 210, 195))
-foot(d, (240, 210, 195), f'{total} / {total}')
+block(d, '저장해 두고 필요할 때 다시 보세요', font('Medium', 36), y + 20, W - 160, P['soft'])
+foot(d, P['soft'], f'{total} / {total}')
 cards.append(im)
 
 for k, c in enumerate(cards, 1):
