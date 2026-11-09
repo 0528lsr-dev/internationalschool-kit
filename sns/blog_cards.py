@@ -109,7 +109,7 @@ def make(title, body, out_dir):
         d.rectangle((70, y + 20, 180, y + 27), fill=P['dark'])
         y += 70
         fb = font('Medium', 38)
-        for ln in [re.sub(r'^\d\)\s*', '', l) for l in lines][:3]:
+        for ln in [re.sub(r'^(·\s*|\d\)\s*)', '', l.strip()) for l in lines][:3]:
             if y > H - 220:
                 break
             d.ellipse((74, y + 16, 90, y + 32), fill=P['accent'])
