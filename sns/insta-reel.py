@@ -69,7 +69,7 @@ print('글:', nxt['title'], heads)
 os.makedirs(OUT, exist_ok=True)
 for k, path in FONT.items():
     if not os.path.exists(path):
-        open(path, 'wb').write(get(f'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/public/static/Pretendard-{k}.otf'))
+        open(path, 'wb').write(get(f'https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-{k}.otf'))
 font = lambda k, size: ImageFont.truetype(FONT[k], size)
 
 
