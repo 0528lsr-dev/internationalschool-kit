@@ -1,5 +1,5 @@
 # 국제학교튜터 스레드 새 댓글 → 텔레그램 알림 (sns/threads-replies.mjs)
-name: 스레드 댓글 알림
+name: 스레드·인스타 댓글 알림
 on:
   schedule:
     - cron: '17 * * * *'   # 1시간마다
@@ -15,3 +15,4 @@ jobs:
       - run: node sns/threads-replies.mjs
         env:
           THREADS_TOKEN: ${{ secrets.THREADS_TOKEN }}
+          INSTA_TOKEN: ${{ secrets.INSTA_TOKEN }}

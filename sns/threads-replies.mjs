@@ -1,4 +1,4 @@
-/* 국제학교튜터 스레드 — 우리 글에 새 댓글이 달리면 텔레그램 "방문알림" 방으로 알림 (2026-11-09)
+/* 국제학교튜터 스레드·인스타 — 우리 글에 새 댓글이 달리면 텔레그램 "방문알림" 방으로 알림 (2026-11-09)
    - GitHub Actions(.github/workflows/threads-replies.yml)가 1시간마다 실행한다.
    - 최근 70분 안에 달린 남의 댓글만 보낸다(기록 파일 없음 — 실행이 늦어지면 가끔 두 번 올 수 있다).
    - 텔레그램은 방문 알림과 같은 Apps Script 웹 앱으로 보낸다(그쪽 코드는 그대로, 방문 알림 칸에 댓글 내용을 넣는다). */
@@ -32,4 +32,31 @@ for (const p of posts) {
     sent++;
   }
 }
-console.log('새 댓글 알림:', sent);
+console.log('스레드 새 댓글 알림:', sent);
+
+/* 인스타그램(intlschool_tutor) 새 댓글·대댓글도 같은 방으로 (2026-11-09) */
+const IG_TOKEN = process.env.INSTA_TOKEN, IG = '17841420958632232', ME = 'intlschool_tutor';
+if (IG_TOKEN) {
+  const ig = async p => {
+    const j = await (await fetch('https://graph.facebook.com/v23.0' + p, { headers: { Authorization: 'Bearer ' + IG_TOKEN } })).json();
+    if (j.error) throw new Error(p.split('?')[0] + ': ' + j.error.message);
+    return j;
+  };
+  let n = 0;
+  const media = (await ig(`/${IG}/media?fields=id,caption,permalink&limit=20`)).data || [];
+  for (const m of media) {
+    let cs = [];
+    try { cs = (await ig(`/${m.id}/comments?fields=id,text,username,timestamp,replies{id,text,username,timestamp}&limit=50`)).data || []; } catch (e) { continue; }
+    for (const c of cs.flatMap(c => [c, ...((c.replies && c.replies.data) || [])])) {
+      if (c.username === ME || !c.timestamp || Date.now() - new Date(c.timestamp) > WINDOW) continue;
+      await fetch(HOOK, { method: 'POST', body: new URLSearchParams({
+        site: '💬 인스타 새 댓글', kind: 'visit',
+        title: (c.text || '(내용 없음)').slice(0, 300), path: m.permalink || '',
+        ref: '릴스: ' + (m.caption || '').split('\n')[0].slice(0, 40), dev: c.username ? '@' + c.username : '',
+        geo: '답글은 Claude 에게 붙여 넣으면 초안 작성'
+      }) });
+      n++;
+    }
+  }
+  console.log('인스타 새 댓글 알림:', n);
+}
