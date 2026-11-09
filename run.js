@@ -319,7 +319,7 @@ const analyticsJs = S => `// Google Analytics 4 — 측정 ID 를 발급받으�
       if (done) return; done = true;
       /* 위치를 못 얻었는데 브라우저 언어가 한국어가 아니면(로봇은 보통 en-US) 보내지 않는다 */
       if (!geo && !/^ko/i.test(navigator.language || '')) { set('bot', '1'); return; }
-      info.geo = geo || ''; set('geo', info.geo); post(info);
+      info.geo = geo || ''; set('geo', info.geo); human(function () { post(info); });
     };
     /* 2026-11-09: 인스타 링크 검사 로봇(메타)·구글 같은 서버 회사에서 브라우저처럼 들어오면 알림 안 보냄 */
     var DC = /google|amazon|aws|microsoft|azure|digitalocean|linode|akamai|ovh|hetzner|cloudflare|oracle|alibaba|tencent|facebook|meta platforms|apple|yandex|baidu|naver cloud|kakao enterprise/i;
@@ -331,8 +331,19 @@ const analyticsJs = S => `// Google Analytics 4 — 측정 ID 를 발급받으�
       if (d && d.country_code && d.country_code !== 'KR' && !/^ko/i.test(navigator.language || '')) { done = true; set('bot', '1'); return; }
       go(region(d)); }, function () { go(''); }); } catch (e) { go(''); }
   }
+  /* 2026-11-09: 사람이 실제로 마우스·터치·키보드·휠을 움직였을 때만 알림 (페이지만 열어 보는 로봇·링크 검사기 차단) */
+  function human(cb) {
+    if (get('human')) return cb();
+    var ev = ['pointermove', 'pointerdown', 'touchstart', 'wheel', 'keydown'], fired = false;
+    var h = function () {
+      if (fired) return; fired = true; set('human', '1');
+      ev.forEach(function (e) { window.removeEventListener(e, h, true); });
+      cb();
+    };
+    ev.forEach(function (e) { window.addEventListener(e, h, { capture: true, passive: true }); });
+  }
   function hot() {
-    if (get('hot') || get('bot')) return;
+    if (get('hot') || get('bot') || !get('human')) return;
     try { if (ls.getItem && ls.getItem('novisit')) return; } catch (e) {}
     var sec = Math.round((Date.now() - +(get('start') || Date.now())) / 1000), pages = +(get('pages') || 1);
     if (sec < 60 && pages < 3) return;
