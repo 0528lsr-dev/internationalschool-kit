@@ -1,30 +1,9 @@
 [
-    {
-        "file":  "01.jpg",
-        "credit":  "Photo: Aliciaregents, CC BY-SA 4.0"
-    },
-    {
-        "file":  "02.jpg",
-        "credit":  ""
-    },
-    {
-        "file":  "03.jpg",
-        "credit":  ""
-    },
-    {
-        "file":  "04.jpg",
-        "credit":  "Photo: Adam Jones, CC BY 2.0"
-    },
-    {
-        "file":  "05.jpg",
-        "credit":  "Photo: Jonathan Hutchins, CC BY-SA 2.0"
-    },
-    {
-        "file":  "06.jpg",
-        "credit":  "Photo: Tulane Public Relations, CC BY 2.0"
-    },
-    {
-        "file":  "07.jpg",
-        "credit":  "Photo: Jlongstreet332, CC BY-SA 4.0"
-    }
+ {"file": "01.jpg", "credit": "Photo: Aliciaregents, CC BY-SA 4.0", "source": "File:Regents-Bangkok.jpg"},
+ {"file": "02.jpg", "credit": "", "source": "File:General view, Radcliffe Quadrangle - IMG 1683.jpg"},
+ {"file": "03.jpg", "credit": "", "source": "File:Sias Library - Students Studying 2017.jpg"},
+ {"file": "04.jpg", "credit": "Photo: Adam Jones, CC BY 2.0", "source": "File:View of Pomona College's Smith Campus Center from Marston Quad.jpg"},
+ {"file": "05.jpg", "credit": "Photo: Jonathan Hutchins, CC BY-SA 2.0", "source": "File:Autumn on Keele campus - geograph.org.uk - 6738612.jpg"},
+ {"file": "06.jpg", "credit": "Photo: Tulane Public Relations, CC BY 2.0", "source": "File:2012 - studying in Howard-Tilton Library New Orleans.jpg"},
+ {"file": "07.jpg", "credit": "Photo: Jlongstreet332, CC BY-SA 4.0", "source": "File:Northwood School Campus Aerial Autumn.jpg"}
 ]
