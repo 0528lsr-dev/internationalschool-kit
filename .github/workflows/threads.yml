@@ -3,6 +3,7 @@
 name: 스레드 자동 게시
 on:
   schedule:
+    - cron: '30 22 * * *'  # 매일 07:30 KST (출근·등교 시간 — 지난 글 하나)
     - cron: '0 3 * * *'    # 매일 12:00 KST
     - cron: '0 11 * * *'   # 매일 20:00 KST
   workflow_dispatch:

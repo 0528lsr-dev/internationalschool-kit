@@ -1,7 +1,7 @@
 /* 국제학교튜터 → 스레드 자동 게시 (2026-11-09)
-   - GitHub Actions(.github/workflows/threads.yml)가 하루 두 번 실행한다.
-   - 사이트 rss.xml 에서 최근 3일 글 중 아직 스레드에 안 올린 글 1편을 골라 올린다.
-     (올렸는지는 내 스레드 최근 게시물에 그 글 주소가 있는지로 판단 — 따로 기록 파일 없음)
+   - GitHub Actions(.github/workflows/threads.yml)가 하루 세 번(07:30·12:00·20:00 KST) 실행한다.
+   - 사이트 rss.xml 에서 아직 스레드에 안 올린 글 1편(새 글 먼저, 없으면 지난 글)을 골라 올린다.
+     (올렸는지는 내 스레드 최근 게시물에 그 글 제목이 있는지로 판단 — 따로 기록 파일 없음)
    - 토큰(THREADS_TOKEN)은 60일짜리라 매번 갱신해서 $RUNNER_TEMP/new_token 에 써 두면 워크플로가 저장한다. */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -25,28 +25,43 @@ const xml = await (await fetch(RSS)).text();
 const tag = (s, t) => { const m = s.match(new RegExp('<' + t + '>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?</' + t + '>')); return m ? unx(m[1].trim()) : ''; };
 const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)]
   .map(m => ({ title: tag(m[1], 'title'), link: tag(m[1], 'link'), desc: tag(m[1], 'description'), date: new Date(tag(m[1], 'pubDate')) }))
-  .filter(i => i.link && Date.now() - i.date < DAYS * 864e5)
-  .reverse();   // 오래된 글부터
+  .filter(i => i.link);
+/* 최근 3일 새 글(오래된 것부터) 먼저, 없으면 지난 글(최신부터)을 하나 꺼내 올린다 */
+const fresh = items.filter(i => Date.now() - i.date < DAYS * 864e5).reverse();
+const queue = [...fresh, ...items.filter(i => !fresh.includes(i))];
 
-/* 2. 이미 올린 글 빼기 */
-const mine = await api('/me/threads?fields=text&limit=30');
+/* 2. 이미 올린 글 빼기 (본문에 글 제목이 있으면 올린 것) */
+const mine = await api('/me/threads?fields=text&limit=60');
 const posted = (mine.data || []).map(x => x.text || '').join('\n');
-const next = items.find(i => !posted.includes(i.link));
+const next = queue.find(i => !posted.includes(i.title));
 
-if (!next) console.log('올릴 새 글 없음');
-else {
-  const url = next.link + '?utm_source=threads';
-  let desc = next.desc;
-  const tail = `\n\n👉 자세히 보기\n${url}\n\n국제학교 1:1 화상 과외 · 10~15분 무료 테스트 수업 #국제학교`;
-  const room = 490 - next.title.length - tail.length - 2;
-  if (desc.length > room) desc = desc.slice(0, room - 1) + '…';
-  const text = `${next.title}\n\n${desc}${tail}`;
-
-  /* 3. 만들기 → 30초 기다렸다 게시 (Threads API 권장) */
-  const c = await api('/me/threads?' + new URLSearchParams({ media_type: 'TEXT', text }), { method: 'POST' });
+/* 만들기 → 30초 기다렸다 게시 (Threads API 권장) */
+const publish = async (text, replyTo) => {
+  const q = { media_type: 'TEXT', text };
+  if (replyTo) q.reply_to_id = replyTo;
+  const c = await api('/me/threads?' + new URLSearchParams(q), { method: 'POST' });
   await new Promise(r => setTimeout(r, 30000));
-  const p = await api('/me/threads_publish?' + new URLSearchParams({ creation_id: c.id }), { method: 'POST' });
-  console.log('게시 완료:', next.title, p.id);
+  return (await api('/me/threads_publish?' + new URLSearchParams({ creation_id: c.id }), { method: 'POST' })).id;
+};
+
+if (!next) console.log('올릴 글 없음');
+else {
+  /* 3. 스레드는 링크 글보다 본문만으로 읽히는 글이 더 퍼진다 — 본문엔 요점만, 링크는 내 댓글로 (2026-11-09) */
+  let heads = [];
+  try {
+    const html = await (await fetch(next.link)).text();
+    heads = [...html.matchAll(/<h2[^>]*>([^<]+)<\/h2>/g)].map(m => unx(m[1]).replace(/^\d+[.)]\s*/, '').trim())
+      .filter(h => h && !/다른 글|관련 글|함께 읽|목차/.test(h)).slice(0, 5);
+  } catch (e) {}
+  let desc = next.desc;
+  const list = heads.length ? '\n\n' + heads.map(h => '✔ ' + h).join('\n') : '';
+  const ask = '\n\n국제학교 부모님, 궁금한 점은 댓글로 남겨 주세요 🙌\n#국제학교';
+  const room = 490 - next.title.length - list.length - ask.length - 2;
+  if (desc.length > room) desc = desc.slice(0, Math.max(0, room - 1)) + '…';
+  const id = await publish(`${next.title}\n\n${desc}${list}${ask}`);
+  console.log('게시 완료:', next.title, id);
+  const reply = `👉 전체 글 보기\n${next.link}?utm_source=threads\n\n국제학교 1:1 화상 과외 · 10~15분 무료 테스트 수업 신청\nhttps://internationalschool.kr/contact.html?utm_source=threads`;
+  try { console.log('링크 댓글:', await publish(reply, id)); } catch (e) { console.log('링크 댓글 실패:', e.message); }
 }
 
 /* 4. 토큰 갱신 (발급 24시간 안이면 실패하는데, 그건 괜찮다) */
