@@ -4,7 +4,7 @@
 name: 인스타 릴스 자동 게시
 on:
   schedule:
-    - cron: '0 10 * * *'   # 매일 19:00 KST
+    - cron: '0 9 * * *'    # 매일 18:00 KST (저녁 7~9시에 올리기 좋게 미리 보냄)
   workflow_dispatch:
     inputs:
       dry:
@@ -25,6 +25,8 @@ jobs:
         env:
           INSTA_TOKEN: ${{ secrets.INSTA_TOKEN }}
           DRY: ${{ github.event.inputs.dry }}
+          MODE: telegram            # 반자동: 텔레그램으로 영상 보내기 (완전 자동으로 바꾸려면 이 줄 삭제)
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -3,6 +3,7 @@
 - 사이트 rss.xml 에서 아직 인스타에 안 올린 글 1편(새 글 먼저, 없으면 지난 글)을 골라
   제목 + 소제목(h2) 요점으로 세로 영상(1080x1920, 약 18초, 무음)을 만들어 릴스로 올린다.
 - 올렸는지는 내 인스타 최근 게시물 캡션에 그 글 제목이 있는지로 판단(기록 파일 없음).
+- 지금은 반자동(MODE=telegram): 영상·캡션을 텔레그램으로 보내고 사용자가 음악 넣어 직접 올린다.
 - 토큰(INSTA_TOKEN)은 비즈니스 포트폴리오 시스템 사용자 토큰이라 만료되지 않는다.
 - DRY=1 이면 영상만 만들고 올리지 않는다(out/reel.mp4)."""
 import html, json, os, re, subprocess, sys, time, urllib.parse, urllib.request
@@ -187,6 +188,29 @@ caption = '\n'.join([
     '👉 프로필 링크에서 신청 (@intlschool_tutor)', '',
     '#국제학교 #국제학교과외 #국제학교입학 #IB #AP #IGCSE #Alevel #송도국제학교 #제주국제학교 #화상과외 #국제학교맘 #유학준비'])
 open(f'{OUT}/caption.txt', 'w').write(caption)
+
+# 4-1. 반자동(2026-11-09 사용자 선택): 영상+캡션을 텔레그램으로 보내고, 사용자가 인기 음악을 넣어 직접 올린다.
+#      사용자가 캡션을 그대로 붙여 올리면 제목이 인스타 캡션에 남으므로, 다음 날엔 다음 글로 넘어간다.
+TG = os.environ.get('TG_TOKEN', '')
+if DRY:
+    print('DRY — 영상만 만들고 끝')
+    sys.exit(0)
+if os.environ.get('MODE') == 'telegram':
+    if not TG:
+        raise SystemExit('TG_TOKEN 이 없습니다 (반자동 모드라 인스타에 바로 올리지 않음)')
+    chat = '-5447586522'   # 텔레그램 "방문알림" 방
+    b = '----reel' + str(int(time.time()))
+    body = b''.join([
+        f'--{b}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n{chat}\r\n'.encode(),
+        f'--{b}\r\nContent-Disposition: form-data; name="caption"\r\n\r\n🎬 오늘의 릴스 — {nxt["title"]}\n① 영상 저장 → ② 인스타 릴스에 올리고 인기 음악 넣기 → ③ 아래 캡션 붙여넣기\r\n'.encode(),
+        f'--{b}\r\nContent-Disposition: form-data; name="supports_streaming"\r\n\r\ntrue\r\n'.encode(),
+        f'--{b}\r\nContent-Disposition: form-data; name="video"; filename="reel.mp4"\r\nContent-Type: video/mp4\r\n\r\n'.encode(),
+        open(reel, 'rb').read(), f'\r\n--{b}--\r\n'.encode()])
+    get(f'https://api.telegram.org/bot{TG}/sendVideo', body, {'Content-Type': f'multipart/form-data; boundary={b}'})
+    get(f'https://api.telegram.org/bot{TG}/sendMessage', urllib.parse.urlencode({'chat_id': chat, 'text': caption}).encode())
+    print('텔레그램으로 보냄:', nxt['title'])
+    sys.exit(0)
+
 if DRY or not TOKEN:
     print('DRY — 올리지 않음')
     sys.exit(0)
