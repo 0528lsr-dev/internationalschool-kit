@@ -1,5 +1,5 @@
 """네이버 블로그 초안 → 텔레그램 (2026-11-09)
-- 매일 13:00 KST 클라우드 루틴이 sns/blog/날짜.md 를 써서 올리면(.github/workflows/blog-telegram.yml) 이 스크립트가
+- 매일 13:00 KST 클라우드 루틴이 4가지 주제(국제학교·중고등 과외·자판기·영어회화)를 돌아가며 sns/blog/날짜.md 를 써서 올리면(.github/workflows/blog-telegram.yml) 이 스크립트가
   그 초안과 그날 카드뉴스 이미지를 텔레그램 "방문알림" 방으로 보낸다. 사용자가 네이버 블로그 앱에 붙여 넣어 올린다.
 - 초안 형식: 첫 줄 '# 제목', 본문, 마지막 줄 '태그: a, b, c'. 본문의 [카드 N] 자리는 N번 카드 이미지를 넣을 곳.
 - 네이버는 블로그 자동 글쓰기 공식 기능이 없고 매크로는 저품질 위험이 있어, 올리기는 사람이 한다."""
@@ -37,12 +37,14 @@ for para in body.split('\n\n'):
 if chunk.strip():
     tg('sendMessage', {'chat_id': CHAT, 'text': chunk.strip()})
 
-# 그날 카드뉴스 이미지 (사이트 sns/cards/날짜/)
+# 그날 카드뉴스 이미지 (사이트 sns/cards/날짜/) — 국제학교 주제 날([카드 N] 자리가 있는 글)만
 try:
+    if '[카드 1]' not in body:
+        raise StopIteration('카드 자리 없는 글(국제학교 외 주제)')
     info = json.loads(urllib.request.urlopen(f'{SITE}/sns/cards/{day}/info.json', timeout=30).read())
     media = [{'type': 'photo', 'media': f'{SITE}/sns/cards/{day}/{k}.jpg', **({'caption': f'카드 1~{info["cards"]} (순서대로)'} if k == 1 else {})}
              for k in range(1, min(info['cards'], 10) + 1)]
     tg('sendMediaGroup', {'chat_id': CHAT, 'media': json.dumps(media, ensure_ascii=False)})
-except Exception as e:
-    print('카드 이미지 못 보냄:', e)
+except (Exception, StopIteration) as e:
+    print('카드 이미지 안 보냄:', e)
 print('보냄:', title)
