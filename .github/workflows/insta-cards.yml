@@ -1,0 +1,32 @@
+# 국제학교튜터 → 인스타 카드뉴스(캐러셀) 자동 게시 (sns/insta-cards.py)
+# 비밀값: INSTA_TOKEN(인스타), GH_PAT(카드 이미지를 사이트 저장소에 올릴 때)
+# 손으로 돌릴 때 dry=1 이면 카드만 만들어 결과물(cards)로 남기고 올리지 않는다.
+name: 인스타 카드뉴스 자동 게시
+on:
+  schedule:
+    - cron: '30 3 * * *'   # 매일 12:30 KST (점심시간)
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: '1 이면 카드만 만들고 올리지 않음'
+        default: '0'
+jobs:
+  cards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -q pillow
+      - run: python sns/insta-cards.py
+        env:
+          INSTA_TOKEN: ${{ secrets.INSTA_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          DRY: ${{ github.event.inputs.dry }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cards
+          path: out/cards
+          retention-days: 7
