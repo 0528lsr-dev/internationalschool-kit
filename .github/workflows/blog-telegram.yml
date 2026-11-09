@@ -1,10 +1,15 @@
 # 네이버 블로그 초안(sns/blog/*.md, 매일 13시 클라우드 루틴이 작성) → 텔레그램 (sns/blog-send.py)
+# 국제학교 외 주제는 sns/blog_cards.py 가 글 내용으로 카드 이미지를 만들어 같이 보낸다.
 name: 네이버 블로그 초안 보내기
 on:
   push:
     paths:
       - 'sns/blog/*.md'
   workflow_dispatch:
+    inputs:
+      file:
+        description: '보낼 초안 파일 (비우면 sns/blog 의 가장 최근 파일)'
+        default: ''
 jobs:
   send:
     runs-on: ubuntu-latest
@@ -13,6 +18,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - run: pip install -q pillow
       - run: python sns/blog-send.py
         env:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          BLOG_FILE: ${{ github.event.inputs.file }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: blog-cards
+          path: out/blog_cards
+          if-no-files-found: ignore
+          retention-days: 7

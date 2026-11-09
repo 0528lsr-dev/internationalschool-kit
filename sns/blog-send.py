@@ -17,6 +17,19 @@ day = os.path.basename(path)[:10]
 text = open(path, encoding='utf-8').read().strip()
 title = re.match(r'#\s*(.+)', text).group(1).strip()
 body = re.sub(r'^#.*\n', '', text, count=1).strip()
+tags = ''
+if body.splitlines()[-1].startswith('태그:'):
+    tags = body.splitlines()[-1]
+    body = '\n'.join(body.splitlines()[:-1]).strip()
+
+# 국제학교 외 주제는 카드뉴스가 없으니 글 내용으로 카드 이미지를 만든다(sns/blog_cards.py)
+own_cards = []
+if '[카드 1]' not in body:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import blog_cards
+    body, own_cards = blog_cards.make(title, body, 'out/blog_cards')
+if tags:
+    body += '\n\n' + tags
 
 
 def tg(method, params):
@@ -37,14 +50,27 @@ for para in body.split('\n\n'):
 if chunk.strip():
     tg('sendMessage', {'chat_id': CHAT, 'text': chunk.strip()})
 
-# 그날 카드뉴스 이미지 (사이트 sns/cards/날짜/) — 국제학교 주제 날([카드 N] 자리가 있는 글)만
+if own_cards:   # 직접 만든 카드 — 파일을 올려 보낸다(multipart)
+    b = '----blogcards'
+    media, parts = [], []
+    for k, p in enumerate(own_cards, 1):
+        media.append({'type': 'photo', 'media': f'attach://c{k}', **({'caption': f'카드 1~{len(own_cards)} (순서대로)'} if k == 1 else {})})
+        parts.append(f'--{b}\r\nContent-Disposition: form-data; name="c{k}"; filename="{k}.jpg"\r\nContent-Type: image/jpeg\r\n\r\n'.encode()
+                     + open(p, 'rb').read() + b'\r\n')
+    head = (f'--{b}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n{CHAT}\r\n'
+            f'--{b}\r\nContent-Disposition: form-data; name="media"\r\n\r\n{json.dumps(media)}\r\n').encode()
+    req = urllib.request.Request(f'https://api.telegram.org/bot{TG}/sendMediaGroup', head + b''.join(parts) + f'--{b}--\r\n'.encode(),
+                                 {'Content-Type': f'multipart/form-data; boundary={b}'})
+    urllib.request.urlopen(req, timeout=120).read()
+    print('직접 만든 카드', len(own_cards), '장 보냄')
+    sys.exit(0)
+
+# 그날 카드뉴스 이미지 (사이트 sns/cards/날짜/) — 국제학교 주제 날
 try:
-    if '[카드 1]' not in body:
-        raise StopIteration('카드 자리 없는 글(국제학교 외 주제)')
     info = json.loads(urllib.request.urlopen(f'{SITE}/sns/cards/{day}/info.json', timeout=30).read())
     media = [{'type': 'photo', 'media': f'{SITE}/sns/cards/{day}/{k}.jpg', **({'caption': f'카드 1~{info["cards"]} (순서대로)'} if k == 1 else {})}
              for k in range(1, min(info['cards'], 10) + 1)]
     tg('sendMediaGroup', {'chat_id': CHAT, 'media': json.dumps(media, ensure_ascii=False)})
-except (Exception, StopIteration) as e:
+except Exception as e:
     print('카드 이미지 안 보냄:', e)
 print('보냄:', title)
