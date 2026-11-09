@@ -267,7 +267,7 @@ const analyticsJs = S => `// Google Analytics 4 — 측정 ID 를 발급받으�
   try { if (/[?&]novisit/.test(location.search)) ls.setItem('novisit', '1'); if (/[?&]visit(&|$)/.test(location.search)) ls.removeItem('novisit'); } catch (e) {}
   try { if (ls.getItem && ls.getItem('novisit')) return; } catch (e) {}
   var ua = navigator.userAgent || '';
-  if (navigator.webdriver || /bot|crawl|spider|slurp|yeti|daum|lighthouse|headless|preview/i.test(ua)) return;
+  if (navigator.webdriver || /bot|crawl|spider|slurp|yeti|daum|lighthouse|headless|preview|externalhit|meta-external/i.test(ua)) return;
   if (!/^https?:$/.test(location.protocol) || /^(localhost|127[.])/.test(location.hostname)) return;
   function get(k) { try { return ss.getItem('vt_' + k); } catch (e) { return null; } }
   function set(k, v) { try { ss.setItem('vt_' + k, v); } catch (e) {} }
@@ -315,12 +315,24 @@ const analyticsJs = S => `// Google Analytics 4 — 측정 ID 를 발급받으�
     var info = { site: SITE, kind: 'visit', title: title, path: path, ref: source(), dev: device(), geo: '' };
     set('ref', info.ref);
     var done = false;
-    var go = function (geo) { if (done) return; done = true; info.geo = geo || ''; set('geo', info.geo); post(info); };
-    setTimeout(function () { go(''); }, 2500);
-    try { fetch('https://ipapi.co/json/').then(function (r) { return r.json(); }).then(function (d) { if (d && SKIP.indexOf(d.ip) >= 0) { done = true; try { ls.setItem('novisit', '1'); } catch (e) {} return; } go(region(d)); }, function () { go(''); }); } catch (e) { go(''); }
+    var go = function (geo) {
+      if (done) return; done = true;
+      /* 위치를 못 얻었는데 브라우저 언어가 한국어가 아니면(로봇은 보통 en-US) 보내지 않는다 */
+      if (!geo && !/^ko/i.test(navigator.language || '')) { set('bot', '1'); return; }
+      info.geo = geo || ''; set('geo', info.geo); post(info);
+    };
+    /* 2026-11-09: 인스타 링크 검사 로봇(메타)·구글 같은 서버 회사에서 브라우저처럼 들어오면 알림 안 보냄 */
+    var DC = /google|amazon|aws|microsoft|azure|digitalocean|linode|akamai|ovh|hetzner|cloudflare|oracle|alibaba|tencent|facebook|meta platforms|apple|yandex|baidu|naver cloud|kakao enterprise/i;
+    setTimeout(function () { go(''); }, 6000);
+    try { fetch('https://ipapi.co/json/').then(function (r) { return r.json(); }).then(function (d) {
+      if (d && SKIP.indexOf(d.ip) >= 0) { done = true; try { ls.setItem('novisit', '1'); } catch (e) {} return; }
+      if (d && DC.test((d.org || '') + ' ' + (d.asn_org || ''))) { done = true; set('bot', '1'); return; }
+      /* 해외 IP 인데 브라우저 언어도 한국어가 아니면 로봇으로 본다 (해외 사는 한국 부모님은 보통 ko 설정이라 그대로 알림) */
+      if (d && d.country_code && d.country_code !== 'KR' && !/^ko/i.test(navigator.language || '')) { done = true; set('bot', '1'); return; }
+      go(region(d)); }, function () { go(''); }); } catch (e) { go(''); }
   }
   function hot() {
-    if (get('hot')) return;
+    if (get('hot') || get('bot')) return;
     try { if (ls.getItem && ls.getItem('novisit')) return; } catch (e) {}
     var sec = Math.round((Date.now() - +(get('start') || Date.now())) / 1000), pages = +(get('pages') || 1);
     if (sec < 60 && pages < 3) return;
