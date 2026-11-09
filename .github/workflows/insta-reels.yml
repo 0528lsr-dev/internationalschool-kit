@@ -1,0 +1,36 @@
+# 국제학교튜터 → 인스타 릴스 자동 게시 (sns/insta-reel.py)
+# 비밀값: INSTA_TOKEN(비즈니스 포트폴리오 시스템 사용자 토큰, 만료 없음)
+# 손으로 돌릴 때 dry=1 이면 영상만 만들어 결과물(reel)로 남기고 올리지 않는다.
+name: 인스타 릴스 자동 게시
+on:
+  schedule:
+    - cron: '0 10 * * *'   # 매일 19:00 KST
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: '1 이면 영상만 만들고 올리지 않음'
+        default: '0'
+jobs:
+  reel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          pip install -q pillow
+          which ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)
+      - run: python sns/insta-reel.py
+        env:
+          INSTA_TOKEN: ${{ secrets.INSTA_TOKEN }}
+          DRY: ${{ github.event.inputs.dry }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reel
+          path: |
+            out/reel.mp4
+            out/s*.png
+            out/caption.txt
+          retention-days: 7
