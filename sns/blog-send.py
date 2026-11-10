@@ -17,6 +17,11 @@ day = os.path.basename(path)[:10]
 text = open(path, encoding='utf-8').read().strip()
 title = re.match(r'#\s*(.+)', text).group(1).strip()
 body = re.sub(r'^#.*\n', '', text, count=1).strip()
+# 제목 다음 줄 '카테고리: …' 는 올릴 블로그 카테고리 — 본문에서 빼고 안내 메시지에만 쓴다 (2026-11-11)
+category = ''
+if body.splitlines()[0].startswith('카테고리:'):
+    category = body.splitlines()[0].split(':', 1)[1].strip()
+    body = '\n'.join(body.splitlines()[1:]).strip()
 tags = ''
 if body.splitlines()[-1].startswith('태그:'):
     tags = body.splitlines()[-1]
@@ -38,7 +43,8 @@ def tg(method, params):
         return json.loads(r.read())
 
 
-tg('sendMessage', {'chat_id': CHAT, 'text': f'📝 오늘의 네이버 블로그 글 — {title}\n① 아래 카드 이미지 저장 → ② 블로그 앱 글쓰기 → ③ 제목·본문 붙여넣기, [카드 N] 자리에 N번째 사진 넣기 → ④ 태그 넣고 발행'})
+tg('sendMessage', {'chat_id': CHAT, 'text': f'📝 오늘의 네이버 블로그 글 — {title}\n' + (f'📂 카테고리: {category}\n' if category else '') +
+   '① 아래 카드 이미지 저장 → ② 블로그 앱 글쓰기(위 카테고리 선택) → ③ 제목·본문 붙여넣기, [카드 N] 자리에 N번째 사진 넣기 → ④ 태그 넣고 발행'})
 tg('sendMessage', {'chat_id': CHAT, 'text': title})
 # 텔레그램 한 메시지는 4096자까지 — 문단 단위로 나눠 보낸다
 chunk = ''
