@@ -6,7 +6,7 @@
 import glob, json, os, re, sys, urllib.parse, urllib.request
 
 TG = os.environ['TG_TOKEN']
-CHAT = '-5447586522'
+CHAT = os.environ.get('TG_CHAT') or '-5447586522'   # 'SNS 콘텐츠' 방(상담·방문 알림 방과 따로, 2026-11-10). 없으면 방문알림 방
 SITE = 'https://internationalschool.kr'
 
 files = sorted(glob.glob('sns/blog/*.md'))

@@ -1,12 +1,22 @@
-/* 국제학교튜터 스레드·인스타 — 우리 글에 새 댓글이 달리면 텔레그램 "방문알림" 방으로 알림 (2026-11-09)
+/* 국제학교튜터 스레드·인스타 — 우리 글에 새 댓글이 달리면 텔레그램으로 알림 (2026-11-09)
    - GitHub Actions(.github/workflows/threads-replies.yml)가 1시간마다 실행한다.
    - 최근 70분 안에 달린 남의 댓글만 보낸다(기록 파일 없음 — 실행이 늦어지면 가끔 두 번 올 수 있다).
-   - 텔레그램은 방문 알림과 같은 Apps Script 웹 앱으로 보낸다(그쪽 코드는 그대로, 방문 알림 칸에 댓글 내용을 넣는다). */
+   - 2026-11-10: 상담·방문 알림 방과 나눠 'SNS 콘텐츠' 방(TG_CHAT)으로 봇이 직접 보낸다.
+     TG_TOKEN·TG_CHAT 이 없으면 예전처럼 방문 알림 Apps Script(방문알림 방)로 보낸다. */
 const TOKEN = process.env.THREADS_TOKEN;
 const API = 'https://graph.threads.net/v1.0';
 const HOOK = 'https://script.google.com/macros/s/AKfycbzpQIZERcfJP0aKF15sZFpIo0-HPvARnnyhlaORN0PCk1bf8j5F0Q5fHRZZ7rkABi5E/exec';
 const WINDOW = 70 * 60 * 1000;
 if (!TOKEN) throw new Error('THREADS_TOKEN 이 없습니다');
+const TG = process.env.TG_TOKEN, TG_CHAT = process.env.TG_CHAT;
+const notify = async (where, text, link, about, who) => {
+  if (TG && TG_CHAT) {
+    const msg = `💬 ${where} 새 댓글${who ? ' — ' + who : ''}\n\n${text}\n\n📄 ${about}\n🔗 ${link}\n\n✍️ 답글은 이 댓글을 Claude 에게 붙여 넣으면 초안을 써 드려요`;
+    await fetch(`https://api.telegram.org/bot${TG}/sendMessage`, { method: 'POST', body: new URLSearchParams({ chat_id: TG_CHAT, text: msg, disable_web_page_preview: 'true' }) });
+  } else {
+    await fetch(HOOK, { method: 'POST', body: new URLSearchParams({ site: `💬 ${where} 새 댓글`, kind: 'visit', title: text, path: link, ref: about, dev: who, geo: '답글은 Claude 에게 붙여 넣으면 초안 작성' }) });
+  }
+};
 
 const api = async p => {
   const j = await (await fetch(API + p, { headers: { Authorization: 'Bearer ' + TOKEN } })).json();
@@ -23,12 +33,7 @@ for (const p of posts) {
   for (const c of conv) {
     if (mineIds.has(c.id) || !c.timestamp || Date.now() - new Date(c.timestamp) > WINDOW) continue;
     const topic = (p.text || '').split('\n')[0].slice(0, 40);
-    await fetch(HOOK, { method: 'POST', body: new URLSearchParams({
-      site: '💬 스레드 새 댓글', kind: 'visit',
-      title: (c.text || '(사진·내용 없음)').slice(0, 300),
-      path: c.permalink || p.permalink || '',
-      ref: '글: ' + topic, dev: c.username ? '@' + c.username : '', geo: '답글은 Claude 에게 붙여 넣으면 초안 작성'
-    }) });
+    await notify('스레드', (c.text || '(사진·내용 없음)').slice(0, 300), c.permalink || p.permalink || '', '글: ' + topic, c.username ? '@' + c.username : '');
     sent++;
   }
 }
@@ -49,12 +54,7 @@ if (IG_TOKEN) {
     try { cs = (await ig(`/${m.id}/comments?fields=id,text,username,timestamp,replies{id,text,username,timestamp}&limit=50`)).data || []; } catch (e) { continue; }
     for (const c of cs.flatMap(c => [c, ...((c.replies && c.replies.data) || [])])) {
       if (c.username === ME || !c.timestamp || Date.now() - new Date(c.timestamp) > WINDOW) continue;
-      await fetch(HOOK, { method: 'POST', body: new URLSearchParams({
-        site: '💬 인스타 새 댓글', kind: 'visit',
-        title: (c.text || '(내용 없음)').slice(0, 300), path: m.permalink || '',
-        ref: '릴스: ' + (m.caption || '').split('\n')[0].slice(0, 40), dev: c.username ? '@' + c.username : '',
-        geo: '답글은 Claude 에게 붙여 넣으면 초안 작성'
-      }) });
+      await notify('인스타', (c.text || '(내용 없음)').slice(0, 300), m.permalink || '', '게시물: ' + (m.caption || '').split('\n')[0].slice(0, 40), c.username ? '@' + c.username : '');
       n++;
     }
   }

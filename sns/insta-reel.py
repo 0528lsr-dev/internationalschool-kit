@@ -207,7 +207,7 @@ if DRY:
 if os.environ.get('MODE') == 'telegram':
     if not TG:
         raise SystemExit('TG_TOKEN 이 없습니다 (반자동 모드라 인스타에 바로 올리지 않음)')
-    chat = '-5447586522'   # 텔레그램 "방문알림" 방
+    chat = os.environ.get('TG_CHAT') or '-5447586522'   # 'SNS 콘텐츠' 방 (2026-11-10). 없으면 방문알림 방
     b = '----reel' + str(int(time.time()))
     body = b''.join([
         f'--{b}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n{chat}\r\n'.encode(),

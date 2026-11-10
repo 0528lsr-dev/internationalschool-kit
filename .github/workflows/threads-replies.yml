@@ -16,3 +16,5 @@ jobs:
         env:
           THREADS_TOKEN: ${{ secrets.THREADS_TOKEN }}
           INSTA_TOKEN: ${{ secrets.INSTA_TOKEN }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CONTENT_CHAT }}

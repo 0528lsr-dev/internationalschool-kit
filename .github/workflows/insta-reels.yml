@@ -27,6 +27,7 @@ jobs:
           DRY: ${{ github.event.inputs.dry }}
           MODE: telegram            # 반자동: 텔레그램으로 영상 보내기 (완전 자동으로 바꾸려면 이 줄 삭제)
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CONTENT_CHAT }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

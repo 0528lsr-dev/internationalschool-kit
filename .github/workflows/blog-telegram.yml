@@ -22,6 +22,7 @@ jobs:
       - run: python sns/blog-send.py
         env:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CONTENT_CHAT }}
           BLOG_FILE: ${{ github.event.inputs.file }}
       - uses: actions/upload-artifact@v4
         if: always()

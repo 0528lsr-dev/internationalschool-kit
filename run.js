@@ -533,8 +533,9 @@ function buildSite(S) {
     if (fs.statSync(p).isFile()) W(path.join(dir, f), fs.readFileSync(p));
   }
 
-  /* RSS — 수업 이야기 + 입시정보, 최신 40편 */
-  const feed = [...blog.map(p => ['blog', p]), ...adm.map(p => ['admissions', p])].sort((a, b) => b[1].date.localeCompare(a[1].date)).slice(0, 40);
+  /* RSS — 수업 이야기 + 입시정보 + 유학 프로그램(2026-11-10, 스레드·인스타·블로그 홍보에 유학도 들어가게), 최신 40편 */
+  const feed = [...blog.map(p => ['blog', p]), ...adm.map(p => ['admissions', p]), ...B.PROGRAMS.map(p => ['study', { ...p, desc: p.short }])]
+    .sort((a, b) => b[1].date.localeCompare(a[1].date)).slice(0, 40);
   W(path.join(dir, 'rss.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>${S.brand} 수업 이야기 · 유학·입시정보</title><link>${S.siteUrl}/blog.html</link><description>${S.tagline}</description><language>ko</language>\n` +
     feed.map(([k, p]) => `<item><title><![CDATA[${p.title}]]></title><link>${S.siteUrl}/${k}/${encodeURIComponent(p.slug)}.html</link><guid>${S.siteUrl}/${k}/${encodeURIComponent(p.slug)}.html</guid><pubDate>${new Date(p.date + 'T09:00:00+09:00').toUTCString()}</pubDate><description><![CDATA[${p.desc}]]></description></item>`).join('\n') + '\n</channel></rss>\n');
 
