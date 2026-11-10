@@ -121,7 +121,50 @@ const BODY = String.raw`
       show(s3);
     });
   }
+  /* 2026-11-10: 카톡 상담 버튼 — 카톡방을 열기 전에 이름·연락처를 먼저 받아 상담 시트에 남긴다
+     (카톡으로만 상담하면 연락처 확보가 어렵다는 사용자 요청). 한 번 남긴 브라우저는 다음부터 바로 카톡방이 열린다. */
+  function kakaoGate(){
+    var links = document.querySelectorAll('a[href*="open.kakao.com"]');
+    if (!links.length) return;
+    var m = document.createElement('div');
+    m.className = 'q-modal'; m.id = 'kgate';
+    m.innerHTML = '<div class="quick" role="dialog" aria-label="카카오톡 상담"><button class="q-close" type="button" aria-label="닫기">×</button>' +
+      '<div class="q-title">💛 카카오톡 상담 시작<small>상담이 중간에 끊겨도 다시 연락드릴 수 있게 먼저 남겨 주세요</small></div>' +
+      '<div class="q-row2"><input type="text" id="k_name" placeholder="이름 *" autocomplete="name"><input type="tel" id="k_phone" placeholder="연락처 * (해외는 카톡 ID도 OK)" autocomplete="tel"></div>' +
+      '<input type="text" id="k_grade" placeholder="학교·학년 (예: 송도 채드윅 G8)">' +
+      '<button class="q-submit" type="button">카카오톡 상담 열기 →</button>' +
+      '<p class="q-hint" style="margin:10px 0 0">입력하신 정보는 상담 연락에만 사용합니다.</p></div>';
+    document.body.appendChild(m);
+    var href = '';
+    function close(){ m.classList.remove('open'); }
+    m.querySelector('.q-close').addEventListener('click', close);
+    m.addEventListener('click', function(e){ if (e.target === m) close(); });
+    links.forEach(function(a){
+      a.addEventListener('click', function(e){
+        try { if (localStorage.getItem('kgate')) return; } catch (x) {}
+        e.preventDefault(); href = a.href; m.classList.add('open');
+        setTimeout(function(){ document.getElementById('k_name').focus(); }, 50);
+      });
+    });
+    m.querySelector('.q-submit').addEventListener('click', function(){
+      var v = function(id){ return document.getElementById(id).value.trim(); };
+      var name = v('k_name'), phone = v('k_phone'), grade = v('k_grade');
+      if (!name || !phone) { alert('이름과 연락처(해외는 카톡 ID)를 입력해 주세요.'); return; }
+      var d = new URLSearchParams({
+        sheet: C.tab, _form: C.site, _time: new Date().toLocaleString('ko-KR'),
+        사이트: C.site, 이름: name, 연락처: phone, 학년: grade, 과목: '카톡상담', 남길말: '[카톡상담 시작]', 신청페이지: location.origin + location.pathname,
+        name: '[' + C.site + '] ' + name, phone: phone, grade: grade, subject: '카톡상담',
+        memo: '[' + C.site + '][카톡상담 시작] ' + location.pathname
+      });
+      if (C.ep) fetch(C.ep, { method: 'POST', mode: 'no-cors', keepalive: true, headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }, body: d.toString() }).catch(function(){});
+      if (typeof gtag === 'function') gtag('event', 'kakao_gate_submit');
+      try { localStorage.setItem('kgate', '1'); } catch (x) {}
+      close();
+      window.open(href, '_blank', 'noopener');
+    });
+  }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kakaoGate); else kakaoGate();
 })();
 `;
 module.exports = { BODY };
