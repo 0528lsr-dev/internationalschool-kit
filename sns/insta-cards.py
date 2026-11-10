@@ -1,5 +1,5 @@
 """국제학교튜터 → 인스타 카드뉴스(캐러셀) 자동 게시 (2026-11-09)
-- GitHub Actions(.github/workflows/insta-cards.yml)가 매일 12:30 KST 에 실행한다.
+- GitHub Actions(.github/workflows/insta-cards.yml)가 매일 21:07 KST 에 실행한다(예비 21:37·22:13).
 - 사이트 rss.xml 에서 아직 인스타에 안 올린 글 중 '두 번째' 글을 고른다
   (첫 번째 글은 그날 저녁 릴스용 — insta-reel.py 가 가져간다).
 - 표지 + 소제목(h2)별 카드(소제목 + 그 아래 내용 요약) + 마지막 안내 카드, 1080x1350 JPG.
@@ -211,7 +211,7 @@ caption = '\n'.join([
     '💬 궁금한 점은 댓글로 남겨 주세요',
     '', '국제학교 1:1 화상 과외 · 10~15분 무료 테스트 수업',
     '👉 프로필 링크에서 신청 (@intlschool_tutor)', '',
-    '#국제학교 #국제학교과외 #국제학교입학 #IB #AP #IGCSE #Alevel #송도국제학교 #제주국제학교 #화상과외 #국제학교맘 #카드뉴스'])
+    style.tags(nxt['link'], 3)])
 open(f'{OUT}/caption.txt', 'w').write(caption)
 print('카드', len(cards), '장')
 if DRY or not TOKEN:

@@ -17,6 +17,20 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 BG = json.load(open(os.path.join(HERE, 'bg', 'credits.json'), encoding='utf-8'))
 
 
+def tags(link, day_offset=0):
+    """캡션 해시태그 (2026-11-10) — 큰 태그(#IB 같은 영어 태그)는 경쟁이 세서 새 계정 글이 묻힌다.
+    부모님이 실제로 누르는 한국어 중간 크기 태그 위주로 8~10개, 글 종류(유학·캠프 / 국제학교 공부)에 맞춰, 날마다 일부를 바꾼다."""
+    day = (datetime.now(timezone.utc) + timedelta(hours=9)).toordinal() + day_offset
+    if '/study/' in link:
+        base = ['#해외캠프', '#영어캠프', '#겨울캠프', '#조기유학', '#유학준비', '#국제학교맘']
+        extra = ['#캐나다캠프', '#뉴질랜드캠프', '#필리핀영어캠프', '#말레이시아캠프', '#보딩스쿨', '#중고등유학', '#초등영어캠프', '#방학캠프']
+    else:
+        base = ['#국제학교', '#국제학교맘', '#국제학교학부모', '#국제학교과외', '#화상과외']
+        extra = ['#송도국제학교', '#제주국제학교', '#IB공부', '#AP시험', '#IGCSE', '#국제학교입학', '#국제학교수학', '#국제학교영어', '#에세이첨삭', '#SAT준비']
+    k = day % len(extra)
+    return ' '.join(base + (extra[k:] + extra[:k])[:4])
+
+
 def pick(offset=0):
     day = (datetime.now(timezone.utc) + timedelta(hours=9)).toordinal() + offset
     bg = BG[day % len(BG)]
