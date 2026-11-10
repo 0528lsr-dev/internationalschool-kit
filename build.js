@@ -97,6 +97,7 @@ function navFor(S) {
     [sp.menu, 'conv', `${sp.dir}/index.html`, sp.pages.map(p => [`${sp.dir}/${p.key}.html`, p.name])],
     ['수강료', 'price', 'price.html', null],
     ['선생님', 'teachers', 'teachers.html', null],
+    ['유학', 'study', 'study.html', null],
     ['수업 이야기', 'blog', 'blog.html', null],
     ['유학·입시정보', 'admissions', 'admissions.html', null]
   ];
@@ -143,6 +144,7 @@ function foot(S, up) {
       </ul></div>
       <div><h5>정보</h5><ul>
         <li><a href="${up}price.html">수강료</a></li>
+        <li><a href="${up}study.html">유학 프로그램</a></li>
         <li><a href="${up}blog.html">수업 이야기</a></li>
         <li><a href="${up}admissions.html">유학·입시정보</a></li>
         <li><a href="${up}contact.html">상담 신청</a></li>
@@ -712,6 +714,106 @@ ${similar.length ? `<h2>이런 선생님도 있어요</h2>
 ${formSection(S, 'f_teacher', { title: `${t.n} 선생님 상담 신청`, lead: '학년·과목·사는 곳을 남겨 주시면 선생님 일정을 확인해 연락드립니다.' })}`);
 }
 
+/* ---------- 유학 (2026-11-10, 같은 회사 동료 사이트 study.html 구성 참고 — 문구는 새로 씀) ----------
+   모집 중 프로그램은 데이터/study-programs.js. 회사 내부 정보(수수료 등)는 넣지 않는다. */
+const { PROGRAMS } = require('./데이터/study-programs');
+const STUDY_TYPES = [
+  ['🏕️', '유학캠프', '방학 2~7주', '방학 동안 현지 학교·캠프에서 수업과 생활을 경험합니다. 초등~중등 첫 해외 경험으로 많이 고릅니다.'],
+  ['🎒', '단기유학', '한 학기~1년', '현지 학교에 일정 기간 다니고 돌아옵니다. 영어와 학교 문화에 익숙해지는 데 좋습니다.'],
+  ['🏫', '조기유학 · 보딩스쿨', '몇 년~졸업까지', '현지 학교(보딩스쿨)를 다니며 졸업과 해외 대학 진학까지 이어 갑니다.'],
+  ['📘', '예비 과정', '입학 전 몇 달', '정규 입학 전에 같은 학교에서 영어·교과목을 먼저 준비합니다. 영어가 부족한 학생에게 맞습니다.']
+];
+const STUDY_HELP = [
+  ['🏫', '미국 보딩스쿨 · 국제학교 입학', '학교 고르기부터 지원 서류, 입학 일정까지 함께 정리합니다.'],
+  ['🎓', '영국 보딩스쿨 입학', 'GCSE·A-Level 학제와 학교 선택, 입학 시험 준비를 안내합니다.'],
+  ['✈️', '조기유학 · 예비 과정', '아이 영어 수준에 맞는 시작 시기와 과정을 함께 찾습니다.'],
+  ['📝', '에세이 · 면접 준비', '입학 에세이와 인터뷰를 1:1 화상 수업으로 준비합니다.']
+];
+const STUDY_FAQ = [
+  ['영어가 부족한데 유학을 갈 수 있나요?', '학교마다 다르지만, 입학 전에 영어와 교과목을 먼저 준비하는 예비 과정이나 EAL(영어 지원) 수업이 있는 학교가 있습니다. 아이의 지금 영어 수준을 먼저 확인하고 맞는 길을 찾는 것이 좋습니다.'],
+  ['몇 학년에 가는 게 좋을까요?', '정답은 없지만, 고학년일수록 학점·졸업 요건과 대학 진학까지 함께 따져야 해서 준비 기간이 더 필요합니다. 학년별로 고려할 점을 상담에서 안내해 드립니다.'],
+  ['비용은 어느 정도인가요?', '학교·나라·기간에 따라 크게 다릅니다. 모집 중인 프로그램은 학교가 안내한 학비를 각 페이지에 적어 두었고, 그 밖의 학교는 상담에서 최신 비용을 확인해 드립니다.'],
+  ['출국 전에 무엇을 준비하면 좋을까요?', '영어 리딩·에세이, 영어로 하는 수학·과학 용어, 학교 생활 영어를 미리 익혀 두면 첫 학기 적응이 훨씬 쉽습니다. 국제학교튜터의 1:1 화상 수업으로 출국 전부터 입학 후까지 이어서 준비할 수 있습니다.']
+];
+const progCard = (p, up) => `<a class="prog-card" href="${up}study/${p.slug}.html"><span class="prog-badge">🎒 ${esc(p.status)}</span><span class="prog-where">${esc(p.country)} · ${esc(p.school)}</span><h3>${esc(p.title)}</h3><p>${esc(p.short)}</p><ul>${p.facts.map(([k, v]) => `<li><i>${esc(k)}</i>${esc(v)}</li>`).join('')}</ul><span class="prog-more">자세히 보기 →</span></a>`;
+
+function studyPage(S) {
+  return page(S, { path: 'study.html', up: '', active: 'study', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['유학', 'study.html']]), faqLd(STUDY_FAQ)] },
+    title: `유학 · 보딩스쿨 · 예비 과정 — 미국·영국 조기유학 준비 | ${S.brand}`,
+    desc: `미국·영국 보딩스쿨 입학, 조기유학, 입학 전 영어 예비 과정까지. 모집 중인 유학 프로그램과 유학 준비 가이드, 출국 전 1:1 화상 수업을 ${S.brand}에서 안내합니다.`,
+    kw: '유학, 조기유학, 미국 보딩스쿨, 영국 보딩스쿨, 보딩스쿨 예비과정, 유학 준비, 국제학교 입학' }, `
+<section class="page-hero">
+  <div class="wrap">
+    <div class="crumb"><a href="index.html">홈</a> › 유학</div>
+    <span class="eyebrow">Study Abroad</span>
+    <h1>유학 · 보딩스쿨 · 예비 과정</h1>
+    <p class="lead">미국·영국 보딩스쿨 입학부터 입학 전 영어 준비까지, 아이에게 맞는 시작을 함께 찾습니다.</p>
+  </div>
+</section>
+${PROGRAMS.length ? `<section>
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Now Open</span><h2>🎒 모집 중인 프로그램</h2></div>
+    <div class="prog-grid">${PROGRAMS.map(p => progCard(p, '')).join('\n')}</div>
+  </div>
+</section>` : ''}
+<section class="soft">
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">Consulting</span><h2>이런 상담을 도와드려요</h2></div>
+    <div class="grid g4">${STUDY_HELP.map(([i, h, p]) => `<a class="card" href="#apply"><span class="ico">${i}</span><h3>${h}</h3><p>${p}</p></a>`).join('')}</div>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">Guide</span><h2>유학, 어떤 방법이 있을까요?</h2><p class="muted">기간과 목적에 따라 크게 네 가지로 나뉩니다.</p></div>
+    <div class="grid g4">${STUDY_TYPES.map(([i, h, t, p]) => `<div class="card"><span class="ico">${i}</span><h3>${h}</h3><p class="small" style="color:var(--hl);font-weight:700;margin:0 0 6px">${t}</p><p>${p}</p></div>`).join('')}</div>
+    <div class="article" style="max-width:860px;margin:40px auto 0">
+      <h2>유학 전에 꼭 챙길 세 가지</h2>
+      <ol>
+        <li><b>영어</b> — 생활 영어보다 수업을 따라가는 아카데믹 영어(읽기·에세이·발표)가 더 중요합니다.</li>
+        <li><b>영어로 된 수학·과학</b> — 개념은 알아도 영어 용어와 서술형 풀이에서 막히는 경우가 많습니다.</li>
+        <li><b>학적 · 학년 맞추기</b> — 학년 기준일과 학점 인정, 귀국 후 학력 인정까지 미리 확인해 두세요.</li>
+      </ol>
+      <p>국제학교튜터는 출국 전 영어·수학·과학 준비와 입학 후 과제·에세이를 <b>1:1 실시간 화상 수업</b>으로 이어서 도와드립니다.</p>
+    </div>
+  </div>
+</section>
+<section class="soft">
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">FAQ</span><h2>유학 자주 묻는 질문</h2></div>
+    <div class="faq-list" style="max-width:820px;margin:0 auto">${STUDY_FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>
+  </div>
+</section>
+${formSection(S, 'f_study', { title: '유학 상담 신청', lead: '아이 학년과 관심 있는 나라·학교를 남겨 주시면 맞는 프로그램과 준비 방법을 안내해 드립니다.' })}`);
+}
+
+function studyProgramPage(S, p) {
+  const up = '../';
+  const others = PROGRAMS.filter(x => x !== p);
+  return page(S, { path: `study/${p.slug}.html`, up, active: 'study',
+    ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['유학', 'study.html'], [p.title, `study/${p.slug}.html`]]),
+      { '@type': 'Article', headline: p.title, description: p.short, datePublished: p.date, dateModified: p.date, author: { '@type': 'Organization', name: S.brand }, publisher: { '@type': 'Organization', name: S.brand }, mainEntityOfPage: abs(S, `study/${p.slug}.html`) }] },
+    title: `${p.title} | ${S.brand}`, desc: p.short, kw: p.keywords }, `
+<section class="page-hero">
+  <div class="wrap">
+    <div class="crumb"><a href="${up}index.html">홈</a> › <a href="${up}study.html">유학</a> › ${esc(p.country)}</div>
+    <span class="prog-badge">🎒 ${esc(p.status)}</span>
+    <h1>${esc(p.title)}</h1>
+    <p class="lead">${esc(p.school)} · <time datetime="${p.date}">${p.date}</time> ${viewsTag(`study/${p.slug}`, true)}</p>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="article">
+      ${p.body.trim()}
+      <div class="hl-box">프로그램 문의 · 출국 전 준비 상담 — 📞 <a href="tel:${TELRAW}"><b>${TEL}</b></a> · <a href="#apply">상담 신청</a></div>
+      ${others.length ? `<h2>다른 유학 프로그램</h2><ul>${others.map(x => `<li><a href="${x.slug}.html">${esc(x.title)}</a></li>`).join('')}</ul>` : ''}
+      <p><a href="${up}study.html">← 유학 페이지로 돌아가기</a></p>
+    </div>
+  </div>
+</section>
+${formSection(S, 'f_study', { title: '이 프로그램 상담 신청', lead: '아이 학년과 영어 수준을 남겨 주시면 맞는 과정과 일정을 안내해 드립니다.' })}`);
+}
+
 /* ---------- 글 (수업 이야기 · 입시정보) ---------- */
 function listPage(S, kind, posts) {
   const isBlog = kind === 'blog';
@@ -1002,5 +1104,5 @@ function specPage(S, L) {
 ${formSection(S, 'f_spec', { title: `${L.name} 무료 상담 신청`, lead: '전문 선생님이 곧 연락드립니다.' })}`);
 }
 
-module.exports = { hubPage, subjectPage, regionPage, schoolFinderPage, subjectIndexPage, regionsIndexPage, teachersPage, teacherPage, specIndexPage, specPage, FINDER, listPage, postPage, contactPage, pricePage, indexPage, notFoundPage,
+module.exports = { studyPage, studyProgramPage, PROGRAMS, hubPage, subjectPage, regionPage, schoolFinderPage, subjectIndexPage, regionsIndexPage, teachersPage, teacherPage, specIndexPage, specPage, FINDER, listPage, postPage, contactPage, pricePage, indexPage, notFoundPage,
   hubFile, subFile, regionFile, subjIndexFile, encPath, TODAY, BLOG, ADMISSIONS };

@@ -441,6 +441,15 @@ ${heroCss}
 .post-item h3 a{color:var(--ink)}
 .post-item time,.post-item .cat{font-size:.8rem;color:var(--ink-soft)}
 .post-item .cat{color:var(--hl);font-weight:700;margin-right:8px}
+.prog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+.prog-card{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--hl);border-radius:var(--r);padding:24px 26px;color:var(--ink);transition:transform .15s,box-shadow .15s}
+.prog-card:hover{transform:translateY(-2px);box-shadow:0 18px 40px -24px rgba(0,0,0,.35)}
+.prog-card h3{margin:2px 0;font-size:1.16rem;line-height:1.45}.prog-card p{margin:0;color:var(--ink-soft);font-size:.94rem}
+.prog-card ul{list-style:none;margin:6px 0 0;padding:12px 0 0;border-top:1px dashed var(--line);display:grid;gap:5px;font-size:.9rem}
+.prog-card li i{font-style:normal;font-weight:700;color:var(--hl);display:inline-block;min-width:58px}
+.prog-badge{display:inline-block;align-self:flex-start;background:var(--hl);color:#fff;font-weight:800;font-size:.78rem;padding:4px 11px;border-radius:999px}
+.prog-where{font-size:.82rem;color:var(--ink-soft);font-weight:700}.prog-more{margin-top:auto;font-weight:800;color:var(--primary);font-size:.92rem}
+@media(max-width:640px){.prog-grid{grid-template-columns:1fr}}
 .views{font-size:.8rem;color:var(--ink-soft);margin-left:8px;white-space:nowrap}.views b{font-weight:600}
 
 /* 회화 */
