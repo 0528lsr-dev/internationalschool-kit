@@ -7,7 +7,7 @@
 - 토큰(INSTA_TOKEN)은 비즈니스 포트폴리오 시스템 사용자 토큰이라 만료되지 않는다.
 - DRY=1 이면 영상만 만들고 올리지 않는다(out/reel.mp4)."""
 import html, json, os, re, subprocess, sys, time, urllib.parse, urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
@@ -45,6 +45,13 @@ def tag(s, t):
     m = re.search(rf'<{t}>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?</{t}>', s)
     return html.unescape(m.group(1).strip()) if m else ''
 
+
+# 0. 하루 한 번만 (2026-11-10) — GitHub 예약 실행이 가끔 빠지거나 늦어서 워크플로에 예비 시간을 여러 개 두었다.
+#    오늘 이미 보냈으면(저장소 변수 REEL_SENT_DATE == 오늘) 끝낸다. 보낸 뒤 $RUNNER_TEMP/sent_date 에 날짜를 쓰면 워크플로가 변수에 저장.
+TODAY = (datetime.now(timezone.utc) + timedelta(hours=9)).strftime('%Y-%m-%d')
+if os.environ.get('SENT_DATE') == TODAY and os.environ.get('FORCE') != '1' and os.environ.get('DRY') != '1':
+    print('오늘 릴스는 이미 보냄:', TODAY)
+    sys.exit(0)
 
 # 1. 올릴 글 고르기 ------------------------------------------------------------
 xml = get(f'{SITE}/rss.xml').decode()
@@ -218,6 +225,8 @@ if os.environ.get('MODE') == 'telegram':
     get(f'https://api.telegram.org/bot{TG}/sendVideo', body, {'Content-Type': f'multipart/form-data; boundary={b}'})
     get(f'https://api.telegram.org/bot{TG}/sendMessage', urllib.parse.urlencode({'chat_id': chat, 'text': caption}).encode())
     print('텔레그램으로 보냄:', nxt['title'])
+    if os.environ.get('RUNNER_TEMP'):
+        open(os.path.join(os.environ['RUNNER_TEMP'], 'sent_date'), 'w').write(TODAY)
     sys.exit(0)
 
 if DRY or not TOKEN:

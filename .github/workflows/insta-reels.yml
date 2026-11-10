@@ -3,12 +3,19 @@
 # 손으로 돌릴 때 dry=1 이면 영상만 만들어 결과물(reel)로 남기고 올리지 않는다.
 name: 인스타 릴스 자동 게시
 on:
+  # GitHub 예약 실행은 정각에 몰리면 늦거나 빠진다(2026-11-10 실제로 빠짐) — 정각을 피하고 예비 시간을 둔다.
+  # 하루 한 번만 보낸다(저장소 변수 REEL_SENT_DATE), 그래서 앞 시간에 보냈으면 뒤 시간은 바로 끝난다.
   schedule:
-    - cron: '0 9 * * *'    # 매일 18:00 KST (저녁 7~9시에 올리기 좋게 미리 보냄)
+    - cron: '7 9 * * *'    # 매일 18:07 KST
+    - cron: '41 9 * * *'   # 예비 18:41
+    - cron: '23 10 * * *'  # 예비 19:23
   workflow_dispatch:
     inputs:
       dry:
         description: '1 이면 영상만 만들고 올리지 않음'
+        default: '0'
+      force:
+        description: '1 이면 오늘 이미 보냈어도 다시 보냄'
         default: '0'
 jobs:
   reel:
@@ -28,6 +35,13 @@ jobs:
           MODE: telegram            # 반자동: 텔레그램으로 영상 보내기 (완전 자동으로 바꾸려면 이 줄 삭제)
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT: ${{ secrets.TG_CONTENT_CHAT }}
+          SENT_DATE: ${{ vars.REEL_SENT_DATE }}
+          FORCE: ${{ github.event.inputs.force }}
+      - name: 오늘 보냈다고 기록
+        if: always()
+        run: if [ -s "$RUNNER_TEMP/sent_date" ]; then gh variable set REEL_SENT_DATE --repo "$GITHUB_REPOSITORY" --body "$(cat $RUNNER_TEMP/sent_date)"; fi
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

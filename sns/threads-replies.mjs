@@ -6,7 +6,11 @@
 const TOKEN = process.env.THREADS_TOKEN;
 const API = 'https://graph.threads.net/v1.0';
 const HOOK = 'https://script.google.com/macros/s/AKfycbzpQIZERcfJP0aKF15sZFpIo0-HPvARnnyhlaORN0PCk1bf8j5F0Q5fHRZZ7rkABi5E/exec';
-const WINDOW = 70 * 60 * 1000;
+/* 2026-11-10: GitHub 예약 실행이 자주 빠져서 '최근 70분' 대신 '지난번 확인 이후'(저장소 변수 LAST_REPLY_CHECK)로 센다.
+   변수가 없거나 하루보다 오래됐으면 70분. 끝나면 이번 시작 시각을 $RUNNER_TEMP/last_check 에 써서 워크플로가 저장한다. */
+const START = Date.now();
+const last = Date.parse(process.env.LAST_CHECK || '');
+const WINDOW = last && START - last < 864e5 ? START - last + 60 * 1000 : 70 * 60 * 1000;
 if (!TOKEN) throw new Error('THREADS_TOKEN 이 없습니다');
 const TG = process.env.TG_TOKEN, TG_CHAT = process.env.TG_CHAT;
 const notify = async (where, text, link, about, who) => {
@@ -31,7 +35,7 @@ for (const p of posts) {
   let conv = [];
   try { conv = (await api(`/${p.id}/conversation?fields=id,text,username,timestamp,permalink&limit=50`)).data || []; } catch (e) { continue; }
   for (const c of conv) {
-    if (mineIds.has(c.id) || !c.timestamp || Date.now() - new Date(c.timestamp) > WINDOW) continue;
+    if (mineIds.has(c.id) || !c.timestamp || START - new Date(c.timestamp) > WINDOW) continue;
     const topic = (p.text || '').split('\n')[0].slice(0, 40);
     await notify('스레드', (c.text || '(사진·내용 없음)').slice(0, 300), c.permalink || p.permalink || '', '글: ' + topic, c.username ? '@' + c.username : '');
     sent++;
@@ -53,10 +57,12 @@ if (IG_TOKEN) {
     let cs = [];
     try { cs = (await ig(`/${m.id}/comments?fields=id,text,username,timestamp,replies{id,text,username,timestamp}&limit=50`)).data || []; } catch (e) { continue; }
     for (const c of cs.flatMap(c => [c, ...((c.replies && c.replies.data) || [])])) {
-      if (c.username === ME || !c.timestamp || Date.now() - new Date(c.timestamp) > WINDOW) continue;
+      if (c.username === ME || !c.timestamp || START - new Date(c.timestamp) > WINDOW) continue;
       await notify('인스타', (c.text || '(내용 없음)').slice(0, 300), m.permalink || '', '게시물: ' + (m.caption || '').split('\n')[0].slice(0, 40), c.username ? '@' + c.username : '');
       n++;
     }
   }
   console.log('인스타 새 댓글 알림:', n);
 }
+
+if (process.env.RUNNER_TEMP) (await import('node:fs')).writeFileSync(process.env.RUNNER_TEMP + '/last_check', new Date(START).toISOString());

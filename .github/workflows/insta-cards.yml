@@ -4,7 +4,9 @@
 name: 인스타 카드뉴스 자동 게시
 on:
   schedule:
-    - cron: '30 3 * * *'   # 매일 12:30 KST (점심시간)
+    - cron: '23 3 * * *'   # 매일 12:23 KST (점심시간) — 정각을 피함
+    - cron: '53 3 * * *'   # 예비 12:53 (오늘 이미 올렸으면 바로 끝남)
+    - cron: '37 4 * * *'   # 예비 13:37
   workflow_dispatch:
     inputs:
       dry:

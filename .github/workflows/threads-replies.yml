@@ -2,7 +2,8 @@
 name: 스레드·인스타 댓글 알림
 on:
   schedule:
-    - cron: '17 * * * *'   # 1시간마다
+    - cron: '17 * * * *'   # 1시간마다 (빠진 시간이 있어도 '지난번 확인 이후' 댓글을 모두 보낸다 — 변수 LAST_REPLY_CHECK)
+    - cron: '47 * * * *'
   workflow_dispatch:
 jobs:
   check:
@@ -18,3 +19,9 @@ jobs:
           INSTA_TOKEN: ${{ secrets.INSTA_TOKEN }}
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT: ${{ secrets.TG_CONTENT_CHAT }}
+          LAST_CHECK: ${{ vars.LAST_REPLY_CHECK }}
+      - name: 확인한 시각 기록
+        if: success()
+        run: if [ -s "$RUNNER_TEMP/last_check" ]; then gh variable set LAST_REPLY_CHECK --repo "$GITHUB_REPOSITORY" --body "$(cat $RUNNER_TEMP/last_check)"; fi
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}

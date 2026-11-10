@@ -60,7 +60,13 @@ fresh = [i for i in reversed(items) if (now - i['date']).days < 3]
 queue = fresh + [i for i in items if i not in fresh]
 posted = ''
 if TOKEN:
-    posted = '\n'.join(x.get('caption', '') for x in api(f'{IG}/media', {'fields': 'caption', 'limit': 50}).get('data', []))
+    mine = api(f'{IG}/media', {'fields': 'caption,media_type,timestamp', 'limit': 50}).get('data', [])
+    posted = '\n'.join(x.get('caption', '') for x in mine)
+    # 하루 한 장만 (2026-11-10) — 예약 실행 예비 시간이 여러 개라, 오늘(KST) 이미 카드뉴스를 올렸으면 끝낸다
+    kst = lambda t: datetime.strptime(t[:19], '%Y-%m-%dT%H:%M:%S').replace(tzinfo=timezone.utc) + timedelta(hours=9)   # IG timestamp 는 UTC
+    if not DRY and any(x.get('media_type') == 'CAROUSEL_ALBUM' and kst(x['timestamp']).date() == (now + timedelta(hours=9)).date() for x in mine):
+        print('오늘 카드뉴스는 이미 올림')
+        sys.exit(0)
 todo = [i for i in queue if i['title'] not in posted]
 if len(todo) < 2:
     print('올릴 글 없음(남은 글은 릴스용)')
