@@ -750,12 +750,16 @@ function studyPage(S) {
     <p class="lead">미국·영국 보딩스쿨 입학부터 입학 전 영어 준비까지, 아이에게 맞는 시작을 함께 찾습니다.</p>
   </div>
 </section>
-${PROGRAMS.length ? `<section>
+${[['camp', 'Winter Camp', '❄️ 2027 겨울캠프 모집 중', '방학 동안 해외 학교·캠퍼스에서 영어와 생활을 경험합니다.'], ['study', 'Study Abroad', '🎒 중고등 유학 모집 중', '현지 학교를 다니며 졸업과 해외 대학까지 이어 가는 유학입니다.']]
+  .map(([kind, eb, h, lead]) => {
+    const list = PROGRAMS.filter(p => !p.sub && (p.kind || 'study') === kind);   // sub = 다른 글에서 이어지는 하위 글(목록에 따로 안 보임)
+    return list.length ? `<section>
   <div class="wrap">
-    <div class="sec-head"><span class="eyebrow">Now Open</span><h2>🎒 모집 중인 프로그램</h2></div>
-    <div class="prog-grid">${PROGRAMS.map(p => progCard(p, '')).join('\n')}</div>
+    <div class="sec-head"><span class="eyebrow">${eb}</span><h2>${h}</h2><p class="muted">${lead}</p></div>
+    <div class="prog-grid">${list.map(p => progCard(p, '')).join('\n')}</div>
   </div>
-</section>` : ''}
+</section>` : '';
+  }).join('\n')}
 <section class="soft">
   <div class="wrap">
     <div class="sec-head center"><span class="eyebrow">Consulting</span><h2>이런 상담을 도와드려요</h2></div>
