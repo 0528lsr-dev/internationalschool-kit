@@ -441,6 +441,7 @@ ${heroCss}
 .post-item h3 a{color:var(--ink)}
 .post-item time,.post-item .cat{font-size:.8rem;color:var(--ink-soft)}
 .post-item .cat{color:var(--hl);font-weight:700;margin-right:8px}
+.views{font-size:.8rem;color:var(--ink-soft);margin-left:8px;white-space:nowrap}.views b{font-weight:600}
 
 /* 회화 */
 .lang-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 22px}

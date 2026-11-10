@@ -357,6 +357,29 @@ const analyticsJs = S => `// Google Analytics 4 — 측정 ID 를 발급받으�
 })();
 `;
 
+/* 글 조회수 (2026-11-10) — Apps Script 웹 앱(코드: Desktop/국제학교사이트_복제키트/조회수_코드.gs, 주소는 sites.js viewsHook)
+   글 페이지([data-hit])는 볼 때 1 올리고(같은 브라우저 세션에서 같은 글은 한 번만, 로봇·내 컴퓨터 제외), 목록은 숫자만 받아 채운다. */
+const viewsJs = S => `// ===== 글 조회수 — ${S.brand} =====
+(function () {
+  var HOOK = ${JSON.stringify(S.viewsHook)};
+  var els = [].slice.call(document.querySelectorAll('.views[data-v]'));
+  if (!els.length) return;
+  function show(map) {
+    els.forEach(function (el) { var n = map[el.getAttribute('data-v')]; if (n == null) return; el.querySelector('b').textContent = Number(n).toLocaleString('ko-KR'); el.hidden = false; });
+  }
+  var ua = navigator.userAgent || '', bot = navigator.webdriver || /bot|crawl|spider|slurp|yeti|daum|lighthouse|headless|preview|externalhit|meta-external/i.test(ua);
+  var mine = false; try { mine = !!localStorage.getItem('novisit'); } catch (e) {}
+  var hitEl = document.querySelector('.views[data-hit]'), id = hitEl && hitEl.getAttribute('data-v'), seen = false;
+  try { seen = !!sessionStorage.getItem('vw_' + id); } catch (e) {}
+  var url = (hitEl && !bot && !mine && !seen) ? HOOK + '?a=hit&id=' + encodeURIComponent(id)
+    : HOOK + '?ids=' + encodeURIComponent(els.map(function (el) { return el.getAttribute('data-v'); }).join(','));
+  fetch(url).then(function (r) { return r.json(); }).then(function (map) {
+    if (hitEl) { try { sessionStorage.setItem('vw_' + id, '1'); } catch (e) {} }
+    show(map);
+  }).catch(function () {});
+})();
+`;
+
 /* 채널톡 — 국제학교 channeltalk.js 와 같은 방식(기본 버튼 숨기고 자체 버튼), 키만 사이트별 */
 const channelJs = S => `// ===== 채널톡 연동 — ${S.brand} 전용 채널 (키는 sites.js channelKey) =====
 (function(){
@@ -485,6 +508,7 @@ function buildSite(S) {
   W(path.join(dir, 'quick.js'), quickJs(S, D));
   W(path.join(dir, 'analytics.js'), analyticsJs(S));
   if (S.channelKey) W(path.join(dir, 'channeltalk.js'), channelJs(S));
+  if (S.viewsHook) W(path.join(dir, 'views.js'), viewsJs(S));
   W(path.join(dir, 'favicon.svg'), faviconSvg(S));
   W(path.join(dir, 'CNAME'), S.domain + '\n');
   W(path.join(dir, '.nojekyll'), '');

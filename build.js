@@ -158,8 +158,10 @@ ${o_scripts(S, up)}
 </html>`;
 }
 function o_scripts(S, up) {
-  return `<script src="${up}form.js?v=${ASSET_V}" defer></script>\n<script src="${up}quick.js?v=${ASSET_V}" defer></script>` + (S.channelKey ? `\n<script src="${up}channeltalk.js" defer></script>` : '');
+  return `<script src="${up}form.js?v=${ASSET_V}" defer></script>\n<script src="${up}quick.js?v=${ASSET_V}" defer></script>` + (S.channelKey ? `\n<script src="${up}channeltalk.js" defer></script>` : '') + (S.viewsHook ? `\n<script src="${up}views.js?v=${ASSET_V}" defer></script>` : '');
 }
+/* 글 조회수 자리 — views.js 가 숫자를 채우고 보여 준다(못 받으면 계속 숨김). hit 이면 이 페이지를 볼 때 1 올린다 (2026-11-10) */
+const viewsTag = (id, hit) => `<span class="views" data-v="${id}"${hit ? ' data-hit' : ''} hidden>👁 <b></b></span>`;
 /* 줄 앞 공백·빈 줄 제거 — 페이지 5만 장이라 용량이 곧 호스팅 한도(GitHub Pages 1GB)다. <pre>/<textarea> 안에 내용이 없으므로 안전 */
 const slim = html => html.split('\n').map(l => l.replace(/^\s+/, '')).filter(l => l.length).join('\n');
 const page = (S, o, body) => slim(head(S, o) + '\n' + (S.topbar ? `<div class="topbar">${esc(S.topbar)}</div>\n` : '') + nav(S, o.active, o.up) + '\n' + body + '\n' + foot(S, o.up));
@@ -727,7 +729,7 @@ function listPage(S, kind, posts) {
 </section>
 <section>
   <div class="wrap">
-    <div class="post-list">${posts.map(p => `<article class="post-item"><span class="cat">${esc(p.cat)}</span><time datetime="${p.date}">${p.date}</time><h3><a href="${kind}/${p.slug}.html">${esc(p.title)}</a></h3><p class="muted" style="margin:0">${esc(p.desc)}</p></article>`).join('\n')}</div>
+    <div class="post-list">${posts.map(p => `<article class="post-item"><span class="cat">${esc(p.cat)}</span><time datetime="${p.date}">${p.date}</time>${viewsTag(`${kind}/${p.slug}`)}<h3><a href="${kind}/${p.slug}.html">${esc(p.title)}</a></h3><p class="muted" style="margin:0">${esc(p.desc)}</p></article>`).join('\n')}</div>
   </div>
 </section>
 ${ctaBand(S, '', '우리 아이 상황에 맞는 답이 필요하세요?', '학교·학년·과목을 알려 주시면 글이 아니라 아이 기준으로 상담해 드립니다.')}`);
@@ -744,7 +746,7 @@ function postPage(S, kind, p, posts) {
   <div class="wrap">
     <div class="crumb"><a href="${up}index.html">홈</a> › <a href="${up}${kind}.html">${title}</a> › ${esc(p.cat)}</div>
     <h1>${esc(p.title)}</h1>
-    <p class="lead"><time datetime="${p.date}">${p.date}</time> · ${esc(p.cat)}</p>
+    <p class="lead"><time datetime="${p.date}">${p.date}</time> · ${esc(p.cat)} ${viewsTag(`${kind}/${p.slug}`, true)}</p>
   </div>
 </section>
 <section>
@@ -897,7 +899,7 @@ function indexPage(S, D, blog) {
     faq: () => `${head('FAQ', '학부모님이 자주 묻는 질문')}
     <div class="faq-list" style="max-width:820px;margin:0 auto">${HOME_FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>`,
     journal: () => blog.length ? `${head('Journal', '수업 이야기', '', ['blog.html', '글 더 보기'])}
-    <div class="post-list">${blog.slice(0, 3).map(p => `<article class="post-item"><span class="cat">${esc(p.cat)}</span><time datetime="${p.date}">${p.date}</time><h3><a href="blog/${p.slug}.html">${esc(p.title)}</a></h3><p class="muted" style="margin:0">${esc(p.desc)}</p></article>`).join('')}</div>` : ''
+    <div class="post-list">${blog.slice(0, 3).map(p => `<article class="post-item"><span class="cat">${esc(p.cat)}</span><time datetime="${p.date}">${p.date}</time>${viewsTag(`blog/${p.slug}`)}<h3><a href="blog/${p.slug}.html">${esc(p.title)}</a></h3><p class="muted" style="margin:0">${esc(p.desc)}</p></article>`).join('')}</div>` : ''
   };
 
   const body = S.home.map(k => sections[k]()).filter(Boolean).map((html, i) => `<section${i % 2 === 0 ? ' class="soft"' : ''}>
