@@ -98,6 +98,42 @@ function buildCss(S) {
 .hero-side{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:30px;box-shadow:0 40px 80px -50px rgba(${SH},.45)}
 .hero-side::before{content:"";display:block;width:44px;height:2px;background:var(--accent);margin-bottom:18px}`,
     /* search — 미니멀: 가운데 큰 제목 + 학교 검색창 하나 */
+    /* offer — 2026-11-11 버건디 단색, 첫 화면에 약속·버튼·수강료 */
+    offer: `.hero{background:radial-gradient(700px 420px at 85% 0%,rgba(${A},.28),transparent 60%),linear-gradient(160deg,#5a1630 0%,var(--primary) 55%,#4a1127 100%);color:#fff}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:24px 48px;align-items:start;padding:clamp(40px,7vw,96px) 0 clamp(40px,6vw,80px)}
+.hero h1{color:#fff;font-size:clamp(2rem,5vw,3.4rem);letter-spacing:-.03em;margin:14px 0 14px}
+.hero h1 em{color:#f3c9b8;font-style:normal}
+.hero .lead{color:rgba(255,255,255,.86);font-size:1.02rem;margin:0}
+.offer-pill{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:6px 14px;border-radius:999px;font-size:.84rem;font-weight:600}
+.offer-checks{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.offer-checks li{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 14px;font-size:.88rem;font-weight:600}
+.offer-checks li::before{content:"✓ ";color:#f3c9b8}
+.offer-cta{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+.offer-cta .btn{flex:1 1 200px;justify-content:center;text-align:center;padding:15px 18px;font-size:1.02rem;font-weight:800;border-radius:999px;border:0;cursor:pointer;font-family:inherit}
+.offer-main{background:#fff;color:var(--primary)}
+.offer-kakao{background:#fee500;color:#191600}
+.offer-note{margin:14px 0 0;font-size:.86rem;color:rgba(255,255,255,.78)}
+.offer-note a{color:#fff;font-weight:700}
+.offer-price{grid-column:2;grid-row:1 / span 2;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:24px;backdrop-filter:blur(6px)}
+.offer-price h3{color:#fff;font-size:1.15rem;margin:0 0 14px}
+.offer-price h3 small{display:block;font-size:.8rem;font-weight:500;color:rgba(255,255,255,.7);margin-top:4px}
+.op-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.op-row b{display:block;font-size:.98rem}
+.op-row em{font-style:normal;font-size:.78rem;color:rgba(255,255,255,.7)}
+.op-row strong{font-size:1.35rem;white-space:nowrap}
+.op-row strong small{font-size:.8rem;font-weight:500;margin-left:2px}
+.offer-price ul{list-style:none;margin:14px 0 0;padding:12px 0 0;border-top:1px dashed rgba(255,255,255,.25);font-size:.86rem;color:rgba(255,255,255,.85)}
+.offer-price li{padding:3px 0}
+.offer-price li::before{content:"· ";color:#f3c9b8}
+.op-more{display:inline-block;margin-top:10px;font-size:.86rem;color:#fff;text-decoration:underline;text-underline-offset:3px}
+.offer-search{grid-column:1;background:#fff;color:var(--ink);border-radius:16px;padding:16px;margin-top:4px}
+.offer-search label{display:block;font-weight:800;font-size:.95rem;margin-bottom:8px}
+.offer-search div{display:flex;gap:6px}
+.offer-search input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:.95rem;font-family:inherit}
+.offer-search button{border:0;background:var(--primary);color:#fff;font-weight:700;border-radius:10px;padding:0 18px;font-family:inherit;cursor:pointer}
+.offer-search p{margin:8px 0 0;font-size:.8rem;color:var(--ink-soft)}
+.offer-search p a{text-decoration:underline;text-underline-offset:2px}
+@media (max-width:900px){.hero .wrap{grid-template-columns:1fr}.offer-price,.offer-search{grid-column:1;grid-row:auto}.hero .lead br{display:none}}`,
     search: `.hero{background:linear-gradient(180deg,var(--surface2),var(--bg) 75%);text-align:center}
 .hero .wrap{padding:clamp(80px,10vw,130px) 0 clamp(64px,8vw,100px);max-width:860px}
 .hero h1{font-size:clamp(2.4rem,5.4vw,4rem);letter-spacing:-.04em}
@@ -531,6 +567,7 @@ footer a:hover{color:#fff}
 @media(max-width:640px){
   section{padding:46px 0}
   .g2,.g3,.g4,.steps,.steps.s6,.price-grid{grid-template-columns:1fr}
+  .steps{gap:10px}.steps div{padding:4px 0 4px 58px;min-height:46px}.steps div b{display:block;margin:0}.steps div::after{display:none}
   .t-slide{flex-basis:78%}
   .grade-chips{grid-template-columns:repeat(3,1fr)}
   .free-test{flex-direction:column;align-items:stretch;text-align:center}

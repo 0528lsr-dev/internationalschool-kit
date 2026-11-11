@@ -954,6 +954,24 @@ function indexPage(S, D, blog) {
       ${facts}`,
     teachers: () => `<div class="in">${eyebrow}${h1}${lead}${cta}${facts}</div>
       <div class="hero-stack">${featured.slice(0, 3).map(t => teacherCard(t, up)).join('')}<p class="more"><a href="teachers.html">선생님 모두 보기 →</a></p></div>`,
+    /* 2026-11-11 offer — 휴대폰 첫 화면에 "무엇을·얼마에·어떻게 신청" 이 다 보이게 (사용자: 사진 정신없고 신청 충동이 안 든다).
+       버건디 단색 배경, 약속 4개, 버튼 2개(무료 테스트·카톡), 수강료 카드, 그 아래 학교 찾기. */
+    offer: () => `<div class="in">
+      <span class="offer-pill">국내·해외 국제학교 학생 1:1 화상 과외</span>
+      ${h1}
+      <p class="lead">IB·AP·IGCSE·A-Level, 아이 학교의 과제와 시험 일정에 맞춰<br class="pc"> 선생님과 실시간 1:1로 수업합니다.</p>
+      <ul class="offer-checks">${['IB · AP · IGCSE · A-Level · SAT', '학교 과제 · 시험 일정 맞춤', '국내 · 해외 시차 맞춰 수업', '수업마다 학습 리포트'].map(x => `<li>${x}</li>`).join('')}</ul>
+      <div class="offer-cta"><button type="button" class="btn offer-main" id="quickOpen">🎁 무료 테스트 수업 신청</button>${S.kakao ? `<a href="${S.kakao}" target="_blank" rel="noopener" class="btn offer-kakao">💬 카카오톡 상담</a>` : ''}</div>
+      <p class="offer-note">📞 <a href="tel:${TELRAW}">${TEL}</a> · 신청하시면 24시간 안에 연락드립니다</p>
+    </div>
+    <div class="offer-price">
+      <h3>수강료 안내 <small>실시간 1:1 화상 · 월 기준</small></h3>
+      ${PRICE.map(p => `<div class="op-row"><span><b>${p.name}</b>${p.tag ? `<em>${p.tag}</em>` : '<em>기본 과정</em>'}</span><strong>${p.won}<small>원</small></strong></div>`).join('')}
+      <ul>${[...PRICE_BADGES, FREE_TEST].map(x => `<li>${x}</li>`).join('')}</ul>
+      <a class="op-more" href="price.html">수강료 자세히 보기 →</a>
+    </div>
+    <form class="offer-search" action="${FINDER['국내'][1]}" method="get"><label for="hq">우리 아이 학교로 찾기</label><div><input id="hq" name="q" placeholder="학교 이름 (예: 채드윅, NLCS, UWCSEA)" /><button type="submit">찾기</button></div>
+      <p><a href="${FINDER['해외'][1]}">해외 국제학교</a> · <a href="regions.html">나라·지역별</a> · <a href="curriculum/index.html">커리큘럼별</a></p></form>`,
     form: () => `<div class="in">${eyebrow}${S.quote ? `<p class="quote">“${esc(S.quote)}”</p>` : ''}${h1}${lead}
       <div class="hero-cta"><a href="${FINDER['국내'][1]}" class="btn btn-primary">우리 학교 찾기 →</a><a href="tel:${TELRAW}" class="btn btn-ghost">📞 ${TEL}</a></div></div>
       <div class="hero-form">

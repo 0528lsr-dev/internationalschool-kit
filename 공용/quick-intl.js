@@ -78,8 +78,12 @@ const BODY = String.raw`
     var pth = location.pathname, home = pth === '/' || pth === '/index.html' || (location.protocol === 'file:' && pth.slice(-10) === 'index.html');
     try {
       if (!/[?&]nopop/.test(location.search)) {
-        if (home) setTimeout(open, 900);
-        else if (!sessionStorage.getItem('qpick2')) { sessionStorage.setItem('qpick2', '1'); setTimeout(open, 900); }
+        /* 2026-11-11: 들어오자마자 첫 화면을 가리지 않게 — 한 방문에 한 번, 25초 지나거나 화면 절반쯤 내렸을 때 연다 */
+        if (!sessionStorage.getItem('qpick2')) {
+          var fired = false, fire = function(){ if (fired || modal.classList.contains('open') || document.querySelector('.q-modal.open')) return; fired = true; sessionStorage.setItem('qpick2', '1'); open(); };
+          setTimeout(fire, home ? 25000 : 30000);
+          window.addEventListener('scroll', function(){ var d = document.documentElement; if ((window.scrollY + innerHeight) / d.scrollHeight > 0.55) fire(); }, { passive: true });
+        }
       }
     } catch (_) {}
 
