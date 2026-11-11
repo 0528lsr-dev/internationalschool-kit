@@ -1,0 +1,38 @@
+# SNS 자동 게시 시간표 (2026-11-11)
+# GitHub 예약 실행은 자주 늦거나 빠진다(11-10 릴스·11-11 아침 스레드가 실제로 빠짐).
+# 그래서 각 워크플로에 예약을 따로 두지 않고, 이 시간표가 10분마다 깨어나 "시간이 지났는데 오늘 아직 안 한 일"을 하나씩 실행한다.
+# 몇 번 빠져도 다음 깨어날 때 따라잡는다. 한 번 깨어날 때 하나만 실행해서 스레드가 한꺼번에 몰려 올라가지 않게 한다.
+# 오늘 한 일은 저장소 변수 SNS_DONE("날짜:이름,이름")에 적는다. 비밀값 GH_PAT 로 다른 워크플로를 실행하고 변수를 쓴다.
+name: SNS 시간표
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+concurrency: sns-scheduler
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 시간 된 일 실행
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          DONE: ${{ vars.SNS_DONE }}
+        run: |
+          R="$GITHUB_REPOSITORY"
+          TODAY=$(TZ=Asia/Seoul date +%F)
+          NOW=$(TZ=Asia/Seoul date +%H%M)
+          case "$DONE" in "$TODAY:"*) LIST="${DONE#*:}" ;; *) LIST="" ;; esac
+          # 이름 시각(KST) 워크플로 — 시각 순서대로
+          for SLOT in "threads1 0727 threads.yml" "threads2 1207 threads.yml" "reel 1807 insta-reels.yml" "threads3 2003 threads.yml" "cards 2107 insta-cards.yml"; do
+            set -- $SLOT
+            NAME=$1; AT=$2; WF=$3
+            case ",$LIST," in *",$NAME,"*) continue ;; esac
+            if [ "$((10#$NOW))" -ge "$((10#$AT))" ]; then
+              echo "실행: $NAME ($AT) → $WF"
+              gh workflow run "$WF" --repo "$R"
+              LIST="${LIST:+$LIST,}$NAME"
+              gh variable set SNS_DONE --repo "$R" --body "$TODAY:$LIST"
+              exit 0
+            fi
+          done
+          echo "지금 할 일 없음 ($TODAY $NOW, 한 일: ${LIST:-없음})"

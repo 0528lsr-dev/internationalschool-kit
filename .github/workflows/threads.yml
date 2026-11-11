@@ -2,10 +2,7 @@
 # 비밀값: THREADS_TOKEN(스레드 토큰), GH_PAT(갱신된 토큰을 다시 저장할 때 쓰는 GitHub 토큰)
 name: 스레드 자동 게시
 on:
-  schedule:
-    - cron: '27 22 * * *'  # 매일 07:27 KST (출근·등교 시간 — 지난 글 하나) · 정각을 피해야 덜 빠진다
-    - cron: '7 3 * * *'    # 매일 12:07 KST
-    - cron: '3 11 * * *'   # 매일 20:03 KST
+  # 예약 시간은 scheduler.yml(SNS 시간표)이 관리한다 — 여기서는 직접 예약하지 않는다 (2026-11-11)
   workflow_dispatch:
 jobs:
   post:
