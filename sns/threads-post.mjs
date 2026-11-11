@@ -60,7 +60,7 @@ else {
   if (desc.length > room) desc = desc.slice(0, Math.max(0, room - 1)) + '…';
   const id = await publish(`${next.title}\n\n${desc}${list}${ask}`);
   console.log('게시 완료:', next.title, id);
-  const reply = `👉 전체 글 보기\n${next.link}?utm_source=threads\n\n국제학교 1:1 화상 과외 · 10~15분 무료 테스트 수업 신청\nhttps://internationalschool.kr/contact.html?utm_source=threads`;
+  const reply = `👉 전체 글 보기\n${next.link}?utm_source=threads\n\n국제학교 1:1 화상 과외 · 20분 무료 테스트 수업 신청\nhttps://internationalschool.kr/contact.html?utm_source=threads`;
   try { console.log('링크 댓글:', await publish(reply, id)); } catch (e) { console.log('링크 댓글 실패:', e.message); }
 }
 

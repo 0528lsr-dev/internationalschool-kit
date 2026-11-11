@@ -195,7 +195,7 @@ y = block(d, '국제학교 1:1 화상 과외', font('ExtraBold', 80), 380, W - 1
 y = block(d, 'IB · AP · IGCSE · A-Level', font('Bold', 46), y + 24, W - 160, P['soft'])
 d.rounded_rectangle((120, y + 70, W - 120, y + 210), 70, fill=CREAM)
 f = font('ExtraBold', 52)
-t = '10~15분 무료 테스트 수업'
+t = '20분 무료 테스트 수업'
 d.text(((W - d.textlength(t, font=f)) / 2, y + 108), t, font=f, fill=WINE)
 y = block(d, '프로필 링크에서 신청하세요', font('Bold', 44), y + 270, W - 160, 'white')
 block(d, '저장해 두고 필요할 때 다시 보세요', font('Medium', 36), y + 20, W - 160, P['soft'])
@@ -209,7 +209,7 @@ caption = '\n'.join([
     *[f'✔ {h}' for h, _ in points], '',
     '📌 저장해 두고 필요할 때 다시 보세요',
     '💬 궁금한 점은 댓글로 남겨 주세요',
-    '', '국제학교 1:1 화상 과외 · 10~15분 무료 테스트 수업',
+    '', '국제학교 1:1 화상 과외 · 20분 무료 테스트 수업',
     '👉 프로필 링크에서 신청 (@intlschool_tutor)', '',
     style.tags(nxt['link'], 3)])
 open(f'{OUT}/caption.txt', 'w').write(caption)
