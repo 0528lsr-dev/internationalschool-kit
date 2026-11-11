@@ -145,6 +145,7 @@ function foot(S, up) {
       <div><h5>정보</h5><ul>
         <li><a href="${up}price.html">수강료</a></li>
         <li><a href="${up}study.html">유학 프로그램</a></li>
+        <li><a href="https://seochoedu.co.kr/parents.html">학부모 영어</a></li>
         <li><a href="${up}blog.html">수업 이야기</a></li>
         <li><a href="${up}admissions.html">유학·입시정보</a></li>
         <li><a href="${up}contact.html">상담 신청</a></li>
@@ -1002,6 +1003,11 @@ function indexPage(S, D, blog) {
     teachers: () => D.teachers.length ? `${head('Teachers', '국제학교 전문 선생님', T_PITCH)}
     ${tScroll(homeTeachers(D), up)}
 ` : `${head('Teachers', '선생님을 먼저 보고 싶다면', '학교·커리큘럼에 맞는 선생님을 상담 때 2~3명 골라 소개해 드립니다.', ['teachers.html', '선생님 페이지'])}`,
+    /* 2026-11-11: 국제학교 학부모 영어 — 수업은 말트임 영어회화(seochoedu.co.kr/parents.html)에서, 여기선 소개+연결 */
+    parents: () => `${head('For parents', '학부모님 영어도 함께 준비하세요', '아이는 국제학교에서, 부모님은 학부모 상담·학교 이메일에서 영어를 만납니다. 부모님을 위한 1:1 영어회화 과정을 함께 운영합니다.', ['https://seochoedu.co.kr/parents.html', '학부모 영어 자세히 보기'])}
+    <div class="grid g4">${[['🧑‍🏫', '학부모 상담(PTC)', '선생님 설명을 알아듣고, 아이에 대해 궁금한 점을 영어로 정확히 묻는 연습'], ['✉️', '담임·학교 이메일', '결석·숙제·상담 요청 이메일을 정중하고 자연스럽게 쓰는 법, 실제 메일 첨삭'], ['☕', '학부모 모임·행사', '커피 모닝, 생일 파티, 플레이데이트 약속 등 외국인 학부모와의 스몰토크'], ['🎤', '입학 인터뷰·학교 투어', '부모 인터뷰 질문과 학교 투어 때 물어볼 질문을 미리 준비하고 롤플레이']]
+      .map(([ic, h, p]) => `<a class="card" href="https://seochoedu.co.kr/parents.html" style="color:inherit"><span class="ico">${ic}</span><h3>${h}</h3><p>${p}</p></a>`).join('')}</div>
+    <p class="center" style="margin-top:22px"><a class="btn btn-primary" href="https://seochoedu.co.kr/parents.html">학부모 영어 무료 레벨테스트 →</a></p>`,
     faq: () => `${head('FAQ', '학부모님이 자주 묻는 질문')}
     <div class="faq-list" style="max-width:820px;margin:0 auto">${HOME_FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>`,
     journal: () => blog.length ? `${head('Journal', '수업 이야기', '', ['blog.html', '글 더 보기'])}
