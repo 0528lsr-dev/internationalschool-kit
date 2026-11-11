@@ -64,9 +64,15 @@ now = datetime.now(timezone.utc)
 fresh = [i for i in reversed(items) if (now - i['date']).days < 3]
 queue = fresh + [i for i in items if i not in fresh]
 
-posted = ''
+# 이미 보낸 글: 텔레그램으로 보낸 제목 목록(저장소 변수 REEL_SENT_LOG) + 인스타에 올라간 캡션
+# (2026-11-11 메타가 API 를 막은 적이 있어, 인스타를 못 읽어도 같은 글을 다시 보내지 않게 자체 목록을 둔다)
+SENT_LOG = os.environ.get('SENT_LOG', '')
+posted = SENT_LOG
 if TOKEN:
-    posted = '\n'.join(x.get('caption', '') for x in api(f'{IG}/media', {'fields': 'caption', 'limit': 50}).get('data', []))
+    try:
+        posted += '\n' + '\n'.join(x.get('caption', '') for x in api(f'{IG}/media', {'fields': 'caption', 'limit': 50}).get('data', []))
+    except SystemExit as e:
+        print('인스타 게시물 확인 못 함(보낸 목록만 사용):', e)
 nxt = next((i for i in queue if i['title'] not in posted), None)
 if not nxt:
     print('올릴 글 없음')
@@ -227,6 +233,8 @@ if os.environ.get('MODE') == 'telegram':
     print('텔레그램으로 보냄:', nxt['title'])
     if os.environ.get('RUNNER_TEMP'):
         open(os.path.join(os.environ['RUNNER_TEMP'], 'sent_date'), 'w').write(TODAY)
+        log = [nxt['title']] + [t for t in SENT_LOG.split('\n') if t.strip()][:59]
+        open(os.path.join(os.environ['RUNNER_TEMP'], 'sent_log'), 'w').write('\n'.join(log))
     sys.exit(0)
 
 if DRY or not TOKEN:
