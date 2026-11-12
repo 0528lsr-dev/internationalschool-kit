@@ -1,7 +1,9 @@
-# SNS 자동 게시 시간표 (2026-11-11)
-# GitHub 예약 실행은 자주 늦거나 빠진다(11-10 릴스·11-11 아침 스레드가 실제로 빠짐).
-# 그래서 각 워크플로에 예약을 따로 두지 않고, 이 시간표가 10분마다 깨어나 "시간이 지났는데 오늘 아직 안 한 일"을 하나씩 실행한다.
-# 몇 번 빠져도 다음 깨어날 때 따라잡는다. 한 번 깨어날 때 하나만 실행해서 스레드가 한꺼번에 몰려 올라가지 않게 한다.
+# SNS 자동 게시 시간표 (2026-11-11, 11-12 고침)
+# GitHub 예약 실행은 자주 늦거나 빠진다. 11-11에는 "10분마다"로 해 두었는데 하루 4번(02·17·01·08시)만 깨어나서
+# 저녁 릴스·카드뉴스가 통째로 빠졌다.
+# 그래서 한 번 깨어나면 바로 끝내지 않고 최대 5시간 50분 동안 기다리며, 시간이 된 일을 그때그때 실행한다.
+# (공개 저장소라 기다리는 시간은 무료) 하루 몇 번만 깨어나도 다음 일까지 기다렸다가 제시간에 올린다.
+# 한 번에 하나씩, 적어도 20분 간격으로 실행해서 한꺼번에 몰려 올라가지 않게 한다.
 # 오늘 한 일은 저장소 변수 SNS_DONE("날짜:이름,이름")에 적는다. 비밀값 GH_PAT 로 다른 워크플로를 실행하고 변수를 쓴다.
 name: SNS 시간표
 on:
@@ -12,27 +14,40 @@ concurrency: sns-scheduler
 jobs:
   tick:
     runs-on: ubuntu-latest
+    timeout-minutes: 355
     steps:
-      - name: 시간 된 일 실행
+      - name: 시간 된 일 실행 (다음 일까지 기다림)
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
-          DONE: ${{ vars.SNS_DONE }}
         run: |
           R="$GITHUB_REPOSITORY"
-          TODAY=$(TZ=Asia/Seoul date +%F)
-          NOW=$(TZ=Asia/Seoul date +%H%M)
-          case "$DONE" in "$TODAY:"*) LIST="${DONE#*:}" ;; *) LIST="" ;; esac
           # 이름 시각(KST) 워크플로 — 시각 순서대로
-          for SLOT in "threads1 0727 threads.yml" "threads2 1207 threads.yml" "reel 1807 insta-reels.yml" "threads3 2003 threads.yml" "cards 2107 insta-cards.yml"; do
-            set -- $SLOT
-            NAME=$1; AT=$2; WF=$3
-            case ",$LIST," in *",$NAME,"*) continue ;; esac
-            if [ "$((10#$NOW))" -ge "$((10#$AT))" ]; then
-              echo "실행: $NAME ($AT) → $WF"
-              gh workflow run "$WF" --repo "$R"
-              LIST="${LIST:+$LIST,}$NAME"
-              gh variable set SNS_DONE --repo "$R" --body "$TODAY:$LIST"
-              exit 0
-            fi
+          SLOTS="threads1 0727 threads.yml|threads2 1207 threads.yml|reel 1807 insta-reels.yml|threads3 2003 threads.yml|cards 2107 insta-cards.yml"
+          END=$(( $(date +%s) + 340*60 ))
+          LAST=0
+          while [ "$(date +%s)" -lt "$END" ]; do
+            TODAY=$(TZ=Asia/Seoul date +%F)
+            NOW=$(TZ=Asia/Seoul date +%H%M)
+            DONE=$(gh variable get SNS_DONE --repo "$R" 2>/dev/null || true)
+            case "$DONE" in "$TODAY:"*) LIST="${DONE#*:}" ;; *) LIST="" ;; esac
+            NEXT=""
+            IFS='|'; set -- $SLOTS; unset IFS
+            for SLOT in "$@"; do
+              set -- $SLOT
+              NAME=$1; AT=$2; WF=$3
+              case ",$LIST," in *",$NAME,"*) continue ;; esac
+              if [ "$((10#$NOW))" -ge "$((10#$AT))" ]; then
+                if [ $(( $(date +%s) - LAST )) -lt 1200 ]; then NEXT="gap"; break; fi
+                echo "실행: $NAME ($AT) → $WF  [$TODAY $NOW]"
+                gh workflow run "$WF" --repo "$R"
+                LIST="${LIST:+$LIST,}$NAME"
+                gh variable set SNS_DONE --repo "$R" --body "$TODAY:$LIST"
+                LAST=$(date +%s)
+                NEXT="gap"; break
+              fi
+              NEXT="$NAME $AT"; break
+            done
+            if [ -z "$NEXT" ]; then echo "오늘 할 일 끝 ($TODAY, 한 일: ${LIST:-없음})"; exit 0; fi
+            sleep 60
           done
-          echo "지금 할 일 없음 ($TODAY $NOW, 한 일: ${LIST:-없음})"
+          echo "기다릴 수 있는 시간 끝 — 다음 깨어날 때 이어서 함"
