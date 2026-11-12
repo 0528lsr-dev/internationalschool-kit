@@ -213,7 +213,7 @@ function formSection(S, id, opt = {}) {
     <div class="form-card" style="margin-top:26px">
       <form id="${id}">
         <div class="row2">
-          <div class="field"><label for="${id}_name">학생(아이) 이름 *</label><input id="${id}_name" required placeholder="아이 이름" /></div>
+          <div class="field"><label for="${id}_name">학생 이름 *</label><input id="${id}_name" required placeholder="학생 이름" /></div>
           <div class="field"><label for="${id}_phone">연락처 *</label><input id="${id}_phone" required inputmode="tel" placeholder="010-0000-0000" /></div>
         </div>
         <div class="row2">
@@ -977,7 +977,7 @@ function indexPage(S, D, blog) {
       <div class="hero-form">
         <h3>빠른 과외 신청</h3>
         <form id="f_hero">
-          <div class="row2"><div class="field"><label for="f_hero_name">학생(아이) 이름 *</label><input id="f_hero_name" required placeholder="아이 이름" /></div>
+          <div class="row2"><div class="field"><label for="f_hero_name">학생 이름 *</label><input id="f_hero_name" required placeholder="학생 이름" /></div>
           <div class="field"><label for="f_hero_phone">연락처 *</label><input id="f_hero_phone" required inputmode="tel" placeholder="010-0000-0000" /></div></div>
           <div class="field"><label for="f_hero_school">학교 *</label><input id="f_hero_school" required placeholder="예: 채드윅송도" /></div>
           <div class="row2"><div class="field"><label for="f_hero_grade">학년 *</label><select id="f_hero_grade" required><option value="">선택</option>${GRADES.map(g => `<option>${g}</option>`).join('')}</select></div>
