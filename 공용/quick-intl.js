@@ -44,7 +44,7 @@ const BODY = String.raw`
       '<button type="button" class="q-back">← 다시 선택</button>' +
       '<div class="q-chosen"></div><div class="q-hint"></div>' +
       '<div class="q-grades">' + C.grades.map(function(g){ return '<button type="button">' + esc(g) + '</button>'; }).join('') + '</div>' +
-      '<div class="q-row2"><input type="text" id="q_name" placeholder="이름 *" autocomplete="name"><input type="tel" id="q_phone" placeholder="연락처 *" autocomplete="tel"></div>' +
+      '<div class="q-row2"><input type="text" id="q_name" placeholder="아이 이름 *" autocomplete="off"><input type="tel" id="q_phone" placeholder="연락처 *" autocomplete="tel"></div>' +
       '<input type="text" id="q_addr" placeholder="도로명 주소 (해외는 국가·도시만 대략 적어 주세요)" autocomplete="street-address">' +
       '<input type="text" id="q_kakao" placeholder="카카오톡 ID (해외 번호는 꼭 적어 주세요)" style="display:none">' +
       '<textarea id="q_memo" placeholder="원하시는 수업이나 궁금한 점을 편하게 적어 주세요 (선택)"></textarea>' +
@@ -107,7 +107,7 @@ const BODY = String.raw`
     box.querySelector('.q-submit').addEventListener('click', function(){
       var v = function(id){ return document.getElementById(id).value.trim(); };
       var name = v('q_name'), phone = v('q_phone'), kakao = v('q_kakao'), addr = v('q_addr'), memo = v('q_memo');
-      if (!name || !phone) { alert('이름과 연락처를 입력해 주세요.'); return; }
+      if (!name || !phone) { alert('아이 이름과 연락처를 입력해 주세요.'); return; }
       if (!isKR(phone) && !kakao) { qKakao.style.display = ''; qKakao.focus(); alert('한국 번호가 아니면 전화 연락이 어려워요.\n카카오톡 ID를 적어 주시면 빠르게 안내해 드립니다.'); return; }
       var extra = (kakao ? '[카톡 ID] ' + kakao + ' / ' : '') + (addr ? '[주소] ' + addr + ' / ' : '') + memo;
       /* form.js 와 같은 항목 이름 — 한글 키 + 영문 키(티쳐포유 Apps Script 는 영문 키만 읽는다) */
@@ -134,7 +134,7 @@ const BODY = String.raw`
     m.className = 'q-modal'; m.id = 'kgate';
     m.innerHTML = '<div class="quick" role="dialog" aria-label="카카오톡 상담"><button class="q-close" type="button" aria-label="닫기">×</button>' +
       '<div class="q-title">💛 카카오톡 상담 시작<small>상담이 중간에 끊겨도 다시 연락드릴 수 있게 먼저 남겨 주세요</small></div>' +
-      '<div class="q-row2"><input type="text" id="k_name" placeholder="이름 *" autocomplete="name"><input type="tel" id="k_phone" placeholder="연락처 * (해외는 카톡 ID도 OK)" autocomplete="tel"></div>' +
+      '<div class="q-row2"><input type="text" id="k_name" placeholder="아이 이름 *" autocomplete="off"><input type="tel" id="k_phone" placeholder="연락처 * (해외는 카톡 ID도 OK)" autocomplete="tel"></div>' +
       '<input type="text" id="k_grade" placeholder="학교·학년 (예: 송도 채드윅 G8)">' +
       '<button class="q-submit" type="button">카카오톡 상담 열기 →</button>' +
       '<p class="q-hint" style="margin:10px 0 0">입력하신 정보는 상담 연락에만 사용합니다.</p></div>';
@@ -153,7 +153,7 @@ const BODY = String.raw`
     m.querySelector('.q-submit').addEventListener('click', function(){
       var v = function(id){ return document.getElementById(id).value.trim(); };
       var name = v('k_name'), phone = v('k_phone'), grade = v('k_grade');
-      if (!name || !phone) { alert('이름과 연락처(해외는 카톡 ID)를 입력해 주세요.'); return; }
+      if (!name || !phone) { alert('아이 이름과 연락처(해외는 카톡 ID)를 입력해 주세요.'); return; }
       var d = new URLSearchParams({
         sheet: C.tab, _form: C.site, _time: new Date().toLocaleString('ko-KR'),
         사이트: C.site, 이름: name, 연락처: phone, 학년: grade, 과목: '카톡상담', 남길말: '[카톡상담 시작]', 신청페이지: location.origin + location.pathname,
