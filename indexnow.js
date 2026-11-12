@@ -7,8 +7,15 @@ const { SITES } = require('./sites');
 const HOME = path.join(__dirname, '출력');
 const only = process.argv.slice(2);
 
+/* 2026-11-12: 네이버는 자기 주소(searchadvisor.naver.com/indexnow)로 직접 보내야 확실히 받는다 — 둘 다 보낸다 */
+const ENDPOINTS = ['https://api.indexnow.org/indexnow', 'https://searchadvisor.naver.com/indexnow'];
 async function post(S, urls) {
-  const r = await fetch('https://api.indexnow.org/indexnow', { method: 'POST', headers: { 'Content-Type': 'application/json; charset=utf-8' },
+  const out = [];
+  for (const ep of ENDPOINTS) out.push(await post1(ep, S, urls));
+  return out.join('/');
+}
+async function post1(ep, S, urls) {
+  const r = await fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json; charset=utf-8' },
     body: JSON.stringify({ host: S.domain, key: S.indexnowKey, keyLocation: `${S.siteUrl}/${S.indexnowKey}.txt`, urlList: urls }) });
   return r.status;
 }

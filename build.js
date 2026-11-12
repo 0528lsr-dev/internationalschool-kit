@@ -1039,7 +1039,7 @@ function indexPage(S, D, blog) {
 </section>`).join('\n');
 
   return page(S, { path: 'index.html', up, active: 'home', ld,
-    title: `${S.brand} — ${profOf(S).homeTitle}`,
+    title: profOf(S).homeTitleFirst ? `${profOf(S).homeTitle} | ${S.brand}` : `${S.brand} — ${profOf(S).homeTitle}`,
     desc: `${S.tagline} 국내·해외 국제학교 학교별 과목 안내, ${profOf(S).homeExtra}. 무료 상담 ${TEL}.`,
     kw: profOf(S).homeKw }, `
 <section class="hero${S.heroImg ? ' has-photo' : ''}">
