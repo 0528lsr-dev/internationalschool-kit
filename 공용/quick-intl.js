@@ -167,6 +167,27 @@ const BODY = String.raw`
       window.open(href, '_blank', 'noopener');
     });
   }
+  /* 2026-11-13: 실시간 상담(채널톡) — 채널톡 기본 버튼은 숨기고, 파란 "💬 실시간 상담" 버튼으로 채팅창을 연다.
+     학부모님 채팅은 대표님 휴대폰 채널톡 앱으로 온다. 플러그인 키는 공개용(사이트에 넣는 값)이다. */
+  function liveChat(){
+    var KEY = 'acff0202-fe5c-49cb-97da-ad6d7fdfd44c';
+    var w = window; if (w.ChannelIO) return;
+    var ch = function(){ ch.c(arguments); }; ch.q = []; ch.c = function(a){ ch.q.push(a); }; w.ChannelIO = ch;
+    function load(){ if (w.ChannelIOInitialized) return; w.ChannelIOInitialized = true;
+      var s = document.createElement('script'); s.async = true; s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
+      document.head.appendChild(s); }
+    if (document.readyState === 'complete') load(); else w.addEventListener('load', load);
+    ChannelIO('boot', { pluginKey: KEY, hideChannelButtonOnBoot: true, language: 'ko' });
+    var st = document.createElement('style');
+    st.textContent = '.live-fab{position:fixed;right:18px;bottom:84px;z-index:61;display:inline-flex;align-items:center;gap:6px;background:#2f5bea;color:#fff;border:none;border-radius:999px;padding:13px 22px;font-family:inherit;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 12px 30px -10px rgba(20,40,120,.6)}' +
+      '.live-fab:hover{transform:translateY(-1px);background:#2449c9}' +
+      '@media (max-width:640px){.live-fab{right:12px;bottom:76px;padding:11px 18px;font-size:14px}}';
+    document.head.appendChild(st);
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'live-fab'; b.textContent = '💬 실시간 상담';
+    b.addEventListener('click', function(){ ChannelIO('showMessenger'); if (typeof gtag === 'function') gtag('event', 'live_chat_open'); });
+    document.body.appendChild(b);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', liveChat); else liveChat();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kakaoGate); else kakaoGate();
 })();
