@@ -49,6 +49,8 @@ if 'blog_vending' in path:
     which = '🥤 [자판기 블로그]'
 elif 'blog_teacher4u' in path:
     which = '🏫 [티쳐포유 블로그]'
+elif 'blog_maltuim' in path:   # 말트임 블로그 매일 14:10 루틴 (영어·중국어·일본어) — 2026-11-13
+    which = '🗣 [말트임 블로그]'
 else:
     which = '📚 [공부 길잡이 블로그]'
 tg('sendMessage', {'chat_id': CHAT, 'text': f'{which} 📝 오늘의 네이버 블로그 글 — {title}\n' + (f'📂 카테고리: {category}\n' if category else '') +
@@ -77,6 +79,21 @@ if own_cards:   # 직접 만든 카드 — 파일을 올려 보낸다(multipart)
                                  {'Content-Type': f'multipart/form-data; boundary={b}'})
     urllib.request.urlopen(req, timeout=120).read()
     print('직접 만든 카드', len(own_cards), '장 보냄')
+    # 말트임 영어 글에는 신청 안내 랜딩 이미지 4장(sns/maltuim_landing)도 같이 — 글 맨 아래에 붙이는 용도
+    if 'blog_maltuim' in path and not re.search(r'중국어|일본어|HSK|JLPT', title):
+        lp = sorted(glob.glob('sns/maltuim_landing/*.png'))
+        if lp:
+            media, parts = [], []
+            for k, p in enumerate(lp, 1):
+                media.append({'type': 'photo', 'media': f'attach://l{k}', **({'caption': '말트임 신청 안내 이미지 4장 — 글 맨 아래(👉 신청 링크 위)에 순서대로 붙이세요'} if k == 1 else {})})
+                parts.append(f'--{b}\r\nContent-Disposition: form-data; name="l{k}"; filename="l{k}.png"\r\nContent-Type: image/png\r\n\r\n'.encode()
+                             + open(p, 'rb').read() + b'\r\n')
+            head = (f'--{b}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n{CHAT}\r\n'
+                    f'--{b}\r\nContent-Disposition: form-data; name="media"\r\n\r\n{json.dumps(media, ensure_ascii=False)}\r\n').encode()
+            req = urllib.request.Request(f'https://api.telegram.org/bot{TG}/sendMediaGroup', head + b''.join(parts) + f'--{b}--\r\n'.encode(),
+                                         {'Content-Type': f'multipart/form-data; boundary={b}'})
+            urllib.request.urlopen(req, timeout=120).read()
+            print('말트임 랜딩 이미지', len(lp), '장 보냄')
     sys.exit(0)
 
 # 그날 카드뉴스 이미지 (사이트 sns/cards/날짜/) — 국제학교 주제 날
