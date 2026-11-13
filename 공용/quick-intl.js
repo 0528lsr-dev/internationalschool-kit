@@ -168,8 +168,9 @@ const BODY = String.raw`
       window.open(href, '_blank', 'noopener');
     });
   }
-  /* 2026-11-13: 실시간 상담(채널톡) — 채널톡 기본 버튼은 숨기고, 파란 "💬 실시간 상담" 버튼으로 채팅창을 연다.
-     학부모님 채팅은 대표님 휴대폰 채널톡 앱으로 온다. 플러그인 키는 공개용(사이트에 넣는 값)이다. */
+  /* 2026-11-13: 실시간 상담(채널톡) — 채널톡 기본 버튼은 숨기고, 플로팅 막대의 [data-live] 버튼으로 연다.
+     카톡 상담처럼 먼저 학생 이름·연락처를 받아 상담 허브(구글 시트·메일·텔레그램)로 보낸 뒤 채팅창을 연다.
+     받은 이름·연락처는 채널톡 고객 정보로도 넘겨서, 채널톡이 이메일을 따로 묻지 않게 한다. 플러그인 키는 공개용 값이다. */
   function liveChat(){
     var KEY = 'acff0202-fe5c-49cb-97da-ad6d7fdfd44c';
     var w = window; if (w.ChannelIO) return;
@@ -178,10 +179,49 @@ const BODY = String.raw`
       var s = document.createElement('script'); s.async = true; s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
       document.head.appendChild(s); }
     if (document.readyState === 'complete') load(); else w.addEventListener('load', load);
-    ChannelIO('boot', { pluginKey: KEY, hideChannelButtonOnBoot: true, language: 'ko' });
-    /* 버튼은 사이트 아래 플로팅 막대(build.js float-cta)의 [data-live] */
+    /* 한국 휴대폰 번호 → 채널톡 형식(+8210…) */
+    function e164(p){ var d = (p || '').replace(/[^\d+]/g, ''); if (/^\+\d{8,}$/.test(d)) return d; if (/^0\d{8,10}$/.test(d)) return '+82' + d.slice(1); return ''; }
+    function profileOf(u){ var pr = { name: u.name, '연락처': u.phone, '학교학년': u.grade || '' }; var m = e164(u.phone); if (m) pr.mobileNumber = m; return pr; }
+    var saved = null; try { saved = JSON.parse(localStorage.getItem('lgate') || 'null'); } catch (x) {}
+    var opt = { pluginKey: KEY, hideChannelButtonOnBoot: true, language: 'ko' };
+    if (saved) opt.profile = profileOf(saved);
+    ChannelIO('boot', opt);
+
+    var m = document.createElement('div');
+    m.className = 'q-modal'; m.id = 'lgate';
+    m.innerHTML = '<div class="quick" role="dialog" aria-label="실시간 상담"><button class="q-close" type="button" aria-label="닫기">×</button>' +
+      '<div class="q-title">💬 실시간 상담 시작<small>답변이 늦어지거나 창을 닫아도 다시 연락드릴 수 있게 먼저 남겨 주세요</small></div>' +
+      '<div class="q-row2"><input type="text" id="l_name" placeholder="학생 이름 * (예: 김민준)" autocomplete="off"><input type="tel" id="l_phone" placeholder="연락처 * (해외는 카톡 ID도 OK)" autocomplete="tel"></div>' +
+      '<input type="text" id="l_grade" placeholder="학교·학년 (예: 송도 채드윅 G8)">' +
+      '<button class="q-submit" type="button">실시간 상담 시작 →</button>' +
+      '<p class="q-hint" style="margin:10px 0 0">입력하신 정보는 상담 연락에만 사용합니다.</p></div>';
+    document.body.appendChild(m);
+    function close(){ m.classList.remove('open'); }
+    m.querySelector('.q-close').addEventListener('click', close);
+    m.addEventListener('click', function(e){ if (e.target === m) close(); });
+    function openChat(){ ChannelIO('showMessenger'); if (typeof gtag === 'function') gtag('event', 'live_chat_open'); }
     [].forEach.call(document.querySelectorAll('[data-live]'), function(b){
-      b.addEventListener('click', function(){ ChannelIO('showMessenger'); if (typeof gtag === 'function') gtag('event', 'live_chat_open'); });
+      b.addEventListener('click', function(e){
+        e.preventDefault();
+        if (saved) { openChat(); return; }
+        m.classList.add('open'); setTimeout(function(){ document.getElementById('l_name').focus(); }, 50);
+      });
+    });
+    m.querySelector('.q-submit').addEventListener('click', function(){
+      var v = function(id){ return document.getElementById(id).value.trim(); };
+      var u = { name: v('l_name'), phone: v('l_phone'), grade: v('l_grade') };
+      if (!u.name || !u.phone) { alert('학생 이름과 연락처(해외는 카톡 ID)를 입력해 주세요.'); return; }
+      var d = new URLSearchParams({
+        sheet: C.tab, _form: C.site, _time: new Date().toLocaleString('ko-KR'),
+        사이트: C.site, 이름: u.name, 연락처: u.phone, 학년: u.grade, 과목: '실시간상담', 남길말: '[실시간 상담 시작]', 신청페이지: location.origin + location.pathname,
+        name: '[' + C.site + '] ' + u.name, phone: u.phone, grade: u.grade, subject: '실시간상담',
+        memo: '[' + C.site + '][실시간 상담 시작] ' + location.pathname
+      });
+      if (C.ep) fetch(C.ep, { method: 'POST', mode: 'no-cors', keepalive: true, headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }, body: d.toString() }).catch(function(){});
+      if (typeof gtag === 'function') gtag('event', 'live_gate_submit');
+      saved = u; try { localStorage.setItem('lgate', JSON.stringify(u)); } catch (x) {}
+      ChannelIO('updateUser', { profile: profileOf(u) });
+      close(); openChat();
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', liveChat); else liveChat();
