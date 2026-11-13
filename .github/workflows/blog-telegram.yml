@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'sns/blog/*.md'
+      - 'sns/blog_vending/*.md'
   workflow_dispatch:
     inputs:
       file:
@@ -15,15 +16,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install -q pillow
-      - run: python sns/blog-send.py
+      # 이번 push 로 새로 생긴 초안만 하나씩 보낸다 (교육 블로그 sns/blog, 자판기 블로그 sns/blog_vending — 2026-11-13)
+      - name: 보낼 초안 고르기
+        env:
+          IN: ${{ github.event.inputs.file }}
+          BEFORE: ${{ github.event.before }}
+          EV: ${{ github.event_name }}
+        run: |
+          if [ -n "$IN" ]; then echo "$IN" > files.txt
+          else git diff --diff-filter=A --name-only "$BEFORE" HEAD -- 'sns/blog/*.md' 'sns/blog_vending/*.md' > files.txt 2>/dev/null || true; fi
+          # 손으로 실행했는데 파일을 비웠으면 교육 블로그 최근 초안
+          if [ "$EV" = workflow_dispatch ] && [ ! -s files.txt ]; then ls sns/blog/*.md | tail -1 > files.txt; fi
+          cat files.txt
+      - run: while read f; do BLOG_FILE="$f" python sns/blog-send.py; done < files.txt
         env:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT: ${{ secrets.TG_CONTENT_CHAT }}
-          BLOG_FILE: ${{ github.event.inputs.file }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
