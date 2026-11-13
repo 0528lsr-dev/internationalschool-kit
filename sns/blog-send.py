@@ -44,7 +44,13 @@ def tg(method, params):
 
 
 # 자판기 글(sns/blog_vending)은 따로 만든 자판기 블로그에 올린다 (2026-11-13)
-which = '🥤 [자판기 블로그]' if 'blog_vending' in path else '📚 [공부 길잡이 블로그]'
+# 티쳐포유 매일 글(sns/blog_teacher4u, 매일 15:10 루틴) — 2026-11-13
+if 'blog_vending' in path:
+    which = '🥤 [자판기 블로그]'
+elif 'blog_teacher4u' in path:
+    which = '🏫 [티쳐포유 블로그]'
+else:
+    which = '📚 [공부 길잡이 블로그]'
 tg('sendMessage', {'chat_id': CHAT, 'text': f'{which} 📝 오늘의 네이버 블로그 글 — {title}\n' + (f'📂 카테고리: {category}\n' if category else '') +
    '① 아래 카드 이미지 저장 → ② 블로그 앱 글쓰기(위 카테고리 선택) → ③ 제목·본문 붙여넣기, [카드 N] 자리에 N번째 사진 넣기 → ④ 태그 넣고 발행'})
 tg('sendMessage', {'chat_id': CHAT, 'text': title})
