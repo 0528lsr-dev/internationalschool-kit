@@ -1,0 +1,22 @@
+# 티쳐포유 → 스레드 자동 게시 (sns/threads-post-t4u.mjs, 2026-11-13)
+# 비밀값: THREADS_TOKEN_T4U(티쳐포유 스레드 토큰 — 없으면 건너뜀), GH_PAT(갱신된 토큰 저장용)
+name: 스레드 자동 게시 (티쳐포유)
+on:
+  # 예약 시간은 scheduler.yml(SNS 시간표)이 관리한다
+  workflow_dispatch:
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node sns/threads-post-t4u.mjs
+        env:
+          THREADS_TOKEN: ${{ secrets.THREADS_TOKEN_T4U }}
+      - name: 갱신된 토큰 저장
+        if: always()
+        run: if [ -s "$RUNNER_TEMP/new_token" ]; then gh secret set THREADS_TOKEN_T4U --repo "$GITHUB_REPOSITORY" < "$RUNNER_TEMP/new_token"; fi
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}

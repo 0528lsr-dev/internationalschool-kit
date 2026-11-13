@@ -22,7 +22,8 @@ jobs:
         run: |
           R="$GITHUB_REPOSITORY"
           # 이름 시각(KST) 워크플로 — 시각 순서대로
-          SLOTS="threads1 0727 threads.yml|threads2 1207 threads.yml|reel 1807 insta-reels.yml|threads3 2003 threads.yml|cards 2107 insta-cards.yml"
+          # t4u1~3: 티쳐포유 스레드 (2026-11-13)
+          SLOTS="threads1 0727 threads.yml|t4u1 0907 threads-t4u.yml|threads2 1207 threads.yml|t4u2 1507 threads-t4u.yml|reel 1807 insta-reels.yml|threads3 2003 threads.yml|cards 2107 insta-cards.yml|t4u3 2137 threads-t4u.yml"
           END=$(( $(date +%s) + 340*60 ))
           LAST=0
           while [ "$(date +%s)" -lt "$END" ]; do
