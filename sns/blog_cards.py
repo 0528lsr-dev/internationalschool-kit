@@ -10,10 +10,16 @@ import style
 W = H = 1080
 BRANDS = {   # 브랜드: (사이트, 팔레트 번호, 한 줄 소개)
     '티쳐포유': ('teacher4u.co.kr', 1, '중·고등 1:1 과외 · 수학 영어 국어 사회 과학'),
-    '자판기마켓': ('mooinstore.kr', 3, '자판기 구매 · 렌탈 · 설치 상담'),
+    '자판기마켓': ('mooinstore.kr', 'vending', '자판기 구매 · 렌탈 · 설치 상담'),
     '말트임 영어회화': ('seochoedu.co.kr', 2, '성인 1:1 전화·화상 영어 · 비즈니스 · 시험 대비'),
     '국제학교튜터': ('internationalschool.kr', 0, '국제학교 1:1 화상 과외 · IB AP IGCSE A-Level'),
 }
+# 자판기마켓 카드 색 — 날마다 3가지를 돌아가며 (사이트 남색·오렌지 / 오렌지 / 민트, 2026-11-13)
+VENDING_PALS = [
+    {'name': '남색', 'dark': (15, 42, 74), 'accent': (255, 138, 0), 'light': (244, 247, 251), 'ink': (27, 36, 48), 'mute': (91, 102, 118), 'soft': (255, 200, 120)},
+    {'name': '오렌지', 'dark': (222, 104, 8), 'accent': (15, 42, 74), 'light': (255, 247, 236), 'ink': (45, 30, 15), 'mute': (115, 92, 70), 'soft': (255, 228, 195)},
+    {'name': '민트', 'dark': (13, 110, 100), 'accent': (255, 176, 32), 'light': (239, 250, 247), 'ink': (16, 46, 42), 'mute': (78, 108, 102), 'soft': (190, 240, 228)},
+]
 FONT = {k: f'out/Pretendard-{k}.otf' for k in ('Bold', 'ExtraBold', 'Medium')}
 
 
@@ -61,7 +67,7 @@ def make(title, body, out_dir):
     brand = next((b for b in BRANDS if m and b in m.group(1)), '티쳐포유')
     site, pal_i, tagline = BRANDS[brand]
     day = (datetime.now(timezone.utc) + timedelta(hours=9)).toordinal()
-    P = style.PALETTES[pal_i]
+    P = VENDING_PALS[day % len(VENDING_PALS)] if pal_i == 'vending' else style.PALETTES[pal_i]
     layout = day % 2
     os.makedirs(out_dir, exist_ok=True)
 
