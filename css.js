@@ -337,7 +337,6 @@ ${heroCss}
 .grade-chips span{font-size:.8rem;color:var(--ink-soft)}
 .agree{display:flex;gap:8px;align-items:flex-start;font-size:.85rem;color:var(--ink-soft);margin:4px 0 14px;line-height:1.5}
 .agree input{margin-top:3px;flex:none}
-.float-cta .btn-test{background:var(--surface)}
 
 /* 숫자 띠 */
 .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
@@ -509,10 +508,17 @@ footer a:hover{color:#fff}
 .copy-bar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.12);margin-top:40px;padding-top:20px;font-size:.82rem;color:rgba(255,255,255,.5)}
 
 /* 플로팅 */
-.float-cta{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;gap:8px}
-.float-cta .btn{box-shadow:0 18px 40px -16px rgba(0,0,0,.5)}
+/* 2026-11-13: 오른쪽 아래 세로 한 줄 · 같은 크기 · 버건디(주 버튼)·흰색·카톡 노랑 */
+.float-cta{position:fixed;right:20px;bottom:20px;z-index:60;display:flex;flex-direction:column;gap:8px;width:190px}
+.fc{display:flex;align-items:center;gap:10px;height:46px;padding:0 16px;border-radius:12px;font-family:inherit;font-weight:700;font-size:.92rem;line-height:1;cursor:pointer;text-decoration:none;white-space:nowrap;
+  background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:0 10px 26px -14px rgba(40,10,20,.45);transition:transform .15s,box-shadow .15s}
+.fc:hover{transform:translateY(-1px);box-shadow:0 14px 30px -14px rgba(40,10,20,.55)}
+.fc svg{flex:none}
+.fc-live{color:var(--primary)}
+.fc-kakao{background:#fee500;border-color:#fee500;color:#191919}
+.fc-test{background:var(--primary);border-color:var(--primary);color:#fff}
+.fc .tel-s,.fc .m-s{display:none}
 .btn-kakao{background:#fee500;color:#191919}
-.float-cta .tel-s{display:none}
 
 /* 간편선택 팝업(quick.js) */
 .q-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:18px}
@@ -589,9 +595,12 @@ footer a:hover{color:#fff}
   .rgrid{grid-template-columns:repeat(2,1fr)}
   .q-tiles{grid-template-columns:repeat(2,1fr)}
   .q-fab{bottom:74px;left:12px;font-size:.85rem;padding:10px 15px}
-  .float-cta{left:12px;right:12px;bottom:12px}
-  .float-cta .btn{flex:1;justify-content:center;white-space:nowrap;padding:12px 10px;font-size:.92rem}
-  .float-cta .tel-n{display:none}.float-cta .tel-s{display:inline}
+  /* 휴대폰: 아래 탭 막대 한 줄 — 아이콘 위·글자 아래, 네 칸 같은 너비 */
+  .float-cta{left:10px;right:10px;bottom:10px;width:auto;flex-direction:row;gap:6px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 30px -12px rgba(40,10,20,.4)}
+  .fc{flex:1;flex-direction:column;justify-content:center;gap:4px;height:52px;padding:0 4px;border-radius:11px;font-size:.74rem;box-shadow:none;border-color:transparent}
+  .fc:hover{transform:none;box-shadow:none}
+  .fc-live{background:#f6eef0}
+  .fc .tel-n,.fc-test span:not(.m-s){display:none}.fc .tel-s,.fc .m-s{display:inline}
   br.pc{display:none}
   .topbar{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.78rem}
 }

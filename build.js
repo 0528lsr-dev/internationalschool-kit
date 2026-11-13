@@ -124,6 +124,15 @@ function nav(S, active, up) {
 </header>`;
 }
 
+/* 플로팅 버튼 아이콘 (선 아이콘, 글자색을 따라감) */
+const FC_SVG = d => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const FC_ICON = {
+  chat: FC_SVG('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>'),
+  kakao: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 4C7 4 3 7.2 3 11.1c0 2.5 1.7 4.7 4.2 6l-1 3.6c-.1.3.3.6.6.4l4.3-2.8c.3 0 .6.1.9.1 5 0 9-3.2 9-7.2S17 4 12 4z"/></svg>',
+  tel: FC_SVG('<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.9 2z"/>'),
+  test: FC_SVG('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/>'),
+};
+
 function foot(S, up) {
   const kakao = S.kakao ? `<a href="${S.kakao}" target="_blank" rel="noopener" class="btn btn-kakao">💬 카카오톡</a>` : '';
   return `<footer>
@@ -154,7 +163,12 @@ function foot(S, up) {
     <div class="copy-bar"><span>© ${new Date().getFullYear()} ${esc(S.brand)}. 선생님 이름은 개인정보 보호를 위해 가려 표기합니다.</span><span><a href="${up}sitemap.xml">사이트맵</a></span></div>
   </div>
 </footer>
-<div class="float-cta">${kakao}<a href="tel:${TELRAW}" class="btn btn-primary">📞 <span class="tel-n">${TEL}</span><span class="tel-s">전화</span></a><a href="${up}contact.html#apply" class="btn btn-ghost btn-test">🎁 무료 테스트</a></div>
+<div class="float-cta"><!-- 2026-11-13: 버튼 모양·크기 통일, 색은 버건디·흰색·카톡 노랑 세 가지만 -->
+  <button type="button" class="fc fc-live" data-live>${FC_ICON.chat}<span>실시간 상담</span></button>
+  ${S.kakao ? `<a href="${S.kakao}" target="_blank" rel="noopener" class="fc fc-kakao">${FC_ICON.kakao}<span>카톡 상담</span></a>` : ''}
+  <a href="tel:${TELRAW}" class="fc fc-tel">${FC_ICON.tel}<span class="tel-n">${TEL}</span><span class="tel-s">전화</span></a>
+  <a href="${up}contact.html#apply" class="fc fc-test" data-quick>${FC_ICON.test}<span>무료 테스트 신청</span><span class="m-s">무료 테스트</span></a>
+</div>
 <script src="${up}app.js?v=${ASSET_V}" defer></script>
 ${o_scripts(S, up)}
 </body>

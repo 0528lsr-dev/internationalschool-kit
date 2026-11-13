@@ -69,7 +69,8 @@ const BODY = String.raw`
 
     var opener = document.getElementById('quickOpen');
     if (opener) opener.addEventListener('click', open);
-    else { var fab = document.createElement('button'); fab.type = 'button'; fab.className = 'q-fab'; fab.textContent = '⚡ 간편 상담'; fab.addEventListener('click', open); document.body.appendChild(fab); }
+    /* 2026-11-13: 왼쪽 아래 "간편 상담" 버튼은 없애고, 오른쪽 플로팅 "무료 테스트 신청"이 이 창을 연다 */
+    [].forEach.call(document.querySelectorAll('[data-quick]'), function(a){ a.addEventListener('click', function(e){ e.preventDefault(); open(); }); });
     box.querySelector('.q-close').addEventListener('click', close);
     modal.addEventListener('click', function(e){ if (e.target === modal) close(); });
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
@@ -178,14 +179,10 @@ const BODY = String.raw`
       document.head.appendChild(s); }
     if (document.readyState === 'complete') load(); else w.addEventListener('load', load);
     ChannelIO('boot', { pluginKey: KEY, hideChannelButtonOnBoot: true, language: 'ko' });
-    var st = document.createElement('style');
-    st.textContent = '.live-fab{position:fixed;right:18px;bottom:84px;z-index:61;display:inline-flex;align-items:center;gap:6px;background:#2f5bea;color:#fff;border:none;border-radius:999px;padding:13px 22px;font-family:inherit;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 12px 30px -10px rgba(20,40,120,.6)}' +
-      '.live-fab:hover{transform:translateY(-1px);background:#2449c9}' +
-      '@media (max-width:640px){.live-fab{right:12px;bottom:76px;padding:11px 18px;font-size:14px}}';
-    document.head.appendChild(st);
-    var b = document.createElement('button'); b.type = 'button'; b.className = 'live-fab'; b.textContent = '💬 실시간 상담';
-    b.addEventListener('click', function(){ ChannelIO('showMessenger'); if (typeof gtag === 'function') gtag('event', 'live_chat_open'); });
-    document.body.appendChild(b);
+    /* 버튼은 사이트 아래 플로팅 막대(build.js float-cta)의 [data-live] */
+    [].forEach.call(document.querySelectorAll('[data-live]'), function(b){
+      b.addEventListener('click', function(){ ChannelIO('showMessenger'); if (typeof gtag === 'function') gtag('event', 'live_chat_open'); });
+    });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', liveChat); else liveChat();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
