@@ -105,6 +105,9 @@ function buildCss(S) {
 .hero h1 em{color:#f3c9b8;font-style:normal}
 .hero .lead{color:rgba(255,255,255,.86);font-size:1.02rem;margin:0}
 .offer-pill{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:6px 14px;border-radius:999px;font-size:.84rem;font-weight:600}
+.offer-season{display:inline-block;margin-left:8px;background:#fff;color:var(--primary);padding:6px 14px;border-radius:999px;font-size:.84rem;font-weight:800;text-decoration:none}
+.offer-season:hover{background:#f3c9b8}
+@media (max-width:640px){.offer-season{margin:8px 0 0}}
 .offer-checks{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .offer-checks li{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 14px;font-size:.88rem;font-weight:600}
 .offer-checks li::before{content:"✓ ";color:#f3c9b8}

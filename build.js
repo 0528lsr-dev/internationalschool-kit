@@ -153,6 +153,7 @@ function foot(S, up) {
       </ul></div>
       <div><h5>정보</h5><ul>
         <li><a href="${up}price.html">수강료</a></li>
+        <li><a href="${up}winter.html">겨울방학 집중 과외</a></li>
         <li><a href="${up}study.html">유학 프로그램</a></li>
         <li><a href="https://seochoedu.co.kr/parents.html">학부모 영어</a></li>
         <li><a href="${up}blog.html">수업 이야기</a></li>
@@ -329,6 +330,61 @@ function pricePage(S) {
   </div>
 </section>
 ${formSection(S, 'f_price', { title: '무료 테스트 수업 신청', lead: '20분 무료 테스트 수업부터 받아 보세요. 전문 선생님이 곧 연락드립니다.' })}`);
+}
+
+/* ===== 겨울방학 집중 과외 (2026-11-15, 사용자 요청) — 12월 중순~1월 문의가 몰리는 시기에 맞춰 미리 검색에 걸리게.
+   가격은 새로 만들지 않는다(기본 수강료 + 횟수 늘리기는 상담 때 안내). 후기·합격 실적·명문대 문구 넣지 않는다. */
+const WINTER_ON = (() => { const m = new Date().getMonth() + 1; return m >= 11 || m <= 1; })();   // 11~1월에만 홈 띠 표시
+const WINTER_TRACKS = [
+  ['📘', '다음 학기 미리 보기', '2학기(Semester 2)에 배울 수학·과학 단원을 방학 동안 먼저 다져 둡니다. 개학 첫 주부터 수업이 들리게 준비합니다.'],
+  ['✍️', '영어 에세이 · 라이팅 집중', '학교 에세이 평가 기준(루브릭)에 맞춰 문단 구성, 근거 쓰기, 문법을 매일 쓰고 고치며 다듬습니다.'],
+  ['🏫', '입학 · 편입 시험 준비', '국제학교 입학 영어·수학 시험, MAP 같은 학력 평가, 인터뷰를 학교별로 준비합니다. 귀국을 앞둔 주재원 자녀도 함께 준비할 수 있습니다.'],
+  ['🎯', 'IB · AP · SAT 집중', 'IA · EE 같은 과제 마감, 봄 학기 시험과 SAT를 앞두고 약한 단원을 방학 동안 집중해서 채웁니다.']
+];
+function winterPage(S) {
+  const faq = [
+    ['겨울방학 과외는 언제 시작하면 좋나요?', '대부분의 국제학교는 12월 중순에 방학을 시작합니다. 12월 초에 상담과 20분 무료 테스트 수업을 마치고 계획을 세워 두면, 방학 첫 주부터 바로 수업을 시작할 수 있습니다.'],
+    ['방학 동안만 수업할 수도 있나요?', '네. 방학 기간에만 집중해서 수업하고 개학 후에는 정리할 수도 있고, 개학 후에도 학교 진도에 맞춰 이어 갈 수도 있습니다.'],
+    ['방학에는 수업 횟수를 늘릴 수 있나요?', '네. 기본은 주 2회이고, 방학 동안 횟수를 늘려 집중 수업을 할 수 있습니다. 일정과 수강료는 상담 때 아이 계획에 맞춰 안내해 드립니다.'],
+    ['해외에 살거나 방학에 한국에 들어와 있어도 되나요?', '네. 모든 수업은 실시간 1:1 화상 수업이라 어디에 있든 같은 선생님과 이어서 수업할 수 있습니다. 시차에 맞춰 시간을 정합니다.']
+  ];
+  const plan = [['12월 초', '상담 신청 · 20분 무료 테스트 수업'], ['12월 중순', '성적표 · 과제를 보고 방학 계획 세우기'], ['방학 시작', '주 2회~집중 수업 시작'], ['개학 전', '배운 것 점검 · 개학 후 계획 안내']];
+  return page(S, { path: 'winter.html', up: '', active: '', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['겨울방학 집중 과외', 'winter.html']]), faqLd(faq)] },
+    title: `국제학교 겨울방학 과외 — 다음 학기 선행 · 에세이 · 입학시험 · IB·AP 집중 | ${S.brand}`,
+    desc: `국제학교 학생 겨울방학 집중 1:1 화상 과외. 2학기 수학·과학 미리 보기, 영어 에세이, 입학·편입 시험, IB·AP·SAT 대비. 국내·해외 어디서든, 20분 무료 테스트 수업부터. 상담 ${TEL}.` }, `
+<section class="page-hero">
+  <div class="wrap">
+    <div class="crumb"><a href="index.html">홈</a> › 겨울방학 집중 과외</div>
+    <h1>국제학교 겨울방학 과외<br><em>3~4주, 다음 학기를 바꾸는 시간</em></h1>
+    <p class="lead">학교 수업이 쉬는 방학은 부족한 단원을 채우고 다음 학기를 미리 준비하기 가장 좋은 때입니다. 아이 학교 커리큘럼에 맞춰 1:1로 집중합니다.</p>
+    <div class="hero-cta" style="margin-top:18px"><a href="#f_winter" class="btn btn-primary">겨울방학 상담 신청</a><a href="price.html" class="btn btn-ghost">기본 수강료 보기</a></div>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">Winter Programs</span><h2>이번 겨울, 이렇게 준비합니다</h2></div>
+    <div class="grid g4">${WINTER_TRACKS.map(([i, h, p]) => `<div class="card"><span class="ico">${i}</span><h3>${h}</h3><p>${p}</p></div>`).join('')}</div>
+  </div>
+</section>
+<section class="soft">
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">Schedule</span><h2>겨울방학 준비 일정</h2><p class="muted">방학이 시작되기 전에 계획을 세워 두면 첫 주부터 바로 수업할 수 있습니다.</p></div>
+    <div class="steps" style="max-width:820px;margin:0 auto">${plan.map(([b, t]) => `<div><b>${b}</b><span>${t}</span></div>`).join('')}</div>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">For</span><h2>이런 학생에게 맞습니다</h2></div>
+    <div class="grid g3">${[['국내 국제학교 학생', '송도 · 제주 · 서울 · 판교 등 국내 국제학교의 다음 학기 과목 준비'], ['해외 국제학교 학생', '방학에 한국에 들어와 있거나 현지에 있어도 시차 맞춰 수업'], ['입학 · 귀국 준비 학생', '국제학교 입학 · 편입 시험, 귀국을 앞둔 주재원 자녀의 학교 적응 준비']].map(([h, p]) => `<div class="card"><h3>${h}</h3><p>${p}</p></div>`).join('')}</div>
+  </div>
+</section>
+<section class="soft">
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">FAQ</span><h2>겨울방학 과외 자주 묻는 질문</h2></div>
+    <div class="faq-list" style="max-width:820px;margin:0 auto">${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>
+  </div>
+</section>
+${formSection(S, 'f_winter', { title: '겨울방학 상담 신청', lead: '20분 무료 테스트 수업으로 아이 수준을 먼저 확인하고, 방학 계획을 같이 세워 드립니다.' })}`);
 }
 /* 선생님 카드 띠 — 옆으로 넘겨 본다(홈·선생님 페이지 공용, 2026-11-03) */
 /* 카드 모양은 동료 사이트(internationaledu.co.kr)처럼: 위쪽 색 띠 · 이름 · 분야 알약 · 경력 점 목록, 화살표는 아래 가운데 */
@@ -971,7 +1027,7 @@ function indexPage(S, D, blog) {
     /* 2026-11-11 offer — 휴대폰 첫 화면에 "무엇을·얼마에·어떻게 신청" 이 다 보이게 (사용자: 사진 정신없고 신청 충동이 안 든다).
        버건디 단색 배경, 약속 4개, 버튼 2개(무료 테스트·카톡), 수강료 카드, 그 아래 학교 찾기. */
     offer: () => `<div class="in">
-      <span class="offer-pill">국내·해외 국제학교 학생 1:1 화상 과외</span>
+      <span class="offer-pill">국내·해외 국제학교 학생 1:1 화상 과외</span>${WINTER_ON ? `<a class="offer-season" href="winter.html">❄ 겨울방학 집중 과외 상담 중 →</a>` : ''}
       ${h1}
       <p class="lead">IB·AP·IGCSE·A-Level, 아이 학교의 과제와 시험 일정에 맞춰<br class="pc"> 선생님과 실시간 1:1로 수업합니다.</p>
       <ul class="offer-checks">${['IB · AP · IGCSE · A-Level · SAT', '학교 과제 · 시험 일정 맞춤', '국내 · 해외 시차 맞춰 수업', '수업마다 학습 리포트'].map(x => `<li>${x}</li>`).join('')}</ul>
@@ -1146,5 +1202,5 @@ function specPage(S, L) {
 ${formSection(S, 'f_spec', { title: `${L.name} 무료 상담 신청`, lead: '전문 선생님이 곧 연락드립니다.' })}`);
 }
 
-module.exports = { studyPage, studyProgramPage, PROGRAMS, hubPage, subjectPage, regionPage, schoolFinderPage, subjectIndexPage, regionsIndexPage, teachersPage, teacherPage, specIndexPage, specPage, FINDER, listPage, postPage, contactPage, pricePage, indexPage, notFoundPage,
+module.exports = { winterPage, studyPage, studyProgramPage, PROGRAMS, hubPage, subjectPage, regionPage, schoolFinderPage, subjectIndexPage, regionsIndexPage, teachersPage, teacherPage, specIndexPage, specPage, FINDER, listPage, postPage, contactPage, pricePage, indexPage, notFoundPage,
   hubFile, subFile, regionFile, subjIndexFile, encPath, TODAY, BLOG, ADMISSIONS };

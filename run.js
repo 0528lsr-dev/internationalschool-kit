@@ -499,6 +499,7 @@ function buildSite(S) {
   for (const p of adm) { W(path.join(dir, `admissions/${p.slug}.html`), B.postPage(S, 'admissions', p, adm)); add('main', `admissions/${p.slug}.html`); }
   full && W(path.join(dir, 'contact.html'), B.contactPage(S)); add('main', 'contact.html');
   full && W(path.join(dir, 'price.html'), B.pricePage(S)); add('main', 'price.html');
+  full && W(path.join(dir, 'winter.html'), B.winterPage(S)); add('main', 'winter.html');   /* 겨울방학 집중 과외 (2026-11-15) */
   /* 유학 메뉴 (2026-11-10) — 프로그램은 데이터/study-programs.js */
   W(path.join(dir, 'study.html'), B.studyPage(S)); add('main', 'study.html');
   for (const p of B.PROGRAMS) { W(path.join(dir, 'study', `${p.slug}.html`), B.studyProgramPage(S, p)); add('main', `study/${p.slug}.html`); }
