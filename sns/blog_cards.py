@@ -14,6 +14,8 @@ BRANDS = {   # 브랜드: (사이트, 팔레트 번호, 한 줄 소개)
     '말트임 영어회화': ('seochoedu.co.kr', 2, '성인 1:1 전화·화상 영어 · 비즈니스 · 시험 대비'),
     '말트임 1:1 회화': ('seochoedu.co.kr', 2, '성인 1:1 전화·화상 영어 · 중국어 · 일본어 회화'),   # 말트임 블로그 중국어·일본어 글 (2026-11-13)
     '국제학교튜터': ('internationalschool.kr', 0, '국제학교 1:1 화상 과외 · IB AP IGCSE A-Level'),
+    # 공부 길잡이 블로그는 인사를 하나로 통일(2026-11-15) — 사이트는 글 끝 👉 링크에서 읽는다
+    '공부 길잡이': ('', 4, '국제학교 · 중고등 내신 · 유학 · 학부모 영어'),
 }
 # 자판기마켓 카드 색 — 날마다 3가지를 돌아가며 (사이트 남색·오렌지 / 오렌지 / 민트, 2026-11-13)
 VENDING_PALS = [
@@ -67,6 +69,9 @@ def make(title, body, out_dir):
     m = re.search(r'안녕하세요,\s*(.+?)입니다', body)
     brand = next((b for b in BRANDS if m and b in m.group(1)), '티쳐포유')
     site, pal_i, tagline = BRANDS[brand]
+    if not site:
+        u = re.search(r'👉[^\n]*?https?://([^/\s?]+)', body)
+        site = u.group(1) if u else 'internationalschool.kr'
     day = (datetime.now(timezone.utc) + timedelta(hours=9)).toordinal()
     P = VENDING_PALS[day % len(VENDING_PALS)] if pal_i == 'vending' else style.PALETTES[pal_i]
     layout = day % 2
