@@ -85,6 +85,8 @@ def make(title, body, out_dir, category=''):
         # 공부 길잡이 블로그 카드에는 말트임 주소를 쓰지 않는다(2026-11-18: 학부모 영어 글 카드에 seochoedu.co.kr 이 찍혀 말트임 글처럼 보임)
         if 'seochoedu' in site:
             site = 'internationalschool.kr'
+    # 카드에 크게 넣을 혜택 문구 — 사이트별로 사실에 맞게 (국제학교 20분·티쳐포유 30분 테스트 수업, 자판기는 상담·견적)
+    OFFER = ('무료 상담', '설치 장소에 맞는 기종 추천') if pal_i == 'vending' else         ('무료 레벨테스트', '20분 테스트 수업으로 지금 실력 확인') if 'internationalschool' in site else         ('무료 레벨테스트', '첫 테스트 수업 30분 무료') if 'teacher4u' in site else         ('무료 레벨테스트', '지금 실력부터 부담 없이 확인')
     day = (datetime.now(timezone.utc) + timedelta(hours=9)).toordinal()
     if brand == '공부 길잡이' and category:
         pal_i = next((p for k, p in GILJABI_PALS if k in category), pal_i)
@@ -116,7 +118,12 @@ def make(title, body, out_dir, category=''):
     else:
         d.ellipse((W / 2 - 40, 220, W / 2 + 40, 300), fill=P['accent'])
         block(d, title, font('ExtraBold', 76), 360, W - 160, 'white', max_lines=4)
-    block(d, tagline, font('Medium', 34), H - 200, W - 160, P['soft'])
+    # 무료 레벨테스트 띠 (2026-11-18 사용자: "무료 레벨테스트를 가장 크게, 구미 당기게")
+    f = font('ExtraBold', 60)
+    t = OFFER[0] + ' 신청 →'
+    tw = d.textlength(t, font=f)
+    d.rounded_rectangle(((W - tw) / 2 - 50, H - 270, (W + tw) / 2 + 50, H - 150), 60, fill=P['accent'])
+    d.text(((W - tw) / 2, H - 247), t, font=f, fill=P['dark'])
     foot(d, P['soft'], 1)
     imgs.append(im)
 
@@ -147,13 +154,16 @@ def make(title, body, out_dir, category=''):
     # 3. 마지막 안내
     im = Image.new('RGB', (W, H), P['dark'])
     d = ImageDraw.Draw(im)
-    y = block(d, brand, font('ExtraBold', 84), 330, W - 160, 'white')
-    y = block(d, tagline, font('Bold', 40), y + 20, W - 180, P['soft'])
-    d.rounded_rectangle((140, y + 70, W - 140, y + 200), 65, fill=P['light'])
+    # 무료 레벨테스트를 이 카드에서 가장 크게 (2026-11-18)
+    y = block(d, brand, font('Bold', 40), 150, W - 160, P['soft'])
+    y = block(d, OFFER[0].split(' ')[0], font('ExtraBold', 150), y + 40, W - 120, P['accent'])
+    y = block(d, ' '.join(OFFER[0].split(' ')[1:]), font('ExtraBold', 150), y - 10, W - 120, 'white')
+    y = block(d, OFFER[1], font('Bold', 44), y + 20, W - 160, P['soft'])
+    d.rounded_rectangle((140, y + 50, W - 140, y + 170), 60, fill=P['light'])
     f = font('ExtraBold', 50)
-    t = '무료 상담 010-5577-3067'
-    d.text(((W - d.textlength(t, font=f)) / 2, y + 107), t, font=f, fill=P['dark'])
-    block(d, site, font('Bold', 40), y + 250, W - 160, 'white')
+    t = '상담 010-5577-3067'
+    d.text(((W - d.textlength(t, font=f)) / 2, y + 82), t, font=f, fill=P['dark'])
+    block(d, site, font('Bold', 38), y + 210, W - 160, 'white')
     foot(d, P['soft'], total)
     imgs.append(im)
 
