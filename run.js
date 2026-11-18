@@ -499,7 +499,8 @@ function buildSite(S) {
   for (const p of adm) { W(path.join(dir, `admissions/${p.slug}.html`), B.postPage(S, 'admissions', p, adm)); add('main', `admissions/${p.slug}.html`); }
   full && W(path.join(dir, 'contact.html'), B.contactPage(S)); add('main', 'contact.html');
   full && W(path.join(dir, 'price.html'), B.pricePage(S)); add('main', 'price.html');
-  full && W(path.join(dir, 'winter.html'), B.winterPage(S)); add('main', 'winter.html');   /* 겨울방학 집중 과외 (2026-11-15) */
+  full && W(path.join(dir, 'winter.html'), B.winterPage(S)); add('main', 'winter.html');
+  full && W(path.join(dir, 'parents.html'), B.parentsPage(S)); add('main', 'parents.html');   /* 국제학교 학부모 영어 자체 페이지 (2026-11-18) */   /* 겨울방학 집중 과외 (2026-11-15) */
   W(path.join(dir, 'choose.html'), B.choosePage(S)); add('main', 'choose.html');   /* AI 검색용: 고르는 법·비교 (2026-11-15) */
   W(path.join(dir, 'faq.html'), B.faqPage(S)); add('main', 'faq.html');
   /* 유학 메뉴 (2026-11-10) — 프로그램은 데이터/study-programs.js */
