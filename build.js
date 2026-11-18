@@ -98,6 +98,7 @@ function navFor(S) {
     ['수강료', 'price', 'price.html', null],
     ['선생님', 'teachers', 'teachers.html', null],
     ['유학', 'study', 'study.html', null],
+    ['학부모 영어', 'parents', 'parents.html', [['parents.html', '학부모 영어 소개'], ...require('./parents-intl.js').map(t => [`parents/${t.key}.html`, t.name])]],   /* 2026-11-18 사용자 요청: 학부모 탭 따로 */
     /* 2026-11-17: '수업 이야기'·'유학·입시정보' 두 탭을 '뉴스' 하나로 합침 */
     ['뉴스', 'blog|admissions', 'blog.html', [['blog.html', '수업 이야기'], ['admissions.html', '유학·입시정보']]]
   ];
@@ -390,15 +391,46 @@ ${formSection(S, 'f_winter', { title: '겨울방학 상담 신청', lead: '20분
 }
 /* ===== 국제학교 학부모 영어 (2026-11-18) — 사용자 요청: 국제학교 사이트에서 말트임으로 넘기지 않고 자체 페이지.
    말트임 parents.html 문장을 복사하지 않는다(네이버 유사문서). 가격은 새로 정하지 않는다(상담 때 안내). */
+const PARENT_TOPICS = require('./parents-intl.js');
+/* 학부모 영어 상황별 상세 페이지 (2026-11-18) — parents/<key>.html */
+function parentTopicPage(S, T) {
+  const up = '../';
+  const tabs = `<div class="lang-tabs">${PARENT_TOPICS.map(x => `<a href="${x.key}.html"${x.key === T.key ? ' class="active"' : ''}>${esc(x.name)}</a>`).join('')}</div>`;
+  return page(S, { path: `parents/${T.key}.html`, up, active: 'parents', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['국제학교 학부모 영어', 'parents.html'], [T.name, `parents/${T.key}.html`]]), faqLd(T.faq)] },
+    title: `${T.title} | ${S.brand}`, desc: T.lead.slice(0, 150), kw: `${T.name} 영어, 국제학교 학부모 영어, 학부모 영어, ${T.h1}, 국제학교 학부모` }, `
+<section class="page-hero">
+  <div class="wrap">
+    <div class="crumb"><a href="${up}index.html">홈</a> › <a href="${up}parents.html">국제학교 학부모 영어</a> › ${esc(T.name)}</div>
+    <h1>${T.ico} ${esc(T.h1)}</h1>
+    <p class="lead">${esc(T.lead)}</p>
+    ${tabs}
+    <div class="hero-cta" style="margin-top:18px"><a href="#apply" class="btn btn-primary">20분 무료 테스트 수업 신청</a><a href="tel:${TELRAW}" class="btn btn-ghost">📞 ${TEL}</a></div>
+  </div>
+</section>
+${T.sections.map(([h, rows], k) => `<section${k % 2 ? ' class="soft"' : ''}>
+  <div class="wrap">
+    <h2>${esc(h)}</h2>
+    <div class="grid g2" style="margin-top:16px">${rows.map(([en, ko]) => `<div class="card"><p style="font-weight:700;font-size:1.05rem;margin:0 0 8px">${esc(en)}</p><p class="muted" style="margin:0">${esc(ko)}</p></div>`).join('')}</div>
+  </div>
+</section>`).join('')}
+<section${T.sections.length % 2 ? ' class="soft"' : ''}>
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">How</span><h2>수업은 이렇게 진행합니다</h2></div>
+    <div class="steps" style="max-width:820px;margin:0 auto">${T.steps.map((t, k) => `<div><b>${k + 1}단계</b><span>${esc(t)}</span></div>`).join('')}</div>
+    <p class="center muted" style="margin-top:18px">모든 수업은 실시간 1:1 화상 수업입니다. 수업 횟수와 수강료는 상담 때 일정에 맞춰 안내해 드립니다.</p>
+  </div>
+</section>
+<section${T.sections.length % 2 ? '' : ' class="soft"'}>
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">FAQ</span><h2>자주 묻는 질문</h2></div>
+    <div class="faq-list" style="max-width:820px;margin:0 auto">${T.faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>
+    <p class="center" style="margin-top:20px"><a href="${up}parents.html">← 학부모 영어 전체 보기</a></p>
+  </div>
+</section>
+${formSection(S, 'f_parents', { title: `${T.name} 영어 상담 신청`, lead: '과목에서 "학부모 영어(부모님 수업)"를 골라 주세요. 20분 무료 테스트 수업으로 시작합니다.' })}`);
+}
 function parentsPage(S) {
-  const scenes = [
-    ['🧑‍🏫', '학부모 상담(PTC)', '선생님이 쓰는 표현(on track, needs support, rubric 등)을 미리 익히고, 아이에 대해 묻고 싶은 질문을 영어 문장으로 준비해 갑니다.'],
-    ['✉️', '담임·학교 이메일', '결석 알림, 면담 요청, 과제 문의, 감사 인사처럼 자주 쓰는 이메일을 직접 써 보고 첨삭받습니다.'],
-    ['📄', '성적표·학교 공지 읽기', '성적표 코멘트, 뉴스레터, 행사 안내문에서 꼭 알아야 할 부분을 빠르게 찾아 읽는 연습을 합니다.'],
-    ['☕', '학부모 모임·행사', '커피 모닝, 학교 행사, 플레이데이트 약속처럼 다른 학부모와 나누는 짧은 대화를 연습합니다.'],
-    ['🎤', '입학 인터뷰·학교 투어', '입학 상담 때 받을 수 있는 질문과 학교 투어에서 물어볼 질문을 미리 정리하고 실제처럼 연습합니다.'],
-    ['✈️', '해외 발령 가족', '해외 국제학교에 아이를 보내기 전, 학교 등록·상담·병원·이웃과의 대화까지 생활 영어를 함께 준비합니다.']
-  ];
+  const scenes = PARENT_TOPICS.map(t => [t.ico, t.name, t.lead.split('. ')[0].replace(/\.$/, '') + '.', `parents/${t.key}.html`]);
   const steps = [['상담 신청', '지금 영어 수준과 필요한 상황을 알려 주세요'], ['20분 무료 테스트 수업', '실제 수업처럼 말해 보며 수준을 확인합니다'], ['맞춤 계획', '다가오는 상담·행사 일정에 맞춰 주제를 정합니다'], ['1:1 화상 수업', '집에서 편한 시간에, 실제 쓸 문장 위주로']];
   const faq = [
     ['영어를 오래 쉬었는데 따라갈 수 있을까요?', '네. 처음에는 학교에서 실제로 쓰는 짧은 문장부터 시작합니다. 테스트 수업에서 수준을 확인한 뒤 거기에 맞춰 계획을 세웁니다.'],
@@ -406,7 +438,7 @@ function parentsPage(S) {
     ['곧 학부모 상담이 있는데 그 준비만 해도 되나요?', '네. 상담 날짜를 알려 주시면 그 전에 필요한 표현과 질문만 집중해서 준비할 수 있습니다.'],
     ['해외에 살고 있어도 수업할 수 있나요?', '네. 모든 수업은 실시간 1:1 화상 수업이라 어느 나라에서든 시차에 맞춰 수업합니다.']
   ];
-  return page(S, { path: 'parents.html', up: '', active: '', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['국제학교 학부모 영어', 'parents.html']]), faqLd(faq)] },
+  return page(S, { path: 'parents.html', up: '', active: 'parents', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['국제학교 학부모 영어', 'parents.html']]), faqLd(faq)] },
     title: `국제학교 학부모 영어 — 학부모 상담·담임 이메일·입학 인터뷰 1:1 | ${S.brand}`,
     desc: `국제학교 학부모님을 위한 1:1 화상 영어. 학부모 상담(PTC), 담임 이메일, 성적표 읽기, 학부모 모임, 입학 인터뷰를 실제 상황 문장으로 준비합니다. 20분 무료 테스트 수업, 상담 ${TEL}.` }, `
 <section class="page-hero">
@@ -420,7 +452,7 @@ function parentsPage(S) {
 <section>
   <div class="wrap">
     <div class="sec-head center"><span class="eyebrow">Situations</span><h2>이런 상황을 준비합니다</h2></div>
-    <div class="grid g3">${scenes.map(([i, h, p]) => `<div class="card"><span class="ico">${i}</span><h3>${h}</h3><p>${p}</p></div>`).join('')}</div>
+    <div class="grid g3">${scenes.map(([i, h, p, href]) => `<a class="card" href="${href}" style="color:inherit"><span class="ico">${i}</span><h3>${h}</h3><p>${esc(p)}</p><p class="small" style="margin-top:10px;color:var(--primary);font-weight:700">자세히 보기 →</p></a>`).join('')}</div>
   </div>
 </section>
 <section class="soft">
@@ -1266,7 +1298,7 @@ function indexPage(S, D, blog) {
     /* 국제학교 학부모 영어 — 2026-11-18부터 자체 페이지 parents.html (말트임으로 넘기지 않음) */
     parents: () => `${head('For parents', '학부모님 영어도 함께 준비하세요', '아이는 국제학교에서, 부모님은 학부모 상담과 학교 이메일에서 영어를 만납니다.<br>그래서 부모님을 위한 1:1&nbsp;영어회화 과정도 함께 운영합니다.', ['parents.html', '학부모 영어 자세히 보기'])}
     <div class="grid g4">${[['🧑‍🏫', '학부모 상담(PTC)', '선생님 설명을 알아듣고, 아이에 대해 궁금한 점을 영어로 정확히 묻는 연습'], ['✉️', '담임·학교 이메일', '결석·숙제·상담 요청 이메일을 정중하고 자연스럽게 쓰는 법, 실제 메일 첨삭'], ['☕', '학부모 모임·행사', '커피 모닝, 생일 파티, 플레이데이트 약속 등 외국인 학부모와의 스몰토크'], ['🎤', '입학 인터뷰·학교 투어', '부모 인터뷰 질문과 학교 투어 때 물어볼 질문을 미리 준비하고 롤플레이']]
-      .map(([ic, h, p]) => `<a class="card" href="parents.html" style="color:inherit"><span class="ico">${ic}</span><h3>${h}</h3><p>${p}</p></a>`).join('')}</div>
+      .map(([ic, h, p], k) => `<a class="card" href="parents/${['ptc', 'email', 'community', 'interview'][k]}.html" style="color:inherit"><span class="ico">${ic}</span><h3>${h}</h3><p>${p}</p></a>`).join('')}</div>
     <p class="center" style="margin-top:22px"><a class="btn btn-primary" href="parents.html">학부모 영어 20분 무료 테스트 수업 →</a></p>`,
     faq: () => `${head('FAQ', '학부모님이 자주 묻는 질문')}
     <div class="faq-list" style="max-width:820px;margin:0 auto">${HOME_FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>`,
@@ -1412,5 +1444,5 @@ ${schoolsH}${examsH}
 ${formSection(S, 'f_spec', { title: `${L.name} 무료 상담 신청`, lead: '전문 선생님이 곧 연락드립니다.' })}`);
 }
 
-module.exports = { parentsPage, winterPage, choosePage, faqPage, studyPage, studyProgramPage, PROGRAMS, hubPage, subjectPage, regionPage, schoolFinderPage, subjectIndexPage, regionsIndexPage, teachersPage, teacherPage, specIndexPage, specPage, FINDER, listPage, postPage, contactPage, pricePage, indexPage, notFoundPage,
+module.exports = { parentsPage, parentTopicPage, PARENT_TOPICS, winterPage, choosePage, faqPage, studyPage, studyProgramPage, PROGRAMS, hubPage, subjectPage, regionPage, schoolFinderPage, subjectIndexPage, regionsIndexPage, teachersPage, teacherPage, specIndexPage, specPage, FINDER, listPage, postPage, contactPage, pricePage, indexPage, notFoundPage,
   hubFile, subFile, regionFile, subjIndexFile, encPath, TODAY, BLOG, ADMISSIONS };
