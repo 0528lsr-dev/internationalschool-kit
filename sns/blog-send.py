@@ -27,6 +27,14 @@ if body.splitlines()[-1].startswith('태그:'):
     tags = body.splitlines()[-1]
     body = '\n'.join(body.splitlines()[:-1]).strip()
 
+# 국제학교·티쳐포유(공부 길잡이) 블로그 글에는 말트임 링크를 넣지 않는다 (2026-11-18 사용자 지시)
+# 루틴이 실수로 넣어도 여기서 국제학교 상담 링크로 바꾸고, '말트임' 글자가 남아 있으면 텔레그램에 ⚠ 로 알린다.
+MALTUIM_WARN = ''
+if 'blog_vending' not in path and 'blog_maltuim' not in path:
+    body = re.sub(r'https?://(www\.)?seochoedu\.co\.kr[^\s)]*', 'https://internationalschool.kr/contact.html?utm_source=naver_blog', body)
+    if '말트임' in body or '말트임' in title:
+        MALTUIM_WARN = '\n⚠ 이 글에 "말트임"이라는 말이 들어 있어요. 국제학교 블로그에는 빼고 올려 주세요.'
+
 # 국제학교 외 주제는 카드뉴스가 없으니 글 내용으로 카드 이미지를 만든다(sns/blog_cards.py)
 own_cards = []
 if '[카드 1]' not in body:
