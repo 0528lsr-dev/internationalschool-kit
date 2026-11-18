@@ -105,7 +105,7 @@ if category not in cats:
 BLOG_ID = {'🥤 [자판기 블로그]': '자판기마켓 블로그', '🗣 [말트임 블로그]': '말트임 1:1 회화 블로그'}.get(which, '국제학교·티쳐포유(공부 길잡이) 블로그')
 END_LINE = f'━━━━━━━━━━━━━━\n■■ 【{BLOG_ID}】 글 끝\n━━━━━━━━━━━━━━'
 tg('sendMessage', {'chat_id': CHAT, 'text': f'━━━━━━━━━━━━━━\n▶▶ 여기부터 【{BLOG_ID}】에 올릴 글\n━━━━━━━━━━━━━━'})
-tg('sendMessage', {'chat_id': CHAT, 'text': f'{which} 📝 오늘의 네이버 블로그 글 — {title}\n✅ 올릴 블로그: 【 {BLOG_ID} 】\n📂 카테고리: 【 {category} 】{warn}\n' +
+tg('sendMessage', {'chat_id': CHAT, 'text': f'{which} 📝 오늘의 네이버 블로그 글 — {title}\n✅ 올릴 블로그: 【 {BLOG_ID} 】\n📂 카테고리: 【 {category} 】{warn}{MALTUIM_WARN}\n' +
    '① 아래 카드 이미지 저장 → ② 블로그 앱 글쓰기(위 카테고리 선택) → ③ 제목·본문 붙여넣기, [카드 N] 자리에 N번째 사진 넣기 → ④ 태그 넣고 발행'})
 tg('sendMessage', {'chat_id': CHAT, 'text': title})
 # 텔레그램 한 메시지는 4096자까지 — 문단 단위로 나눠 보낸다
