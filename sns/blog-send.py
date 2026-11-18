@@ -93,7 +93,11 @@ if category not in cats:
     guess = next((c for c, kw in reversed(list(cats.items())) if re.search(kw, title)), list(cats)[0])
     warn = f'\n⚠ 초안에 적힌 카테고리 "{category or "없음"}" 는 목록에 없어 위처럼 바꿨어요'
     category = guess
-tg('sendMessage', {'chat_id': CHAT, 'text': f'{which} 📝 오늘의 네이버 블로그 글 — {title}\n📂 카테고리: 【 {category} 】{warn}\n' +
+# 블로그 3개 글이 한 방으로 와서 섞이지 않게 시작·끝 구분선 (2026-11-18 — 말트임 글이 국제학교 블로그에 올라간 일)
+BLOG_ID = {'🥤 [자판기 블로그]': '자판기마켓 블로그', '🗣 [말트임 블로그]': '말트임 1:1 회화 블로그'}.get(which, '국제학교·티쳐포유(공부 길잡이) 블로그')
+END_LINE = f'━━━━━━━━━━━━━━\n■■ 【{BLOG_ID}】 글 끝\n━━━━━━━━━━━━━━'
+tg('sendMessage', {'chat_id': CHAT, 'text': f'━━━━━━━━━━━━━━\n▶▶ 여기부터 【{BLOG_ID}】에 올릴 글\n━━━━━━━━━━━━━━'})
+tg('sendMessage', {'chat_id': CHAT, 'text': f'{which} 📝 오늘의 네이버 블로그 글 — {title}\n✅ 올릴 블로그: 【 {BLOG_ID} 】\n📂 카테고리: 【 {category} 】{warn}\n' +
    '① 아래 카드 이미지 저장 → ② 블로그 앱 글쓰기(위 카테고리 선택) → ③ 제목·본문 붙여넣기, [카드 N] 자리에 N번째 사진 넣기 → ④ 태그 넣고 발행'})
 tg('sendMessage', {'chat_id': CHAT, 'text': title})
 # 텔레그램 한 메시지는 4096자까지 — 문단 단위로 나눠 보낸다
@@ -110,7 +114,7 @@ if own_cards:   # 직접 만든 카드 — 파일을 올려 보낸다(multipart)
     b = '----blogcards'
     media, parts = [], []
     for k, p in enumerate(own_cards, 1):
-        media.append({'type': 'photo', 'media': f'attach://c{k}', **({'caption': f'카드 1~{len(own_cards)} (순서대로)'} if k == 1 else {})})
+        media.append({'type': 'photo', 'media': f'attach://c{k}', **({'caption': f'【{BLOG_ID}】 카드 1~{len(own_cards)} (순서대로)'} if k == 1 else {})})
         parts.append(f'--{b}\r\nContent-Disposition: form-data; name="c{k}"; filename="{k}.jpg"\r\nContent-Type: image/jpeg\r\n\r\n'.encode()
                      + open(p, 'rb').read() + b'\r\n')
     head = (f'--{b}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n{CHAT}\r\n'
@@ -134,14 +138,16 @@ if own_cards:   # 직접 만든 카드 — 파일을 올려 보낸다(multipart)
                                          {'Content-Type': f'multipart/form-data; boundary={b}'})
             urllib.request.urlopen(req, timeout=120).read()
             print('말트임 랜딩 이미지', len(lp), '장 보냄')
+    tg('sendMessage', {'chat_id': CHAT, 'text': END_LINE})
     sys.exit(0)
 
 # 그날 카드뉴스 이미지 (사이트 sns/cards/날짜/) — 국제학교 주제 날
 try:
     info = json.loads(urllib.request.urlopen(f'{SITE}/sns/cards/{day}/info.json', timeout=30).read())
-    media = [{'type': 'photo', 'media': f'{SITE}/sns/cards/{day}/{k}.jpg', **({'caption': f'카드 1~{info["cards"]} (순서대로)'} if k == 1 else {})}
+    media = [{'type': 'photo', 'media': f'{SITE}/sns/cards/{day}/{k}.jpg', **({'caption': f'【{BLOG_ID}】 카드 1~{info["cards"]} (순서대로)'} if k == 1 else {})}
              for k in range(1, min(info['cards'], 10) + 1)]
     tg('sendMediaGroup', {'chat_id': CHAT, 'media': json.dumps(media, ensure_ascii=False)})
 except Exception as e:
     print('카드 이미지 안 보냄:', e)
+tg('sendMessage', {'chat_id': CHAT, 'text': END_LINE})
 print('보냄:', title)

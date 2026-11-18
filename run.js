@@ -183,7 +183,7 @@ const appJs = `/* 공용 동작 — 모바일 메뉴 · 학교 검색 · 선생�
       cities.forEach(function(c){
         var cityHit = v && norm(c.querySelector('h3 a').textContent).indexOf(v) > -1, any = false;
         [].slice.call(c.querySelectorAll('.sgrid a')).forEach(function(a){
-          var ok = !v || cityHit || norm(a.textContent).indexOf(v) > -1;
+          var ok = !v || cityHit || norm(a.textContent + ' ' + (a.getAttribute('data-e') || '')).indexOf(v) > -1;
           a.classList.toggle('is-off', !ok); if (ok) { any = true; n++; }
         });
         c.classList.toggle('is-off', !any);
@@ -492,7 +492,7 @@ function buildSite(S) {
   if (full) for (const t of D.teachers) { W(path.join(dir, `t/${t.i}.html`), B.teacherPage(S, D, t)); add('teachers', `t/${t.i}.html`); }
   /* 커리큘럼 메뉴 */
   full && W(path.join(dir, `${sp.dir}/index.html`), B.specIndexPage(S)); add('main', `${sp.dir}/index.html`);
-  for (const L of sp.pages) { full && W(path.join(dir, `${sp.dir}/${L.key}.html`), B.specPage(S, L)); add('main', `${sp.dir}/${L.key}.html`); }
+  for (const L of [...sp.pages, ...(sp.exams || [])]) { full && W(path.join(dir, `${sp.dir}/${L.key}.html`), B.specPage(S, L, D)); add('main', `${sp.dir}/${L.key}.html`); }
   W(path.join(dir, 'blog.html'), B.listPage(S, 'blog', blog)); add('main', 'blog.html');
   for (const p of blog) { W(path.join(dir, `blog/${p.slug}.html`), B.postPage(S, 'blog', p, blog)); add('main', `blog/${p.slug}.html`); }
   W(path.join(dir, 'admissions.html'), B.listPage(S, 'admissions', adm)); add('main', 'admissions.html');

@@ -21,34 +21,36 @@ const SUBJ = {
 function track(s) {
   const c = s.c || '';
   const ib = /IB/.test(c), ap = /AP/.test(c), uk = /영국식|IGCSE|GCSE|A-Level/.test(c), al = /A-Level/.test(c);
-  const mid = /IGCSE|GCSE/.test(c) ? 'igcse' : (ib && !/미국식|캐나다식/.test(c) && !uk) ? 'myp' : 'us';
-  const sen = ib && ap ? 'apib' : ib ? 'ib' : al ? 'alevel' : ap ? 'ap' : 'us';
-  return { mid, sen, ib, ap, uk };
+  /* 호주식(2026-11-17): 중등 Year 7~10 호주 교육과정, 고등 HSC·VCE. IB를 함께 하는 학교도 고등은 HSC·VCE 기준으로 쓰고 IB 수업 가능하다고 덧붙인다 */
+  const au = /호주식/.test(c);
+  const mid = au ? 'au' : /IGCSE|GCSE/.test(c) ? 'igcse' : (uk && !ib) ? 'ks3' : (ib && !/미국식|캐나다식/.test(c) && !uk) ? 'myp' : 'us';
+  const sen = au ? 'au' : ib && ap ? 'apib' : ib ? 'ib' : (al || uk) ? 'alevel' : ap ? 'ap' : 'us';
+  return { mid, sen, ib, ap, uk, au };
 }
-const SEN_NAME = { ib: 'IB 디플로마(DP)', alevel: 'A-Level', ap: 'AP', apib: 'AP·IB', us: 'Honors·심화 과목' };
-const MID_NAME = { myp: 'IB MYP', igcse: 'IGCSE', us: '미국식 미들스쿨' };
-const ASSESS = { ib: 'IA(내부평가)와 DP 최종 시험', alevel: 'A-Level 최종 시험과 예측 성적(Predicted Grade)', ap: '학기 성적(GPA)과 5월 AP 시험', apib: '학기 성적(GPA)과 AP 시험·IB 평가', us: '학기 성적(GPA)과 과제·프로젝트' };
+const SEN_NAME = { ib: 'IB 디플로마(DP)', alevel: 'A-Level', ap: 'AP', apib: 'AP·IB', us: 'Honors·심화 과목', au: 'HSC·VCE(호주 고교 졸업 과정)' };
+const MID_NAME = { myp: 'IB MYP', igcse: 'IGCSE', us: '미국식 미들스쿨', ks3: 'KS3(영국식 중등)', au: '호주 교육과정(Australian Curriculum)' };
+const ASSESS = { ib: 'IA(내부평가)와 DP 최종 시험', alevel: 'A-Level 최종 시험과 예측 성적(Predicted Grade)', ap: '학기 성적(GPA)과 5월 AP 시험', apib: '학기 성적(GPA)과 AP 시험·IB 평가', us: '학기 성적(GPA)과 과제·프로젝트', au: '학교 내신 평가(assessment task)와 HSC·VCE 최종 시험' };
 /* 학년 이름 — 영국식은 Year, 그 밖은 Grade */
-const BANDS = t => t.mid === 'igcse'
+const BANDS = t => t.mid === 'ks3' ? ['Year 7~9 (KS3)', 'Year 10~11', 'Year 12~13'] : t.mid === 'au' ? ['Year 7~8', 'Year 9~10', `Year 11~12 (HSC·VCE${t.ib ? ' 또는 IB DP' : ''})`] : t.mid === 'igcse'
   ? ['Year 7~9', 'Year 10~11 (IGCSE)', `Year 12~13 (${t.sen === 'ib' || t.sen === 'apib' ? 'IB DP' : 'A-Level'})`]
   : ['G6~G8 (미들스쿨)', 'G9~G10', `G11~G12 (${t.sen === 'ib' ? 'IB DP' : t.sen === 'apib' ? 'AP·IB' : t.sen === 'ap' ? 'AP' : '심화 과목'})`];
 
 /* 과목별 실제 과목 이름 */
 const COURSE = {
-  '수학': { mid: { myp: 'MYP Mathematics(Standard·Extended)', igcse: 'IGCSE Mathematics(Core·Extended)', us: 'Pre-Algebra·Algebra 1·Geometry' },
-            sen: { ib: 'IB Math AA·AI (SL·HL)', alevel: 'A-Level Maths·Further Maths', ap: 'Algebra 2·Pre-Calculus·AP Calculus AB/BC·AP Statistics', apib: 'Pre-Calculus 뒤 AP Calculus 또는 IB Math AA·AI', us: 'Algebra 2·Pre-Calculus·Calculus' } },
-  '영어': { mid: { myp: 'MYP Language & Literature', igcse: 'IGCSE First Language English·Literature', us: 'English Language Arts(ELA)' },
-            sen: { ib: 'IB English A (Language & Literature / Literature)', alevel: 'A-Level English Literature·Language', ap: 'AP English Language·AP English Literature', apib: 'AP English 또는 IB English A', us: 'English 9~12(Honors)' } },
-  '과학': { mid: { myp: 'MYP Sciences', igcse: 'IGCSE Combined·Co-ordinated Science', us: 'Life·Earth·Physical Science' },
-            sen: { ib: 'IB Biology·Chemistry·Physics (SL·HL)', alevel: 'A-Level Biology·Chemistry·Physics', ap: 'Biology·Chemistry·Physics(Honors·AP)', apib: 'AP 또는 IB 과학 과목', us: 'Biology·Chemistry·Physics(Honors)' } },
-  '물리': { mid: { myp: 'MYP Sciences(물리 영역)', igcse: 'IGCSE Physics', us: 'Physical Science' },
-            sen: { ib: 'IB Physics SL·HL', alevel: 'A-Level Physics', ap: 'AP Physics 1·2·C', apib: 'AP Physics 또는 IB Physics', us: 'Physics(Honors)' } },
-  '화학': { mid: { myp: 'MYP Sciences(화학 영역)', igcse: 'IGCSE Chemistry', us: 'Physical Science(화학 단원)' },
-            sen: { ib: 'IB Chemistry SL·HL', alevel: 'A-Level Chemistry', ap: 'Chemistry Honors·AP Chemistry', apib: 'AP Chemistry 또는 IB Chemistry', us: 'Chemistry(Honors)' } },
-  '생물': { mid: { myp: 'MYP Sciences(생물 영역)', igcse: 'IGCSE Biology', us: 'Life Science' },
-            sen: { ib: 'IB Biology SL·HL', alevel: 'A-Level Biology', ap: 'Biology Honors·AP Biology', apib: 'AP Biology 또는 IB Biology', us: 'Biology(Honors)' } },
-  '경제': { mid: { myp: 'MYP Individuals & Societies', igcse: 'IGCSE Economics', us: 'Social Studies' },
-            sen: { ib: 'IB Economics SL·HL', alevel: 'A-Level Economics', ap: 'AP Microeconomics·AP Macroeconomics', apib: 'AP Micro·Macro 또는 IB Economics', us: 'Economics(Honors)' } }
+  '수학': { mid: { myp: 'MYP Mathematics(Standard·Extended)', igcse: 'IGCSE Mathematics(Core·Extended)', us: 'Pre-Algebra·Algebra 1·Geometry', ks3: 'KS3 Mathematics', au: 'Year 7~10 Mathematics' },
+            sen: { ib: 'IB Math AA·AI (SL·HL)', alevel: 'A-Level Maths·Further Maths', ap: 'Algebra 2·Pre-Calculus·AP Calculus AB/BC·AP Statistics', apib: 'Pre-Calculus 뒤 AP Calculus 또는 IB Math AA·AI', us: 'Algebra 2·Pre-Calculus·Calculus', au: 'HSC Mathematics Advanced·Extension / VCE Mathematical Methods·Specialist Mathematics' } },
+  '영어': { mid: { myp: 'MYP Language & Literature', igcse: 'IGCSE First Language English·Literature', us: 'English Language Arts(ELA)', ks3: 'KS3 English', au: 'Year 7~10 English' },
+            sen: { ib: 'IB English A (Language & Literature / Literature)', alevel: 'A-Level English Literature·Language', ap: 'AP English Language·AP English Literature', apib: 'AP English 또는 IB English A', us: 'English 9~12(Honors)', au: 'HSC English Advanced·Extension / VCE English·Literature' } },
+  '과학': { mid: { myp: 'MYP Sciences', igcse: 'IGCSE Combined·Co-ordinated Science', us: 'Life·Earth·Physical Science', ks3: 'KS3 Science', au: 'Year 7~10 Science' },
+            sen: { ib: 'IB Biology·Chemistry·Physics (SL·HL)', alevel: 'A-Level Biology·Chemistry·Physics', ap: 'Biology·Chemistry·Physics(Honors·AP)', apib: 'AP 또는 IB 과학 과목', us: 'Biology·Chemistry·Physics(Honors)', au: 'HSC·VCE Biology·Chemistry·Physics' } },
+  '물리': { mid: { myp: 'MYP Sciences(물리 영역)', igcse: 'IGCSE Physics', us: 'Physical Science', ks3: 'KS3 Science(물리 영역)', au: 'Year 7~10 Science(물리 영역)' },
+            sen: { ib: 'IB Physics SL·HL', alevel: 'A-Level Physics', ap: 'AP Physics 1·2·C', apib: 'AP Physics 또는 IB Physics', us: 'Physics(Honors)', au: 'HSC Physics / VCE Physics' } },
+  '화학': { mid: { myp: 'MYP Sciences(화학 영역)', igcse: 'IGCSE Chemistry', us: 'Physical Science(화학 단원)', ks3: 'KS3 Science(화학 영역)', au: 'Year 7~10 Science(화학 영역)' },
+            sen: { ib: 'IB Chemistry SL·HL', alevel: 'A-Level Chemistry', ap: 'Chemistry Honors·AP Chemistry', apib: 'AP Chemistry 또는 IB Chemistry', us: 'Chemistry(Honors)', au: 'HSC Chemistry / VCE Chemistry' } },
+  '생물': { mid: { myp: 'MYP Sciences(생물 영역)', igcse: 'IGCSE Biology', us: 'Life Science', ks3: 'KS3 Science(생물 영역)', au: 'Year 7~10 Science(생물 영역)' },
+            sen: { ib: 'IB Biology SL·HL', alevel: 'A-Level Biology', ap: 'Biology Honors·AP Biology', apib: 'AP Biology 또는 IB Biology', us: 'Biology(Honors)', au: 'HSC Biology / VCE Biology' } },
+  '경제': { mid: { myp: 'MYP Individuals & Societies', igcse: 'IGCSE Economics', us: 'Social Studies', ks3: 'KS3 Humanities', au: 'Year 7~10 Economics and Business' },
+            sen: { ib: 'IB Economics SL·HL', alevel: 'A-Level Economics', ap: 'AP Microeconomics·AP Macroeconomics', apib: 'AP Micro·Macro 또는 IB Economics', us: 'Economics(Honors)', au: 'HSC Economics / VCE Economics' } }
 };
 const course = (sub, s, lvl) => { const t = track(s); return COURSE[sub][lvl][lvl === 'mid' ? t.mid : t.sen]; };
 
@@ -62,7 +64,7 @@ const C = {
       [b[1], '함수와 그래프, 기하 증명이 본격적으로 나옵니다. 한 번 막히면 고등 과정 전체가 흔들리는 구간이라 빈 단원을 먼저 메웁니다.'],
       [b[2], `${course('수학', s, 'sen')}. ${ASSESS[track(s).sen]}에 맞춰 학기 계획을 세웁니다.`]]; },
     exam: ['용어 — 학교 교재의 영어 용어를 한국어 개념과 짝지어 정리', '풀이 쓰기 — 답만이 아니라 과정을 영어 문장으로 남기기', '계산기 — 학교가 허용하는 계산기 기능을 시험 형식대로 연습', '오답 — 틀린 이유를 개념·계산·문제 읽기 셋 중 하나로 표시'],
-    perf: s => track(s).sen === 'ib' || track(s).sen === 'apib' ? 'IB 수학은 IA(Mathematical Exploration)가 최종 성적에 들어갑니다. 주제 고르기, 수학적 근거 세우기, 보고서 구성까지 단계마다 점검하되 글은 학생이 직접 씁니다.' : track(s).sen === 'alevel' ? 'A-Level 수학은 최종 시험 비중이 커서 Past Paper를 시간 재고 푸는 연습이 핵심입니다. 단원별 약점을 표로 정리해 시험 전 마지막 한 달을 계획합니다.' : '미국식 수학은 퀴즈·테스트·숙제가 모두 GPA에 들어갑니다. 매주 퀴즈를 놓치지 않도록 학교 진도보다 한 단원 앞에서 개념을 정리합니다.',
+    perf: s => track(s).sen === 'au' ? 'HSC·VCE 수학은 학기 중 학교 평가(assessment task)와 최종 시험이 함께 ATAR(대학 입학 순위)에 반영됩니다. 학교 과제 일정과 과거 기출(past paper)을 한 달력에 놓고 준비합니다.' : track(s).sen === 'ib' || track(s).sen === 'apib' ? 'IB 수학은 IA(Mathematical Exploration)가 최종 성적에 들어갑니다. 주제 고르기, 수학적 근거 세우기, 보고서 구성까지 단계마다 점검하되 글은 학생이 직접 씁니다.' : track(s).sen === 'alevel' ? 'A-Level 수학은 최종 시험 비중이 커서 Past Paper를 시간 재고 푸는 연습이 핵심입니다. 단원별 약점을 표로 정리해 시험 전 마지막 한 달을 계획합니다.' : '미국식 수학은 퀴즈·테스트·숙제가 모두 GPA에 들어갑니다. 매주 퀴즈를 놓치지 않도록 학교 진도보다 한 단원 앞에서 개념을 정리합니다.',
     why: '수학은 학생마다 막힌 곳이 다릅니다. 어떤 학생은 개념이 비어 있고, 어떤 학생은 개념은 알지만 영어 문제를 잘못 읽습니다. 1:1에서는 학생이 문제를 소리 내어 읽고 풀게 해서, 어느 쪽에서 틀리는지부터 가려냅니다.',
     faq: [['한국 수학 선행을 했는데 국제학교 수학이 어렵다고 합니다.', '흔한 경우입니다. 계산은 앞서 있어도 영어로 된 서술형 문제와 풀이 설명에서 점수가 깎입니다. 개념보다 "영어로 읽고 쓰는 수학"을 따로 연습해야 합니다.']]
   },
@@ -73,7 +75,7 @@ const C = {
       [b[1], '시·희곡·논설문까지 범위가 넓어집니다. 인용문을 골라 분석하는 문단(analytical paragraph)을 정해진 시간 안에 쓰는 연습을 합니다.'],
       [b[2], `${course('영어', s, 'sen')}. 작품 분석 에세이와 구술 평가를 ${ASSESS[track(s).sen]} 일정에 맞춰 준비합니다.`]]; },
     exam: ['읽기 — 작품마다 인물·주제·표현을 한 장에 정리', '인용 — 주장을 받쳐 줄 문장을 골라 짧게 설명', '구성 — 서론·본론·결론의 문장 수를 정해 두고 쓰기', '고쳐쓰기 — 첨삭받은 글을 반드시 한 번 더 쓰기'],
-    perf: s => track(s).sen === 'ib' || track(s).sen === 'apib' ? 'IB English는 IO(개인 구술)와 에세이 과제가 성적에 들어갑니다. 작품 고르기, 개요, 말할 순서를 함께 짜고 실제 시간에 맞춰 리허설합니다.' : track(s).sen === 'alevel' ? 'A-Level 영어는 Coursework(NEA)와 최종 시험이 함께 들어갑니다. 작품 비교 에세이의 구성을 먼저 잡고, 초고를 단계별로 다듬습니다.' : '미국식 영어는 에세이 과제와 독서 퀴즈, 발표가 GPA에 들어갑니다. 루브릭(채점 기준표)을 먼저 같이 읽고, 기준마다 빠진 것이 없는지 확인하며 씁니다.',
+    perf: s => track(s).sen === 'au' ? 'HSC·VCE 영어는 모든 학생이 듣는 필수 과목이라 ATAR 계산에 반드시 들어갑니다. 지정 작품 분석 에세이, 창작 글쓰기, 발표 과제를 학교 평가 일정에 맞춰 준비합니다.' : track(s).sen === 'ib' || track(s).sen === 'apib' ? 'IB English는 IO(개인 구술)와 에세이 과제가 성적에 들어갑니다. 작품 고르기, 개요, 말할 순서를 함께 짜고 실제 시간에 맞춰 리허설합니다.' : track(s).sen === 'alevel' ? 'A-Level 영어는 Coursework(NEA)와 최종 시험이 함께 들어갑니다. 작품 비교 에세이의 구성을 먼저 잡고, 초고를 단계별로 다듬습니다.' : '미국식 영어는 에세이 과제와 독서 퀴즈, 발표가 GPA에 들어갑니다. 루브릭(채점 기준표)을 먼저 같이 읽고, 기준마다 빠진 것이 없는지 확인하며 씁니다.',
     why: '영어 에세이는 혼자 많이 쓴다고 늘지 않습니다. 쓴 글을 문장 단위로 읽어 줄 사람이 필요합니다. 1:1에서는 학생 글의 논리가 어디서 끊기는지 짚고, 학생이 직접 다시 쓰게 합니다. 대신 써 주지 않습니다.',
     faq: [['원어민 선생님이 더 좋지 않나요?', '회화는 그렇습니다. 하지만 국제학교 영어 과목은 분석과 글쓰기라, 커리큘럼과 채점 기준을 아는 선생님이 더 중요합니다. 영어가 약한 학생은 한국어로 개념을 먼저 설명받는 편이 빠릅니다.']]
   },
@@ -82,7 +84,7 @@ const C = {
     grades: s => { const t = track(s), b = BANDS(t); return [
       [b[0], '한 문단 글쓰기. 주제문을 쓰고 예시를 붙이는 연습을 매주 한 편씩 합니다.'],
       [b[1], '다섯 문단 에세이와 비교·대조 글. 출처를 밝히고 인용하는 방법(MLA·APA)을 익힙니다.'],
-      [b[2], t.sen === 'ib' || t.sen === 'apib' ? 'IB EE(소논문 4,000단어)와 TOK 에세이, 대학 원서 에세이까지 긴 글이 몰리는 시기입니다. 일정을 거꾸로 짜서 준비합니다.' : t.sen === 'alevel' ? 'A-Level Coursework와 EPQ, UCAS 퍼스널 스테이트먼트까지 긴 글이 몰리는 시기입니다. 마감 순서대로 계획을 세웁니다.' : '연구 페이퍼와 Common App 에세이를 함께 준비하는 시기입니다. 학교 과제 마감과 원서 마감을 한 달력에 놓고 계획합니다.']]; },
+      [b[2], t.sen === 'au' ? 'HSC·VCE 영어 에세이와 과목별 평가 과제가 몰리는 시기입니다. 호주 대학(UAC·VTAC)과 다른 나라 대학 지원 일정까지 한 달력에 놓고 계획합니다.' : t.sen === 'ib' || t.sen === 'apib' ? 'IB EE(소논문 4,000단어)와 TOK 에세이, 대학 원서 에세이까지 긴 글이 몰리는 시기입니다. 일정을 거꾸로 짜서 준비합니다.' : t.sen === 'alevel' ? 'A-Level Coursework와 EPQ, UCAS 퍼스널 스테이트먼트까지 긴 글이 몰리는 시기입니다. 마감 순서대로 계획을 세웁니다.' : '연구 페이퍼와 Common App 에세이를 함께 준비하는 시기입니다. 학교 과제 마감과 원서 마감을 한 달력에 놓고 계획합니다.']]; },
     exam: ['주제 — 질문을 한 문장 주장으로 바꾸기', '개요 — 쓰기 전에 문단별 핵심 문장부터', '근거 — 예시·인용·자료 중 무엇으로 받칠지 정하기', '퇴고 — 소리 내어 읽고 어색한 문장 표시하기'],
     perf: () => '학교 과제 에세이는 루브릭(채점 기준표)이 곧 답안지입니다. 쓰기 전에 기준표를 같이 읽고, 기준 하나하나에 해당하는 문단이 있는지 확인합니다. 표절 검사(Turnitin 등)를 하는 학교가 많아, 첨삭은 하되 글은 학생이 직접 씁니다.',
     why: '에세이는 학생 혼자 고치기 가장 어려운 과제입니다. 내가 쓴 글의 빈틈은 내 눈에 잘 안 보이기 때문입니다. 1:1에서는 학생이 쓴 문장을 앞에 두고 "이 근거가 주장을 받쳐 주는가"를 같이 묻고, 학생이 스스로 고치게 합니다.',

@@ -5,6 +5,7 @@
 const PROFILES = {
   intl: {
     menu: '커리큘럼', dir: 'curriculum', eyebrow: 'Curriculum',
+    exams: require('./exams-intl.js'), examsHub: 'sat',
     title: '국제학교 커리큘럼별 과외 — IB·AP·IGCSE·A-Level·SAT·입학시험',
     h1: '커리큘럼을 알아야 성적이 보입니다',
     lead: '같은 국제학교 수학이라도 IB와 AP, A-Level은 배우는 순서도 평가 방식도 다릅니다. 아이 학교의 커리큘럼을 고르면 그 과정에 맞춘 준비법이 나옵니다.',
@@ -37,13 +38,13 @@ const PROFILES = {
         kw: 'IGCSE 과외, A-Level 과외, 영국식 국제학교 과외, IGCSE 수학, A-Level Maths, Further Maths, Past Paper, Predicted Grade'
       },
       {
-        key: 'sat', name: 'SAT·TOEFL', title: 'SAT·TOEFL·IELTS 과외',
+        key: 'sat', name: 'SAT·TOEFL·IELTS', title: '입시·영어 시험 과외 — SAT·ACT·TOEFL·IELTS·SSAT',
         h1: 'SAT·TOEFL·IELTS — 학교 공부와 함께 가는 시험 준비',
         lead: '진단 시험으로 영역별 약점을 먼저 찾고, 학교 시험이 없는 시기에 집중 구간을 둡니다. 지원 대학의 시험 정책은 해마다 바뀌니 대학 공식 안내로 확인합니다.',
         reasons: [['진단부터', '처음 한 번은 실전처럼 풀어 봅니다. 영역별로 약점이 뚜렷하게 갈려서, 공부할 곳이 생각보다 좁아집니다.'], ['학교 성적과 시간 나누기', 'SAT·TOEFL 때문에 GPA가 떨어지면 손해입니다. 학기 중에는 짧게 유지하고 방학에 집중하는 계획을 세웁니다.']],
-        types: [['SAT', ['Reading and Writing', 'Math', '디지털 시험 실전 연습']], ['영어 시험', ['TOEFL iBT', 'IELTS Academic', 'Duolingo English Test']], ['시기별', ['G9~G10 기초', 'G11 집중', 'G12 마지막 응시']]],
+        types: [['대학 입시', ['SAT', 'ACT', 'AP 시험']], ['영어 시험', ['TOEFL iBT', 'IELTS Academic', 'Duolingo English Test']], ['학교 입학', ['SSAT', 'ISEE', 'MAP Growth', 'UKiset']]],
         faq: [['SAT와 ACT 중 무엇을 볼까요?', '진단 시험을 둘 다 한 번씩 보고 점수가 잘 나오는 쪽을 고르는 방법이 있습니다. 대학은 대개 둘 중 하나를 받습니다. 정책은 대학마다 확인합니다.'], ['국제학교 학생도 TOEFL이 필요한가요?', '영어로 수업받은 기간이 길면 면제해 주는 대학도 있습니다. 지원 대학의 면제 조건을 먼저 확인합니다.'], ['몇 번 보는 게 좋나요?', '목표 점수와 원서 마감에 따라 다릅니다. 보통 첫 응시 뒤 약점을 보완해 한두 번 더 봅니다.']],
-        kw: 'SAT 과외, 디지털 SAT, TOEFL 과외, IELTS 과외, 듀오링고 영어시험, 국제학교 SAT, 미국 대학 입시'
+        kw: 'SAT 과외, ACT 과외, 디지털 SAT, TOEFL 과외, IELTS 과외, 아이엘츠 과외, 듀오링고 영어시험, SSAT 과외, ISEE, 국제학교 SAT, 미국 대학 입시'
       },
       {
         key: 'admission', name: '입학·편입', title: '국제학교 입학·편입 준비',

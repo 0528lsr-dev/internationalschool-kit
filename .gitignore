@@ -2,3 +2,5 @@
 출력/
 node_modules/
 indexnow.log
+out/
+sns/__pycache__/

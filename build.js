@@ -98,14 +98,14 @@ function navFor(S) {
     ['수강료', 'price', 'price.html', null],
     ['선생님', 'teachers', 'teachers.html', null],
     ['유학', 'study', 'study.html', null],
-    ['수업 이야기', 'blog', 'blog.html', null],
-    ['유학·입시정보', 'admissions', 'admissions.html', null]
+    /* 2026-11-17: '수업 이야기'·'유학·입시정보' 두 탭을 '뉴스' 하나로 합침 */
+    ['뉴스', 'blog|admissions', 'blog.html', [['blog.html', '수업 이야기'], ['admissions.html', '유학·입시정보']]]
   ];
 }
 
 function nav(S, active, up) {
   const li = navFor(S).map(([t, k, href, sub]) => {
-    const a = `<a href="${up}${href || sub[0][0]}"${k === active ? ' class="active"' : ''}>${t}</a>`;
+    const a = `<a href="${up}${href || sub[0][0]}"${k.split('|').includes(active) ? ' class="active"' : ''}>${t}</a>`;
     return sub ? `<li>${a}<div class="sub">${sub.map(([h, n]) => `<a href="${up}${h}">${n}</a>`).join('')}</div></li>` : `<li>${a}</li>`;
   }).join('\n      ');
   /* 모바일 메뉴는 app.js 가 데스크톱 목록을 복사해 만든다(페이지마다 두 벌 넣지 않아 용량 절약) */
@@ -188,12 +188,12 @@ const page = (S, o, body) => slim(head(S, o) + '\n' + (S.topbar ? `<div class="t
 
 /* ===== 목록 부품 (2026-10-19 — "학교·동네 리스트가 지저분하다" → 티처스 격자 + 와와 줄 맞춤 + 티칭코칭 지역 상자) ===== */
 /* 학교 칸 격자: 같은 크기 칸에 약칭 + 작은 꼬리말 */
-const cells = (list, hrefOf, tail, cls = '') => `<div class="sgrid${cls}">${list.map(s => `<a href="${hrefOf(s)}"><b>${esc(s.sn)}</b> <span>${esc(tail)}</span></a>`).join('')}</div>`;
+const cells = (list, hrefOf, tail, cls = '') => `<div class="sgrid${cls}">${list.map(s => `<a href="${hrefOf(s)}" data-e="${esc(s.n + ' ' + (s.e || ''))}"><b>${esc(s.sn)}</b> <span>${esc(tail)}</span></a>`).join('')}</div>`;
 /* 지역 칸 격자: "상하이 · 6개교" */
 const regionCells = (regions, hrefOf) => `<div class="rgrid">${regions.map(r => `<a href="${hrefOf(r)}"><b>${esc(r.city)}</b></a>`).join('')}</div>`;
 const bySido = (D, items) => { const m = new Map(); for (const x of items) { if (!m.has(x.sido)) m.set(x.sido, []); m.get(x.sido).push(x); } return D.SIDO_ORDER.filter(k => m.has(k)).map(k => [k, m.get(k)]); };
 /* 시도 → 시군구 줄 → 학교 칸 (학교찾기·과목 전체 페이지). pages/ 안에서 쓰는 상대 주소 기준 */
-function cityGroups(D, list, hrefOf, tail, idPrefix = '') {
+function cityGroups(D, list, hrefOf, tail, idPrefix = '', rbase = '') {
   const groups = bySido(D, list);
   const navH = `<div class="sido-nav">${groups.map(([k, ss]) => `<a href="#${idPrefix}${k}">${k}</a>`).join('')}</div>`;
   const blocks = groups.map(([k, ss]) => {
@@ -201,7 +201,7 @@ function cityGroups(D, list, hrefOf, tail, idPrefix = '') {
     for (const s of ss) { if (!cities.has(s.regionKey)) cities.set(s.regionKey, []); cities.get(s.regionKey).push(s); }
     return `<div class="sido-block" id="${idPrefix}${k}" data-block>
 <div class="sido-head"><h2>${D.FLAG[k] ? D.FLAG[k] + ' ' : ''}${k}</h2></div>
-${[...cities].map(([key, cs]) => `<div class="city" data-city><h3><a href="${regionLink(key)}">${esc(cs[0].city)}</a></h3>${cells(cs, hrefOf, tail)}</div>`).join('\n')}
+${[...cities].map(([key, cs]) => `<div class="city" data-city><h3><a href="${rbase}${regionLink(key)}">${esc(cs[0].city)}</a></h3>${cells(cs, hrefOf, tail)}</div>`).join('\n')}
 </div>`;
   }).join('\n');
   return { navH, blocks };
@@ -555,9 +555,9 @@ function hubPage(S, D, s, region) {
   const gradeBlock = `
       <h2>${esc(sn)} 학년마다 챙기는 것이 다릅니다</h2>
       <ul>
-        <li><b>${t.mid === 'igcse' ? 'Primary (Year 1~6)' : '엘리멘터리 (K~G5)'}</b> — 영어로 읽고 쓰는 힘이 모든 과목의 바탕이 되는 시기입니다. 리딩 레벨과 수학 기초 연산을 학년 수준에 맞춰 둡니다.</li>
-        <li><b>${t.mid === 'igcse' ? '중등 (Year 7~11)' : '미들스쿨 (G6~G8)'}</b> — ${MID_NAME[t.mid]} 과정입니다. 과제와 프로젝트 비중이 커지고, 수학·과학에서 영어 서술형 답안이 늘어납니다.${t.mid === 'igcse' ? ' Year 10~11에는 IGCSE 최종 시험이 있습니다.' : ''}</li>
-        <li><b>${t.mid === 'igcse' ? '고등 (Year 12~13)' : '하이스쿨 (G9~G12)'}</b> — ${SEN_NAME[t.sen]} 과정입니다. ${ib ? 'IA·EE·TOK 같은 과제와 최종 시험이 2년에 걸쳐 쌓입니다.' : t.sen === 'alevel' ? '3~4과목을 깊게 배우고, Mock 시험과 예측 성적이 대학 지원에 쓰입니다.' : '학기 성적(GPA)이 대학 지원의 중심이고, AP·SAT 같은 시험을 함께 준비합니다.'}</li>
+        <li><b>${t.mid === 'au' ? 'Primary (K~Year 6)' : (t.mid === 'igcse' || t.mid === 'ks3') ? 'Primary (Year 1~6)' : '엘리멘터리 (K~G5)'}</b> — 영어로 읽고 쓰는 힘이 모든 과목의 바탕이 되는 시기입니다. 리딩 레벨과 수학 기초 연산을 학년 수준에 맞춰 둡니다.</li>
+        <li><b>${t.mid === 'au' ? '중등 (Year 7~10)' : (t.mid === 'igcse' || t.mid === 'ks3') ? '중등 (Year 7~11)' : '미들스쿨 (G6~G8)'}</b> — ${MID_NAME[t.mid]} 과정입니다. 과제와 프로젝트 비중이 커지고, 수학·과학에서 영어 서술형 답안이 늘어납니다.${t.mid === 'igcse' ? ' Year 10~11에는 IGCSE 최종 시험이 있습니다.' : ''}</li>
+        <li><b>${t.mid === 'au' ? '고등 (Year 11~12)' : (t.mid === 'igcse' || t.mid === 'ks3') ? '고등 (Year 12~13)' : '하이스쿨 (G9~G12)'}</b> — ${t.mid === 'ks3' ? '영국식 고등 과정(A-Level·IB 등)은 진학하는 학교에 따라 정해집니다. 중등에서 영어로 읽고 쓰는 힘과 수학 기초를 단단히 해 두면 어느 쪽으로 가도 수월합니다.' : `${SEN_NAME[t.sen]} 과정입니다. ${t.sen === 'au' ? `과목을 골라 2년 동안 학교 평가와 최종 시험을 치르고, 그 점수로 ATAR(대학 입학 순위)가 정해집니다.${t.ib ? ' 이 학교는 IB 디플로마도 운영해 IB 과정 수업도 가능합니다.' : ''}` : ib ? 'IA·EE·TOK 같은 과제와 최종 시험이 2년에 걸쳐 쌓입니다.' : t.sen === 'alevel' ? '3~4과목을 깊게 배우고, Mock 시험과 예측 성적이 대학 지원에 쓰입니다.' : '학기 성적(GPA)이 대학 지원의 중심이고, AP·SAT 같은 시험을 함께 준비합니다.'}`}</li>
       </ul>
       <h2>🎒 ${esc(sn)} 입학·편입을 준비한다면</h2>
       <p>${abroad ? `${region.label}의 국제학교는 학기 중에도 결원이 생기면 편입 시험을 보는 곳이 많습니다. 부모님 발령으로 갑자기 옮기게 된 경우라면 영어 읽기·에세이와 영어로 된 수학을 먼저 점검합니다.` : `${esc(sn)}처럼 국내에 있는 국제학교·외국인학교는 학교마다 지원 자격과 시험 방식이 다릅니다. 학교 입학처 안내로 자격과 일정을 먼저 확인하고, 영어 읽기·에세이·수학·인터뷰 순서로 준비합니다.`} 자세한 준비 방법은 <a href="${s.slug}-입학준비-과외.html">${esc(sn)} 입학준비 안내</a>에 정리했습니다.</p>`;
@@ -579,7 +579,9 @@ function hubPage(S, D, s, region) {
 <section>
   <div class="wrap">
     <div class="article">
-      <p>${pick(HUB_INTRO, s.slug)[0]({ sn: esc(sn), n: esc(s.n), e: esc(s.e), c: esc(s.c) }, esc(s.area))}</p>
+      <p>${pick(HUB_INTRO, s.slug)[0]({ sn: esc(sn), n: esc(s.n), e: esc(s.e), c: esc(s.c) }, esc(s.area))}</p>${s.note ? `
+      <p class="small"><b>참고</b> — ${esc(s.note)}</p>` : ''}${s.u ? `
+      <p class="small"><b>비인가 학교 안내</b> — 이 학교는 교육청 인가를 받지 않은 비인가(대안교육) 국제학교입니다. 국내 학력 인정과 졸업 자격은 학교와 관할 교육청에 확인하세요. 수업은 학교 진도와 과제에 맞춰 똑같이 진행합니다.</p>` : ''}
       <div class="kwlist">${kw.slice(0, 7).map(k => `<span>${esc(k)}</span>`).join('')}</div>
 
       <h2>${esc(sn)} 과목별 과외</h2>
@@ -589,7 +591,7 @@ function hubPage(S, D, s, region) {
       ${gradeBlock}
 
       <h2>${esc(sn)} 성적은 이렇게 매겨집니다</h2>
-      <p>${ib ? 'IB 과정은 최종 시험만으로 점수가 나오지 않습니다. 과목마다 IA(내부평가)가 있고, EE(소논문)와 TOK가 따로 점수에 더해집니다. 그래서 시험 공부와 과제 마감을 한 달력에서 함께 관리합니다.' : t.sen === 'alevel' ? '영국식 과정은 최종 시험 비중이 큽니다. Past Paper와 Mark Scheme(채점 기준)이 공개되어 있어, 시험 형식에 익숙해지는 연습이 곧 점수입니다.' : '미국식 과정은 숙제·퀴즈·테스트·프로젝트가 모두 학기 성적(GPA)에 들어갑니다. 한 번의 시험보다 매주 쌓이는 점수를 놓치지 않는 것이 중요합니다.'}</p>
+      <p>${t.sen === 'au' ? '호주 과정은 학기 중 평가 과제(assessment task)와 HSC·VCE 최종 시험이 함께 ATAR에 반영됩니다. 한 번의 시험보다 학기마다 쌓이는 평가 점수를 놓치지 않는 것이 중요합니다.' : ib ? 'IB 과정은 최종 시험만으로 점수가 나오지 않습니다. 과목마다 IA(내부평가)가 있고, EE(소논문)와 TOK가 따로 점수에 더해집니다. 그래서 시험 공부와 과제 마감을 한 달력에서 함께 관리합니다.' : t.sen === 'alevel' ? '영국식 과정은 최종 시험 비중이 큽니다. Past Paper와 Mark Scheme(채점 기준)이 공개되어 있어, 시험 형식에 익숙해지는 연습이 곧 점수입니다.' : '미국식 과정은 숙제·퀴즈·테스트·프로젝트가 모두 학기 성적(GPA)에 들어갑니다. 한 번의 시험보다 매주 쌓이는 점수를 놓치지 않는 것이 중요합니다.'}</p>
       <ul>
         <li><b>과제 일정</b> — 과목별 마감을 한 달력에 모으고 초고 날짜를 따로 정하기</li>
         <li><b>영어 서술</b> — 수학·과학도 풀이와 설명을 영어 문장으로 쓰는 연습</li>
@@ -706,7 +708,7 @@ function regionPage(S, D, r) {
   const up = '../';
   const local = r.abroad ? [] : D.tidx.visitFor(r.schools[0]);
   const siblings = D.regions.filter(x => x.sido === r.sido && x !== r);
-  const curs = [...new Set(r.schools.map(s => { const t = track(s); return t.sen === 'apib' ? 'AP·IB' : t.sen === 'ib' ? 'IB' : t.sen === 'alevel' ? 'A-Level' : '미국식'; }))];
+  const curs = [...new Set(r.schools.map(s => { const t = track(s); return t.sen === 'apib' ? 'AP·IB' : t.sen === 'ib' ? 'IB' : t.sen === 'alevel' ? 'A-Level' : t.sen === 'au' ? 'HSC·VCE' : '미국식'; }))];
   const ld = { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['나라·지역별', 'regions.html'], [`${r.label} 국제학교 과외`, regionFile(r)]]),
     { '@type': 'Service', serviceType: `${r.label} 국제학교 1:1 과외`, areaServed: r.full, provider: { '@type': 'EducationalOrganization', name: S.brand, url: S.siteUrl + '/' } }] };
   return page(S, { path: regionFile(r), og: 'regions', up, active: 'tutor', ld,
@@ -1212,7 +1214,7 @@ function indexPage(S, D, blog) {
     ${tScroll(homeTeachers(D), up)}
 ` : `${head('Teachers', '선생님을 먼저 보고 싶다면', '학교·커리큘럼에 맞는 선생님을 상담 때 2~3명 골라 소개해 드립니다.', ['teachers.html', '선생님 페이지'])}`,
     /* 2026-11-11: 국제학교 학부모 영어 — 수업은 말트임 영어회화(seochoedu.co.kr/parents.html)에서, 여기선 소개+연결 */
-    parents: () => `${head('For parents', '학부모님 영어도 함께 준비하세요', '아이는 국제학교에서, 부모님은 학부모 상담·학교 이메일에서 영어를 만납니다. 부모님을 위한 1:1 영어회화 과정을 함께 운영합니다.', ['https://seochoedu.co.kr/parents.html', '학부모 영어 자세히 보기'])}
+    parents: () => `${head('For parents', '학부모님 영어도 함께 준비하세요', '아이는 국제학교에서, 부모님은 학부모 상담과 학교 이메일에서 영어를 만납니다.<br>그래서 부모님을 위한 1:1&nbsp;영어회화 과정도 함께 운영합니다.', ['https://seochoedu.co.kr/parents.html', '학부모 영어 자세히 보기'])}
     <div class="grid g4">${[['🧑‍🏫', '학부모 상담(PTC)', '선생님 설명을 알아듣고, 아이에 대해 궁금한 점을 영어로 정확히 묻는 연습'], ['✉️', '담임·학교 이메일', '결석·숙제·상담 요청 이메일을 정중하고 자연스럽게 쓰는 법, 실제 메일 첨삭'], ['☕', '학부모 모임·행사', '커피 모닝, 생일 파티, 플레이데이트 약속 등 외국인 학부모와의 스몰토크'], ['🎤', '입학 인터뷰·학교 투어', '부모 인터뷰 질문과 학교 투어 때 물어볼 질문을 미리 준비하고 롤플레이']]
       .map(([ic, h, p]) => `<a class="card" href="https://seochoedu.co.kr/parents.html" style="color:inherit"><span class="ico">${ic}</span><h3>${h}</h3><p>${p}</p></a>`).join('')}</div>
     <p class="center" style="margin-top:22px"><a class="btn btn-primary" href="https://seochoedu.co.kr/parents.html">학부모 영어 무료 레벨테스트 →</a></p>`,
@@ -1275,20 +1277,58 @@ function specIndexPage(S) {
 </section>
 ${formSection(S, 'f_spec', { title: '무료 상담 신청', lead: '전문 선생님이 곧 연락드립니다.' })}`);
 }
-function specPage(S, L) {
+/* 커리큘럼 페이지 학교 목록 (2026-11-17 사용자 요청: "IB 과외 누르면 관련 국제학교 싹 다, 학교 검색도") — 학교 데이터의 c(커리큘럼) 글자로 고른다 */
+const CURR_MATCH = { ib: c => /IB/.test(c), ap: c => /미국식|AP|캐나다식/.test(c), igcse: c => /GCSE|A-Level|영국식/.test(c) };
+function currSchools(S, D, L) {
+  const m = CURR_MATCH[L.key]; if (!m || !D) return '';
+  const list = D.schools.filter(s => m(s.c || ''));
+  if (!list.length) return '';
+  const kr = list.filter(s => s.t === '국내'), ab = list.filter(s => s.t === '해외');
+  const href = s => `../pages/${s.slug}-과외.html`;
+  const grp = (arr, pre, eb, h, top) => arr.length ? (G => `<div class="sec-head"${top ? ' style="margin-top:30px"' : ''}><span class="eyebrow">${eb}</span><h3 style="font-size:1.3rem">${h} (${arr.length}개교)</h3>${G.navH}</div>
+${G.blocks}`)(cityGroups(D, arr, href, '과외', pre, '../pages/')) : '';
+  return `<section id="schools" style="scroll-margin-top:90px">
+  <div class="wrap">
+    <h2>${esc(L.name)} 국제학교 — 학교별로 찾기 <span class="muted" style="font-size:.7em">${list.length}개교</span></h2>
+    <p class="lead">${esc(L.name)} 과정을 운영하는 국내·해외 국제학교입니다. 학교 이름을 누르면 그 학교에 맞춘 과목별 과외 안내로 갑니다. <b>목록에 없는 학교도 수업할 수 있습니다.</b></p>
+    <div class="toolbar"><input class="search" id="q" placeholder="학교·도시 이름 검색 (예: 채드윅, Chadwick, 싱가포르)" /><span class="small muted" id="cnt"></span></div>
+    <div id="finder">
+    ${grp(kr, 'k-', 'Korea', `국내 ${L.name} 국제학교`, false)}
+    ${grp(ab, 'o-', 'Overseas', `해외 ${L.name} 국제학교`, kr.length > 0)}
+    </div>
+  </div>
+</section>`;
+}
+/* 시험별 페이지 묶음 (2026-11-17) — 허브(sat.html)에는 시험 카드, 시험 페이지에는 시험 탭 */
+function examTabs(P, active) { return `<div class="lang-tabs">${P.exams.map(e => `<a href="${e.key}.html"${e.key === active ? ' class="active"' : ''}>${esc(e.name)}</a>`).join('')}</div>`; }
+function examCards(P) {
+  const groups = [...new Set(P.exams.map(e => e.group))];
+  return `<section id="exams" style="scroll-margin-top:90px">
+  <div class="wrap">
+    <h2>시험별로 보기</h2>
+    <p class="lead">준비하는 시험을 고르면 시험 구성과 준비 방법, 자주 묻는 질문이 나옵니다.</p>
+    ${groups.map(g => `<h3 style="margin:22px 0 10px">${esc(g)}</h3><div class="grid g3">${P.exams.filter(e => e.group === g).map(e => `<a class="card" href="${e.key}.html" style="color:inherit"><h3>${esc(e.name)}</h3><p>${esc(e.title)}</p></a>`).join('')}</div>`).join('')}
+  </div>
+</section>`;
+}
+function specPage(S, L, D) {
   const P = specOf(S), up = '../';
-  const ld = { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], [P.menu, `${P.dir}/index.html`], [L.title, `${P.dir}/${L.key}.html`]]), faqLd(L.faq)] };
+  const isExam = !!(P.exams && P.exams.includes(L)), hub = P.exams && P.pages.find(p => p.key === P.examsHub);
+  const schoolsH = isExam ? '' : currSchools(S, D, L);
+  const examsH = !isExam && hub === L ? examCards(P) : '';
+  const ld = { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], [P.menu, `${P.dir}/index.html`], ...(isExam ? [[hub.name, `${P.dir}/${hub.key}.html`]] : []), [L.title, `${P.dir}/${L.key}.html`]]), faqLd(L.faq)] };
   return page(S, { path: `${P.dir}/${L.key}.html`, up, active: 'conv', ld, title: `${L.title} — 1:1 화상 과외 | ${S.brand}`, desc: L.lead, kw: L.kw }, `
 <section class="page-hero">
   <div class="wrap">
-    <div class="crumb"><a href="${up}index.html">홈</a> › <a href="index.html">${esc(P.menu)}</a> › ${esc(L.name)}</div>
+    <div class="crumb"><a href="${up}index.html">홈</a> › <a href="index.html">${esc(P.menu)}</a> › ${isExam ? `<a href="${hub.key}.html">${esc(hub.name)}</a> › ` : ''}${esc(L.name)}</div>
     <h1>${esc(L.h1)}</h1>
     <p class="lead">${esc(L.lead)}</p>
-    ${specTabs(P, L.key)}
-    <div class="hero-cta"><a href="#apply" class="btn btn-primary">무료 상담 신청 →</a><a href="tel:${TELRAW}" class="btn btn-ghost">📞 ${TEL}</a></div>
+    ${isExam ? specTabs(P, hub.key) + examTabs(P, L.key) : specTabs(P, L.key)}
+    <div class="hero-cta"><a href="#apply" class="btn btn-primary">무료 상담 신청 →</a>${examsH ? `<a href="#exams" class="btn btn-ghost">📝 시험별로 보기</a>` : schoolsH ? `<a href="#schools" class="btn btn-ghost">🏫 ${esc(L.name)} 학교 찾기</a>` : `<a href="tel:${TELRAW}" class="btn btn-ghost">📞 ${TEL}</a>`}</div>
   </div>
 </section>
-<section>
+${schoolsH}${examsH}
+<section${schoolsH || examsH ? ' class="soft"' : ''}>
   <div class="wrap">
     <h2>${esc(L.name)} 1:1 과외를 선택하는 2가지 이유</h2>
     <div class="grid g2">${L.reasons.map(([h, p], i) => `<div class="card"><span class="ico">0${i + 1}</span><h3>${esc(h)}</h3><p>${esc(p)}</p></div>`).join('')}</div>

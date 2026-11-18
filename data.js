@@ -13,12 +13,13 @@ const EXCLUDE_TEACHERS = new Set([]);
 /* 묶음 순서 — 국내(시도) 다음 해외(나라). 목록에 없는 묶음은 맨 뒤에 가나다순 */
 const SIDO_ORDER = ['제주', '인천', '서울', '경기', '부산', '대구', '대전', '광주', '울산', '경남',
   '싱가포르', '홍콩', '중국', '일본', '대만', '베트남', '태국', '말레이시아', '필리핀', '인도네시아', '인도', 'UAE', '카타르',
-  '미국', '캐나다', '영국', '스위스'];
+  '캄보디아',
+  '미국', '캐나다', '영국', '스위스', '호주'];
 const SIDO_FULL = { 서울: '서울특별시', 경기: '경기도', 인천: '인천광역시', 부산: '부산광역시', 대구: '대구광역시', 광주: '광주광역시', 대전: '대전광역시', 제주: '제주특별자치도', 울산: '울산광역시', 경남: '경상남도' };
 /* 학교가 적은 곳은 시도·나라 하나로 묶는다(지역 페이지에 학교 1곳만 있는 일을 줄인다). 학교 페이지에는 원래 위치(area)를 보여 준다 */
 const GROUP_WHOLE = new Set(['제주', '인천', '서울', '경기', '부산', '대구', '대전', '광주', '울산', '경남', '미국', '영국', '캐나다', '스위스']);
 const FLAG = { 싱가포르: '🇸🇬', 홍콩: '🇭🇰', 중국: '🇨🇳', 일본: '🇯🇵', 대만: '🇹🇼', 베트남: '🇻🇳', 태국: '🇹🇭', 말레이시아: '🇲🇾', 필리핀: '🇵🇭', 인도네시아: '🇮🇩', 인도: '🇮🇳',
-  UAE: '🇦🇪', 카타르: '🇶🇦', 미국: '🇺🇸', 캐나다: '🇨🇦', 영국: '🇬🇧', 스위스: '🇨🇭' };
+  UAE: '🇦🇪', 카타르: '🇶🇦', 미국: '🇺🇸', 캐나다: '🇨🇦', 영국: '🇬🇧', 스위스: '🇨🇭', 캄보디아: '🇰🇭', 호주: '🇦🇺' };
 
 /* 과목 — 모든 학교 같은 10과목 (profiles.js 에서 바꿀 수 있다) */
 const SUBJECTS = ['수학', '영어', '에세이', '과학', '물리', '화학', '생물', '경제', 'SAT', '입학준비'];
@@ -44,7 +45,7 @@ function loadSchools(opts = {}) {
     const reg = splitRegion(x.r);
     const area = reg.city === reg.sido ? reg.sido : x.r;            // 화면에 보여 줄 위치 (예: 서울 서대문, 미국 매사추세츠)
     if (GROUP_WHOLE.has(reg.sido)) { reg.city = reg.sido; reg.cityKey = reg.sido; }
-    list.push({ area, n: x.n, e: x.e, c: x.c, r: x.r, t: x.t, sido: reg.sido, city: reg.city, cityKey: reg.cityKey, sn: x.sn, slug: x.sn, subjects: subjFor(x.t) });
+    list.push({ area, n: x.n, e: x.e, c: x.c, r: x.r, t: x.t, note: x.note || '', u: !!x.u, sido: reg.sido, city: reg.city, cityKey: reg.cityKey, sn: x.sn, slug: x.sn, subjects: subjFor(x.t) });
   }
   const ord = k => { const i = SIDO_ORDER.indexOf(k); return i < 0 ? 999 : i; };
   list.sort((a, b) => ord(a.sido) - ord(b.sido) || a.sido.localeCompare(b.sido, 'ko') || a.city.localeCompare(b.city, 'ko') || a.sn.localeCompare(b.sn, 'ko'));

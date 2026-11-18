@@ -72,6 +72,9 @@ def make(title, body, out_dir):
     if not site:
         u = re.search(r'👉[^\n]*?https?://([^/\s?]+)', body)
         site = u.group(1) if u else 'internationalschool.kr'
+        # 공부 길잡이 블로그 카드에는 말트임 주소를 쓰지 않는다(2026-11-18: 학부모 영어 글 카드에 seochoedu.co.kr 이 찍혀 말트임 글처럼 보임)
+        if 'seochoedu' in site:
+            site = 'internationalschool.kr'
     day = (datetime.now(timezone.utc) + timedelta(hours=9)).toordinal()
     P = VENDING_PALS[day % len(VENDING_PALS)] if pal_i == 'vending' else style.PALETTES[pal_i]
     layout = day % 2
