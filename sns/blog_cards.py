@@ -23,6 +23,16 @@ VENDING_PALS = [
     {'name': '오렌지', 'dark': (222, 104, 8), 'accent': (15, 42, 74), 'light': (255, 247, 236), 'ink': (45, 30, 15), 'mute': (115, 92, 70), 'soft': (255, 228, 195)},
     {'name': '민트', 'dark': (13, 110, 100), 'accent': (255, 176, 32), 'light': (239, 250, 247), 'ink': (16, 46, 42), 'mute': (78, 108, 102), 'soft': (190, 240, 228)},
 ]
+# 공부 길잡이 블로그 카드 색 — 카테고리별로 다르게 (2026-11-18 사용자: "맨날 보라색 괜찮아?")
+# 말트임 블로그 색(포레스트 초록)은 쓰지 않는다. 앞에서부터 맞는 것을 고른다.
+GILJABI_PALS = [
+    ('학부모 영어', 4),        # 퍼플
+    ('국제학교', 0),           # 버건디 (국제학교튜터 사이트 색)
+    ('유학', 1),               # 네이비
+    ('공지', 0),
+    ('중고등', 'blue'),        # 중고등 내신·수능 — 파랑
+]
+BLUE_PAL = {'name': '블루', 'dark': (22, 92, 160), 'accent': (255, 196, 60), 'light': (244, 248, 253), 'ink': (20, 32, 48), 'mute': (85, 100, 120), 'soft': (200, 225, 250)}
 FONT = {k: f'out/Pretendard-{k}.otf' for k in ('Bold', 'ExtraBold', 'Medium')}
 
 
@@ -65,7 +75,7 @@ def block(d, text, f, y, width, fill, x=None, gap=1.32, max_lines=None):
     return y
 
 
-def make(title, body, out_dir):
+def make(title, body, out_dir, category=''):
     m = re.search(r'안녕하세요,\s*(.+?)입니다', body)
     brand = next((b for b in BRANDS if m and b in m.group(1)), '티쳐포유')
     site, pal_i, tagline = BRANDS[brand]
@@ -76,7 +86,9 @@ def make(title, body, out_dir):
         if 'seochoedu' in site:
             site = 'internationalschool.kr'
     day = (datetime.now(timezone.utc) + timedelta(hours=9)).toordinal()
-    P = VENDING_PALS[day % len(VENDING_PALS)] if pal_i == 'vending' else style.PALETTES[pal_i]
+    if brand == '공부 길잡이' and category:
+        pal_i = next((p for k, p in GILJABI_PALS if k in category), pal_i)
+    P = VENDING_PALS[day % len(VENDING_PALS)] if pal_i == 'vending' else BLUE_PAL if pal_i == 'blue' else style.PALETTES[pal_i]
     layout = day % 2
     os.makedirs(out_dir, exist_ok=True)
 

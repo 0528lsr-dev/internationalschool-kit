@@ -40,7 +40,7 @@ own_cards = []
 if '[카드 1]' not in body:
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import blog_cards
-    body, own_cards = blog_cards.make(title, body, 'out/blog_cards')
+    body, own_cards = blog_cards.make(title, body, 'out/blog_cards', category)
 if tags:
     body += '\n\n' + tags
 
