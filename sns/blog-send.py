@@ -101,11 +101,13 @@ if category not in cats:
     guess = next((c for c, kw in reversed(list(cats.items())) if re.search(kw, title)), list(cats)[0])
     warn = f'\n⚠ 초안에 적힌 카테고리 "{category or "없음"}" 는 목록에 없어 위처럼 바꿨어요'
     category = guess
+# 제목은 25자 이내 (2026-11-18 사용자: "제목 너무 길지 않게") — 넘으면 첫 메시지에 ⚠
+TITLE_WARN = f'\n⚠ 제목이 {len(title)}자예요. 25자 안으로 줄여서 올려 주세요.' if len(title) > 25 else ''
 # 블로그 3개 글이 한 방으로 와서 섞이지 않게 시작·끝 구분선 (2026-11-18 — 말트임 글이 국제학교 블로그에 올라간 일)
 BLOG_ID = {'🥤 [자판기 블로그]': '자판기마켓 블로그', '🗣 [말트임 블로그]': '말트임 1:1 회화 블로그'}.get(which, '국제학교·티쳐포유(공부 길잡이) 블로그')
 END_LINE = f'━━━━━━━━━━━━━━\n■■ 【{BLOG_ID}】 글 끝\n━━━━━━━━━━━━━━'
 tg('sendMessage', {'chat_id': CHAT, 'text': f'━━━━━━━━━━━━━━\n▶▶ 여기부터 【{BLOG_ID}】에 올릴 글\n━━━━━━━━━━━━━━'})
-tg('sendMessage', {'chat_id': CHAT, 'text': f'{which} 📝 오늘의 네이버 블로그 글 — {title}\n✅ 올릴 블로그: 【 {BLOG_ID} 】\n📂 카테고리: 【 {category} 】{warn}{MALTUIM_WARN}\n' +
+tg('sendMessage', {'chat_id': CHAT, 'text': f'{which} 📝 오늘의 네이버 블로그 글 — {title}\n✅ 올릴 블로그: 【 {BLOG_ID} 】\n📂 카테고리: 【 {category} 】{warn}{MALTUIM_WARN}{TITLE_WARN}\n' +
    '① 아래 카드 이미지 저장 → ② 블로그 앱 글쓰기(위 카테고리 선택) → ③ 제목·본문 붙여넣기, [카드 N] 자리에 N번째 사진 넣기 → ④ 태그 넣고 발행'})
 tg('sendMessage', {'chat_id': CHAT, 'text': title})
 # 텔레그램 한 메시지는 4096자까지 — 문단 단위로 나눠 보낸다
