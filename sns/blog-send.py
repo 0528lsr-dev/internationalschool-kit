@@ -31,7 +31,7 @@ if body.splitlines()[-1].startswith('태그:'):
 # 루틴이 실수로 넣어도 여기서 국제학교 상담 링크로 바꾸고, '말트임' 글자가 남아 있으면 텔레그램에 ⚠ 로 알린다.
 MALTUIM_WARN = ''
 if 'blog_vending' not in path and 'blog_maltuim' not in path:
-    body = re.sub(r'https?://(www\.)?seochoedu\.co\.kr[^\s)]*', 'https://internationalschool.kr/contact.html?utm_source=naver_blog', body)
+    body = re.sub(r'https?://(www\.)?seochoedu\.co\.kr[^\s)]*', 'https://internationalschool.kr/parents.html?utm_source=naver_blog', body)
     if '말트임' in body or '말트임' in title:
         MALTUIM_WARN = '\n⚠ 이 글에 "말트임"이라는 말이 들어 있어요. 국제학교 블로그에는 빼고 올려 주세요.'
 
