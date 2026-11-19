@@ -502,6 +502,8 @@ function buildSite(S) {
   full && W(path.join(dir, 'winter.html'), B.winterPage(S)); add('main', 'winter.html');
   full && W(path.join(dir, 'parents.html'), B.parentsPage(S)); add('main', 'parents.html');
   for (const T of B.PARENT_TOPICS) { full && W(path.join(dir, `parents/${T.key}.html`), B.parentTopicPage(S, T)); add('main', `parents/${T.key}.html`); }   /* 국제학교 학부모 영어 자체 페이지 (2026-11-18) */   /* 겨울방학 집중 과외 (2026-11-15) */
+  full && W(path.join(dir, 'special.html'), B.specialHubPage(S)); add('main', 'special.html');   /* 국제고·국제중 (2026-11-19) */
+  for (const x of B.SPECIAL) { full && W(path.join(dir, B.spFile(x)), B.specialSchoolPage(S, x)); add('main', B.spFile(x)); }
   W(path.join(dir, 'choose.html'), B.choosePage(S)); add('main', 'choose.html');   /* AI 검색용: 고르는 법·비교 (2026-11-15) */
   W(path.join(dir, 'faq.html'), B.faqPage(S)); add('main', 'faq.html');
   /* 유학 메뉴 (2026-11-10) — 프로그램은 데이터/study-programs.js */
@@ -522,7 +524,8 @@ function buildSite(S) {
   W(path.join(dir, '.nojekyll'), '');
   W(path.join(dir, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /data/\n\nSitemap: ${S.siteUrl}/sitemap.xml\n` + BUCKETS.map(k => `Sitemap: ${S.siteUrl}/sitemap-${k}.xml\n`).join(''));
   W(path.join(dir, `${S.indexnowKey}.txt`), S.indexnowKey);
-  W(path.join(dir, 'llms.txt'), `# ${S.brand}\n\n> ${S.tagline}\n\n- 서비스: ${PROFILES[S.profile].desc}\n- 상담 전화: ${TEL}\n- 국내 국제학교: ${S.siteUrl}/pages/국내국제학교찾기.html\n- 해외 국제학교: ${S.siteUrl}/pages/해외국제학교찾기.html\n- 커리큘럼(IB·AP·IGCSE·A-Level·SAT·입학): ${S.siteUrl}/curriculum/index.html\n- 선생님: ${S.siteUrl}/teachers.html\n- 사이트맵: ${S.siteUrl}/sitemap.xml\n`);
+  W(path.join(dir, 'llms.txt'), `# ${S.brand}\n\n> ${S.tagline}\n\n- 서비스: ${PROFILES[S.profile].desc}\n- 상담 전화: ${TEL}\n- 국내 국제학교: ${S.siteUrl}/pages/국내국제학교찾기.html\n- 해외 국제학교: ${S.siteUrl}/pages/해외국제학교찾기.html\n- 커리큘럼(IB·AP·IGCSE·A-Level·SAT·입학): ${S.siteUrl}/curriculum/index.html\n- 국제고·국제중 과외: ${S.siteUrl}/special.html
+- 선생님: ${S.siteUrl}/teachers.html\n- 사이트맵: ${S.siteUrl}/sitemap.xml\n`);
   W(path.join(dir, 'CLAUDE.md'), claudeMd(S));
   W(path.join(dir, '.gitignore'), 'Thumbs.db\n.DS_Store\n*.log\n');
   W(path.join(dir, '.gitattributes'), '* text=auto eol=lf\n');   // 생성기는 LF 로 쓴다 — autocrlf 경고 5만 줄 방지

@@ -95,6 +95,7 @@ function navFor(S) {
   return [
     ['국제학교 과외', 'tutor', null, [...finders, ['regions.html', '나라·지역별'], [`pages/${firstSub}과외-전체.html`, '과목별 과외']]],
     [sp.menu, 'conv', `${sp.dir}/index.html`, sp.pages.map(p => [`${sp.dir}/${p.key}.html`, p.name])],
+    ['국제고·국제중', 'special', 'special.html', [['special.html', '국제고·국제중 전체'], ...require('./데이터/special-schools').map(x => [`special/${x.name}-과외.html`, x.name])]],   /* 2026-11-19 국내 국제고·국제중 */
     ['수강료', 'price', 'price.html', null],
     ['선생님', 'teachers', 'teachers.html', null],
     ['유학', 'study', 'study.html', null],
@@ -158,6 +159,7 @@ function foot(S, up) {
         <li><a href="${up}faq.html">자주 묻는 질문</a></li>
         <li><a href="${up}winter.html">겨울방학 집중 과외</a></li>
         <li><a href="${up}study.html">유학 프로그램</a></li>
+        <li><a href="${up}special.html">국제고·국제중 과외</a></li>
         <li><a href="${up}parents.html">국제학교 학부모 영어</a></li>
         <li><a href="${up}blog.html">수업 이야기</a></li>
         <li><a href="${up}admissions.html">유학·입시정보</a></li>
@@ -470,6 +472,121 @@ function parentsPage(S) {
 </section>
 ${formSection(S, 'f_parents', { title: '학부모 영어 상담 신청', lead: '과목에서 "학부모 영어(부모님 수업)"를 골라 주세요. 20분 무료 테스트 수업으로 시작합니다.' })}`);
 }
+/* ===== 국내 국제고·국제중 (2026-11-19) — 외국인학교·국제학교와 다른 '한국 학교'(특목고·특성화중).
+   데이터는 데이터/special-schools.js. 학교 개수 숫자·경쟁률·합격 숫자는 화면에 쓰지 않는다. */
+const SPECIAL = require('./데이터/special-schools');
+const spFile = s => `special/${s.name}-과외.html`;
+const SP_KIND = { '고': ['국제고', '특목고', '고등학교'], '중': ['국제중', '특성화중학교', '중학교'] };
+const SP_HELP = {
+  '고': [['📚', '내신 시험 대비', '학교 진도와 기출 유형에 맞춰 시험 범위를 정리하고, 서술형 답안을 쓰는 연습까지 합니다.'], ['🗣', '영어 수행평가', '영어 에세이, 발표, 토론처럼 국제고에서 많이 보는 수행평가를 미리 써 보고 고칩니다.'], ['🌐', 'AP·국제 계열 과목', 'AP 과목과 국제정치·국제경제 같은 전문 과목을 영어 원서와 우리말 개념으로 같이 잡습니다.'], ['🎓', '진학 준비', '국내 대학 학생부 탐구 활동부터 해외 대학(SAT·AP·에세이)까지 진로에 맞춰 준비합니다.']],
+  '중': [['🧭', '입학 전 준비', '영어로 수업을 듣고 과제를 내는 생활에 미리 익숙해지도록 읽기·쓰기·듣기를 준비합니다.'], ['➗', '영어로 하는 수학·과학', '개념은 알아도 영어 용어와 서술형 풀이에서 막히는 부분을 1:1로 잡아 줍니다.'], ['✍️', '에세이·발표', '영어 에세이 구조, 프레젠테이션, 토론 표현을 학교 과제에 맞춰 연습합니다.'], ['🏫', '국제고·특목고 진학', '중학교 내신 관리와 자기주도학습 전형 준비를 학년에 맞춰 계획합니다.']]
+};
+const SP_FAQ = [
+  ['국제고·국제중은 국제학교와 무엇이 다른가요?', '국제고는 한국의 특수목적고등학교, 국제중은 특성화중학교입니다. 한국 교육과정을 따르고 한국 학력이 그대로 인정되며, 영어 수업과 국제 계열 과목 비중이 큰 것이 특징입니다. 외국인학교·국제학교(제주·송도 등)와는 입학 자격과 교육과정이 다릅니다.'],
+  ['국제고 내신은 왜 어렵다고 하나요?', '비슷한 수준의 학생이 모여 있고, 영어로 된 자료와 서술형·수행평가 비중이 커서 시험 공부만으로는 점수를 지키기 어렵습니다. 과목별로 학교 진도와 평가 방식에 맞춘 준비가 필요합니다.'],
+  ['학교 수업 자료에 맞춰 수업할 수 있나요?', '네. 학교 프린트, 교과서, 수행평가 안내문을 화면에 띄워 놓고 그대로 수업합니다. 시험 범위가 나오면 범위에 맞춰 계획을 다시 짭니다.'],
+  ['기숙사에 있는데도 수업할 수 있나요?', '네. 모든 수업은 실시간 1:1 화상 수업이라 주말이나 귀가하는 날에 맞춰 시간을 정할 수 있습니다.'],
+  ['어떻게 시작하나요?', '상담을 남기시면 학교·학년·과목을 확인하고 20분 무료 테스트 수업을 잡아 드립니다. 수업 횟수와 수강료는 상담 때 안내합니다.']
+];
+function spCard(s, up) {
+  return `<a class="card" href="${up}${spFile(s)}" style="color:inherit"><span class="ico">${s.kind === '고' ? '🏫' : '🎒'}</span><h3>${esc(s.name)} 과외</h3><p class="small muted" style="margin:0 0 6px">${esc([s.area, s.type, SP_KIND[s.kind][1]].filter(Boolean).join(' · '))}</p><p>${esc(s.focus.slice(0, 3).join(' · '))}</p><p class="small" style="margin-top:10px;color:var(--primary);font-weight:700">자세히 보기 →</p></a>`;
+}
+function specialHubPage(S) {
+  const up = '';
+  const grp = k => SPECIAL.filter(s => s.kind === k);
+  return page(S, { path: 'special.html', up, active: 'special', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['국제고·국제중 과외', 'special.html']]), faqLd(SP_FAQ)] },
+    title: `국제고·국제중 과외 — 내신·영어 수행평가·AP 1:1 화상 | ${S.brand}`,
+    desc: `서울국제고·청심국제고·고양국제고·대원국제중·영훈국제중 등 국내 국제고·국제중 학생을 위한 1:1 화상 과외. 학교 진도에 맞춘 내신, 영어 에세이·발표 수행평가, AP 과목, 입학 준비. 20분 무료 테스트 수업, 상담 ${TEL}.`,
+    kw: '국제고 과외, 국제중 과외, 국제고 내신, 서울국제고 과외, 청심국제고 과외, 대원국제중 과외, 영훈국제중 과외, 국제중 입학 준비, 국제고 AP' }, `
+<section class="page-hero">
+  <div class="wrap">
+    <div class="crumb"><a href="index.html">홈</a> › 국제고·국제중 과외</div>
+    <span class="eyebrow">Global High · Middle School</span>
+    <h1>국제고·국제중 과외<br><em>학교 진도 그대로, 1:1 화상으로</em></h1>
+    <p class="lead">국제고·국제중은 한국 교육과정을 따르면서도 영어 수업, 에세이·발표 수행평가, AP·국제 계열 과목 비중이 큰 학교입니다. 학교 자료에 맞춰 내신과 수행평가를 함께 준비합니다.</p>
+    <div class="hero-cta" style="margin-top:18px"><a href="#apply" class="btn btn-primary">20분 무료 테스트 수업 신청</a><a href="tel:${TELRAW}" class="btn btn-ghost">📞 ${TEL}</a></div>
+  </div>
+</section>
+${[['고', 'Global High School', '국제고 과외', '국제 계열 특수목적고등학교'], ['중', 'Global Middle School', '국제중 과외', '국제 계열 특성화중학교']].map(([k, eb, h, p], i) => `<section${i ? ' class="soft"' : ''}>
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">${eb}</span><h2>${h}</h2><p class="muted">${p} — 학교를 고르면 그 학교에 맞춘 수업 안내가 나옵니다.</p></div>
+    <div class="grid g4">${grp(k).map(s => spCard(s, up)).join('')}</div>
+  </div>
+</section>`).join('\n')}
+<section>
+  <div class="wrap">
+    <div class="article" style="max-width:860px;margin:0 auto">
+      <h2>국제고·국제중과 국제학교, 무엇이 다를까요?</h2>
+      <ul>
+        <li><b>국제고</b> — 한국의 특수목적고등학교입니다. 한국 교육과정과 내신 평가를 따르고, 국제 계열 전문 과목과 영어 수업 비중이 큽니다. 학교에 따라 AP나 IB 과목도 배웁니다.</li>
+        <li><b>국제중</b> — 한국의 특성화중학교입니다. 한국 학력이 인정되며 영어로 진행하는 수업이 많습니다.</li>
+        <li><b>외국인학교·국제학교</b> — 제주·송도 등의 국제학교는 해외 교육과정(IB·AP·IGCSE 등)을 따르고 입학 자격도 다릅니다. <a href="pages/국내국제학교찾기.html">국내 국제학교 찾기</a>에서 볼 수 있습니다.</li>
+      </ul>
+      <p>입학 방식과 지원 자격은 해마다 바뀔 수 있으니 반드시 그해 학교 모집 요강을 확인하세요.</p>
+    </div>
+  </div>
+</section>
+<section class="soft">
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">FAQ</span><h2>국제고·국제중 과외 자주 묻는 질문</h2></div>
+    <div class="faq-list" style="max-width:820px;margin:0 auto">${SP_FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>
+  </div>
+</section>
+${formSection(S, 'f_special', { title: '국제고·국제중 과외 상담 신청', lead: '학교와 학년, 필요한 과목을 남겨 주세요. 20분 무료 테스트 수업으로 시작합니다.' })}`);
+}
+function specialSchoolPage(S, s) {
+  const up = '../';
+  const [kn, kl] = SP_KIND[s.kind];
+  const same = SPECIAL.filter(x => x.kind === s.kind && x !== s);
+  const faq = [
+    [`${s.name} 학생도 화상으로 수업할 수 있나요?`, `네. 모든 수업은 실시간 1:1 화상 수업입니다. ${s.area}에 있지 않아도, 기숙사에 있어도 시간만 맞추면 됩니다.`],
+    [`${s.name} 학교 자료로 수업하나요?`, '네. 학교 프린트, 교과서, 수행평가 안내문, 시험 범위를 받아서 그대로 수업합니다.'],
+    s.kind === '중' ? [`${s.name} 입학 전에 무엇을 준비하면 좋을까요?`, '영어로 수업을 듣고 과제를 내는 생활에 미리 익숙해지는 것이 가장 중요합니다. 영어 읽기·에세이와 영어 수학 용어를 먼저 준비하면 입학 후 적응이 빠릅니다. 지원 자격과 선발 방식은 그해 모집 요강을 꼭 확인하세요.']
+      : [`${s.name} 내신은 어떻게 준비하나요?`, '과목마다 수업 자료와 평가 방식이 달라서, 학교 진도에 맞춰 개념 정리 → 서술형 연습 → 수행평가 준비 순서로 갑니다. 영어로 된 자료는 우리말 개념과 함께 정리합니다.'],
+    ['수강료와 수업 횟수는 어떻게 되나요?', '20분 무료 테스트 수업 뒤 학년과 목표에 맞춰 안내해 드립니다.']
+  ];
+  return page(S, { path: spFile(s), up, active: 'special', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['국제고·국제중 과외', 'special.html'], [`${s.name} 과외`, spFile(s)]]), faqLd(faq)] },
+    title: `${s.name} 과외 — ${s.focus.slice(0, 2).join('·')} 1:1 화상 | ${S.brand}`,
+    desc: `${s.full}(${s.area}) 학생을 위한 1:1 화상 과외. ${s.focus.join(', ')}을 학교 진도에 맞춰 준비합니다. 20분 무료 테스트 수업, 상담 ${TEL}.`,
+    kw: `${s.name} 과외, ${s.full} 과외, ${s.name} 내신, ${s.name} 영어, ${s.name} 수학, ${kn} 과외, ${s.focus.slice(0, 2).map(f => `${s.name} ${f}`).join(', ')}` }, `
+<section class="page-hero">
+  <div class="wrap">
+    <div class="crumb"><a href="${up}index.html">홈</a> › <a href="${up}special.html">국제고·국제중 과외</a> › ${esc(s.name)}</div>
+    <span class="eyebrow">${esc([s.area, s.type, kl].filter(Boolean).join(' · '))}</span>
+    <h1>${esc(s.name)} 과외<br><em>학교 진도 그대로, 1:1 화상으로</em></h1>
+    <p class="lead">${esc(s.facts.join(' '))} ${esc(s.name)} 수업 자료와 평가 방식에 맞춰 준비합니다.</p>
+    <div class="hero-cta" style="margin-top:18px"><a href="#apply" class="btn btn-primary">20분 무료 테스트 수업 신청</a><a href="tel:${TELRAW}" class="btn btn-ghost">📞 ${TEL}</a></div>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">Focus</span><h2>${esc(s.name)} 학생이 많이 찾는 수업</h2></div>
+    <div class="chips" style="justify-content:center;margin-bottom:22px">${s.focus.map(f => `<span class="chip">${esc(f)}</span>`).join('')}</div>
+    <div class="grid g4">${SP_HELP[s.kind].map(([i, h, p]) => `<div class="card"><span class="ico">${i}</span><h3>${h}</h3><p>${p}</p></div>`).join('')}</div>
+  </div>
+</section>
+<section class="soft">
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">How</span><h2>수업은 이렇게 진행합니다</h2></div>
+    <div class="steps" style="max-width:820px;margin:0 auto">${[['상담 신청', '학년·과목·지금 고민을 남겨 주세요'], ['20분 무료 테스트 수업', '실제 수업처럼 풀어 보며 수준을 확인합니다'], ['학교 맞춤 계획', `${s.name} 진도와 시험·수행평가 일정에 맞춥니다`], ['1:1 화상 수업', '학교 자료를 화면에 띄워 함께 풉니다']].map(([b, t]) => `<div><b>${b}</b><span>${esc(t)}</span></div>`).join('')}</div>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">FAQ</span><h2>${esc(s.name)} 과외 자주 묻는 질문</h2></div>
+    <div class="faq-list" style="max-width:820px;margin:0 auto">${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>
+    <p class="center muted small" style="margin-top:18px">학교 정보는 공개된 자료를 바탕으로 정리했습니다. 지원 자격·모집 방식·개설 과목은 해마다 바뀔 수 있으니 학교 공지를 함께 확인해 주세요.</p>
+  </div>
+</section>
+<section class="soft">
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">More</span><h2>다른 ${kn} 과외</h2></div>
+    <div class="chips" style="justify-content:center">${same.map(x => `<a class="chip" href="${up}${spFile(x)}">${esc(x.name)}</a>`).join('')}<a class="chip" href="${up}special.html">전체 보기</a></div>
+  </div>
+</section>
+${formSection(S, 'f_special', { title: `${s.name} 과외 상담 신청`, lead: '학교와 학년, 필요한 과목을 남겨 주세요. 20분 무료 테스트 수업으로 시작합니다.' })}`);
+}
+
 /* ===== AI 검색(ChatGPT·Copilot)용 페이지 (2026-11-15) — "국제학교 과외 추천" 같은 질문에 인용되도록
    비교·고르는 법(choose.html)과 자주 묻는 질문 모음(faq.html). 다른 회사 이름·지어낸 숫자·후기 넣지 않는다. */
 
@@ -1444,5 +1561,5 @@ ${schoolsH}${examsH}
 ${formSection(S, 'f_spec', { title: `${L.name} 무료 상담 신청`, lead: '전문 선생님이 곧 연락드립니다.' })}`);
 }
 
-module.exports = { parentsPage, parentTopicPage, PARENT_TOPICS, winterPage, choosePage, faqPage, studyPage, studyProgramPage, PROGRAMS, hubPage, subjectPage, regionPage, schoolFinderPage, subjectIndexPage, regionsIndexPage, teachersPage, teacherPage, specIndexPage, specPage, FINDER, listPage, postPage, contactPage, pricePage, indexPage, notFoundPage,
+module.exports = { specialHubPage, specialSchoolPage, SPECIAL, spFile, parentsPage, parentTopicPage, PARENT_TOPICS, winterPage, choosePage, faqPage, studyPage, studyProgramPage, PROGRAMS, hubPage, subjectPage, regionPage, schoolFinderPage, subjectIndexPage, regionsIndexPage, teachersPage, teacherPage, specIndexPage, specPage, FINDER, listPage, postPage, contactPage, pricePage, indexPage, notFoundPage,
   hubFile, subFile, regionFile, subjIndexFile, encPath, TODAY, BLOG, ADMISSIONS };
