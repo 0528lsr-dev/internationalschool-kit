@@ -92,16 +92,13 @@ function navFor(S) {
   const sp = specOf(S);
   const finders = LV_KEYS.map(k => [FINDER[k][1], LEVEL[k] + ' 찾기']);
   const firstSub = (S.subjectsAll || ['수학'])[0];
+  /* 2026-11-19 사용자 요청 "카테고리 정리": 8개 → 5개로 묶음(+오른쪽 무료 테스트 버튼). 뉴스 탭은 유학·입시 안으로. */
   return [
-    ['국제학교 과외', 'tutor', null, [...finders, ['regions.html', '나라·지역별'], [`pages/${firstSub}과외-전체.html`, '과목별 과외']]],
+    ['과외 찾기', 'tutor|special|winter', null, [...finders, ['regions.html', '나라·지역별'], [`pages/${firstSub}과외-전체.html`, '과목별 과외'], ['special.html', '국제고·국제중'], ['winter.html', '겨울방학 집중 과외']]],
     [sp.menu, 'conv', `${sp.dir}/index.html`, sp.pages.map(p => [`${sp.dir}/${p.key}.html`, p.name])],
-    ['국제고·국제중', 'special', 'special.html', [['special.html', '국제고·국제중 전체'], ...require('./데이터/special-schools').map(x => [`special/${x.name}-과외.html`, x.name])]],   /* 2026-11-19 국내 국제고·국제중 */
-    ['수강료', 'price', 'price.html', null],
-    ['선생님', 'teachers', 'teachers.html', null],
-    ['유학', 'study', 'study.html', null],
-    ['학부모 영어', 'parents', 'parents.html', [['parents.html', '학부모 영어 소개'], ...require('./parents-intl.js').map(t => [`parents/${t.key}.html`, t.name])]],   /* 2026-11-18 사용자 요청: 학부모 탭 따로 */
-    /* 2026-11-17: '수업 이야기'·'유학·입시정보' 두 탭을 '뉴스' 하나로 합침 */
-    ['뉴스', 'blog|admissions', 'blog.html', [['blog.html', '수업 이야기'], ['admissions.html', '유학·입시정보']]]
+    ['유학·입시', 'study|blog|admissions', 'study.html', [['study.html', '유학 프로그램'], ['admissions.html', '유학·입시정보'], ['blog.html', '수업 이야기']]],
+    ['학부모 영어', 'parents', 'parents.html', [['parents.html', '학부모 영어 소개'], ...require('./parents-intl.js').map(t => [`parents/${t.key}.html`, t.name])]],
+    ['수업 안내', 'price|teachers|choose|faq', 'price.html', [['price.html', '수강료'], ['teachers.html', '선생님'], ['choose.html', '과외 고르는 법'], ['faq.html', '자주 묻는 질문']]]
   ];
 }
 
@@ -118,7 +115,7 @@ function nav(S, active, up) {
       ${li}
     </ul>
     <div class="nav-cta">
-      <a href="${up}contact.html" class="btn btn-primary btn-sm">상담신청</a>
+      <a href="${up}contact.html#apply" class="btn btn-primary btn-sm" data-quick>무료 테스트</a>
       <button class="menu-btn" type="button" aria-label="메뉴" data-menu>☰</button>
     </div>
   </div>
@@ -354,7 +351,7 @@ function winterPage(S) {
     ['해외에 살거나 방학에 한국에 들어와 있어도 되나요?', '네. 모든 수업은 실시간 1:1 화상 수업이라 어디에 있든 같은 선생님과 이어서 수업할 수 있습니다. 시차에 맞춰 시간을 정합니다.']
   ];
   const plan = [['12월 초', '상담 신청 · 20분 무료 테스트 수업'], ['12월 중순', '성적표 · 과제를 보고 방학 계획 세우기'], ['방학 시작', '주 2회~집중 수업 시작'], ['개학 전', '배운 것 점검 · 개학 후 계획 안내']];
-  return page(S, { path: 'winter.html', up: '', active: '', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['겨울방학 집중 과외', 'winter.html']]), faqLd(faq)] },
+  return page(S, { path: 'winter.html', up: '', active: 'winter', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['겨울방학 집중 과외', 'winter.html']]), faqLd(faq)] },
     title: `국제학교 겨울방학 과외 — 다음 학기 선행 · 에세이 · 입학시험 · IB·AP 집중 | ${S.brand}`,
     desc: `국제학교 학생 겨울방학 집중 1:1 화상 과외. 2학기 수학·과학 미리 보기, 영어 에세이, 입학·편입 시험, IB·AP·SAT 대비. 국내·해외 어디서든, 20분 무료 테스트 수업부터. 상담 ${TEL}.` }, `
 <section class="page-hero">
@@ -645,7 +642,7 @@ function choosePage(S) {
 <h2>자주 묻는 질문</h2>
 <div class="faq-list">${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>
 <p style="margin-top:22px">더 궁금한 점은 <a href="faq.html">자주 묻는 질문 모음</a>에서 확인하시거나 상담 전화 ${TEL}로 문의해 주세요.</p>`;
-  return page(S, { path: 'choose.html', up: '', active: '', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['국제학교 과외 고르는 법', 'choose.html']]),
+  return page(S, { path: 'choose.html', up: '', active: 'choose', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['국제학교 과외 고르는 법', 'choose.html']]),
       { '@type': 'Article', headline: '국제학교 과외 추천 — 고르는 기준 7가지와 과외 방식 비교', description: '국제학교 과외를 고를 때 확인할 7가지 기준, 일반 과외·학원·1:1 화상 과외 비교, IB·AP·IGCSE 커리큘럼별 체크포인트.', datePublished: date, dateModified: date, author: { '@type': 'Organization', name: S.brand }, publisher: { '@type': 'Organization', name: S.brand }, mainEntityOfPage: abs(S, 'choose.html') },
       faqLd(faq)] },
     title: `국제학교 과외 추천 — 고르는 기준 7가지와 과외 방식 비교 | ${S.brand}`,
@@ -687,7 +684,7 @@ function faqPage(S) {
     ]]
   ];
   const all = groups.flatMap(g => g[1]);
-  return page(S, { path: 'faq.html', up: '', active: '', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['자주 묻는 질문', 'faq.html']]), faqLd(all)] },
+  return page(S, { path: 'faq.html', up: '', active: 'faq', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['자주 묻는 질문', 'faq.html']]), faqLd(all)] },
     title: `국제학교 과외 자주 묻는 질문 — 수업 방식·선생님·수강료·커리큘럼 | ${S.brand}`,
     desc: `국제학교튜터 자주 묻는 질문. 1:1 화상 수업 방식, 선생님, 수강료(주 2회 60분 월 432,000원), 20분 무료 테스트 수업, IB·AP·IGCSE 과목, 입학 시험 준비.` }, `
 <section class="page-hero">
