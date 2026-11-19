@@ -472,6 +472,7 @@ ${formSection(S, 'f_parents', { title: '학부모 영어 상담 신청', lead: '
 /* ===== 국내 국제고·국제중 (2026-11-19) — 외국인학교·국제학교와 다른 '한국 학교'(특목고·특성화중).
    데이터는 데이터/special-schools.js. 학교 개수 숫자·경쟁률·합격 숫자는 화면에 쓰지 않는다. */
 const SPECIAL = require('./데이터/special-schools');
+const NEIS_INTL = require('./데이터/neis-intl');   /* 국내 국제학교 나이스 기본 정보 (2026-11-19) */
 const spFile = s => `special/${s.name}-과외.html`;
 const SP_KIND = { '고': ['국제고', '특목고', '고등학교'], '중': ['국제중', '특성화중학교', '중학교'] };
 const SP_HELP = {
@@ -862,7 +863,18 @@ function hubPage(S, D, s, region) {
     <h1>${esc(sn)} 과외 — ${esc(s.n)} 1:1 맞춤 수업</h1>
     <p class="lead">${esc(s.e)} · ${esc(s.area)} · ${esc(s.c)} · ${MODE(s)}</p>
   </div>
-</section>
+</section>${(() => { const X = NEIS_INTL[s.sn]; if (!X) return '';   /* 국내 국제학교 나이스 기본 정보 (2026-11-19) */
+  const rows = [['정식 이름', X.full], ['구분', [X.fond, X.kind].filter(Boolean).join(' · ')], ['주소', X.addr], ['대표 전화', X.tel], ['홈페이지', X.home]].filter(r => r[1]);
+  return `
+<section style="padding-bottom:0">
+  <div class="wrap">
+    <div class="card" style="max-width:860px">
+      <h2 style="font-size:1.15rem;margin:0 0 10px">${esc(sn)} 학교 기본 정보</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:.93rem">${rows.map(([k, v]) => `<tr><th style="text-align:left;width:96px;padding:8px 10px 8px 0;border-bottom:1px solid var(--line);color:var(--ink-soft);font-weight:600;white-space:nowrap;vertical-align:top">${k}</th><td style="padding:8px 0;border-bottom:1px solid var(--line);word-break:break-all">${k === '홈페이지' ? `<a href="${esc(v)}" target="_blank" rel="noopener nofollow">${esc(v)}</a>` : esc(v)}</td></tr>`).join('')}</table>
+      <p class="small muted" style="margin:10px 0 0">자료: 나이스 교육정보 개방 포털(공공데이터). 외국인학교·국제학교는 급식·시간표를 나이스에 올리지 않아 학교 홈페이지에서 확인하셔야 합니다.</p>
+    </div>
+  </div>
+</section>`; })()}
 <section>
   <div class="wrap">
     <div class="article">
