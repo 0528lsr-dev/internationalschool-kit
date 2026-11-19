@@ -86,7 +86,7 @@ def make(title, body, out_dir, category=''):
         if 'seochoedu' in site:
             site = 'internationalschool.kr'
     # 카드에 크게 넣을 혜택 문구 — 사이트별로 사실에 맞게 (국제학교 20분·티쳐포유 30분 테스트 수업, 자판기는 상담·견적)
-    OFFER = ('무료 상담', '설치 장소에 맞는 기종 추천') if pal_i == 'vending' else         ('무료 테스트수업', '20분 테스트 수업으로 지금 실력 확인') if 'internationalschool' in site else         ('무료 테스트수업', '첫 테스트 수업 30분 무료') if 'teacher4u' in site else         ('무료 레벨테스트', '지금 실력부터 부담 없이 확인')
+    OFFER = ('무료 상담', '설치 장소에 맞는 기종 추천') if pal_i == 'vending' else         ('무료 테스트수업', '20분 테스트 수업으로 지금 실력 확인') if 'internationalschool' in site else         ('무료 테스트수업', '첫 테스트 수업 30분 무료') if 'teacher4u' in site else         ('무료 테스트수업', '지금 실력부터 부담 없이 확인')
     day = (datetime.now(timezone.utc) + timedelta(hours=9)).toordinal()
     if brand == '공부 길잡이' and category:
         pal_i = next((p for k, p in GILJABI_PALS if k in category), pal_i)
