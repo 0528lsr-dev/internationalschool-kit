@@ -531,6 +531,94 @@ ${[['고', 'Global High School', '국제고 과외', '국제 계열 특수목적
 </section>
 ${formSection(S, 'f_special', { title: '국제고·국제중 과외 상담 신청', lead: '학교와 학년, 필요한 과목을 남겨 주세요. 20분 무료 테스트 수업으로 시작합니다.' })}`);
 }
+/* 나이스 학교 정보 (2026-11-19 사용자 요청: 학년별 개설과목·급식·일정·시간표) — 사이트 저장소 data/neis/<name>.json
+   (매일 .github/workflows/neis.yml 이 새로 받음). 기본 정보·개설 과목은 만들 때 HTML 로 넣고(검색용),
+   급식·학사일정·시간표는 페이지가 열릴 때 JSON 을 읽어 그린다(매일 바뀌므로). */
+function neisData(s) {
+  try { return JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '출력', 'internationalschool', 'data', 'neis', s.name + '.json'), 'utf8')); } catch (e) { return null; }
+}
+const NEIS_CSS = `<style>
+.nx-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}.nx-tabs button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 14px;font:inherit;font-weight:600;cursor:pointer;font-size:.9rem}.nx-tabs button.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.nx-info{width:100%;border-collapse:collapse;font-size:.95rem}.nx-info th,.nx-info td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.nx-info th{width:96px;color:var(--ink-soft);font-weight:600;white-space:nowrap}.nx-info td{word-break:break-all}
+.nx-meals{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}.nx-meal{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}.nx-meal h4{margin:0 0 6px;font-size:.95rem}.nx-meal b{display:block;font-size:.8rem;color:var(--primary);margin:8px 0 2px}.nx-meal p{margin:0;font-size:.88rem;line-height:1.55;color:var(--ink-soft)}.nx-meal.today{border:2px solid var(--primary)}
+.nx-sch{list-style:none;padding:0;margin:0}.nx-sch li{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)}.nx-sch time{flex:none;width:126px;font-weight:700;font-size:.9rem;color:var(--primary)}
+.nx-tt-wrap{overflow-x:auto}.nx-tt{border-collapse:collapse;width:100%;min-width:520px;font-size:.86rem;background:var(--surface);table-layout:fixed}.nx-tt tr>*:first-child{width:52px}.nx-tt th,.nx-tt td{border:1px solid var(--line);padding:8px 6px;text-align:center}.nx-tt th{background:var(--bg,transparent)}
+[data-nx-g][hidden]{display:none!important}
+.nx-src{font-size:.8rem;color:var(--ink-soft);margin-top:12px}
+.nx-sel{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}.nx-sel select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:var(--surface);color:var(--ink)}
+</style>`;
+function neisSections(s, N) {
+  if (!N) return '';
+  const I = N.info || {};
+  const ymd = v => v && v.length === 8 ? `${v.slice(0, 4)}.${+v.slice(4, 6)}.${+v.slice(6)}` : '';
+  const rows = [['정식 이름', I.full], ['영문 이름', I.eng], ['구분', [I.fond, I.kind, I.track, I.coedu].filter(Boolean).join(' · ')], ['주소', I.addr], ['대표 전화', I.tel], ['홈페이지', I.home], ['설립일', ymd(I.founded)]].filter(r => r[1]);
+  const subs = Object.entries(N.subjects || {});
+  const src = `<p class="nx-src">자료: 나이스 교육정보 개방 포털(공공데이터) · <span data-nx-upd>${esc(N.updated || '')}</span> 기준 · 학교 사정으로 바뀔 수 있으니 정확한 내용은 학교 공지를 확인하세요.</p>`;
+  return `${NEIS_CSS}
+<section id="school-info">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">School Info</span><h2>${esc(s.name)} 학교 정보·학사일정</h2></div>
+    <div class="grid g2" style="align-items:start">
+      <div class="card"><table class="nx-info">${rows.map(([k, v]) => `<tr><th>${k}</th><td>${k === '홈페이지' ? `<a href="${esc(v)}" target="_blank" rel="noopener nofollow">${esc(v)}</a>` : esc(v)}</td></tr>`).join('')}</table></div>
+      <div class="card"><h3 style="margin-top:0">다가오는 학사일정</h3><ul class="nx-sch" data-nx-sch><li><span class="muted">불러오는 중…</span></li></ul></div>
+    </div>
+    ${src}
+  </div>
+</section>
+${subs.length ? `<section class="soft" id="subjects">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Subjects</span><h2>${esc(s.name)} 학년별 개설 과목</h2><p class="muted">${N.subjects_year || ''}학년도 시간표에 나온 과목입니다. 과목마다 학교 진도와 평가 방식에 맞춰 1:1로 준비할 수 있습니다.</p></div>
+    <div class="nx-tabs" data-nx-tabs>${subs.map(([g, list], i) => `<button type="button" data-g="${g}"${i ? '' : ' class="on"'}>${g}학년 · ${list.length}과목</button>`).join('')}</div>
+    ${subs.map(([g, list], i) => `<div class="chips" data-nx-g="${g}"${i ? ' hidden' : ''}>${list.map(x => `<span class="chip">${esc(x)}</span>`).join('')}</div>`).join('\n    ')}
+    ${src}
+  </div>
+</section>` : ''}
+<section id="meals">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Meals</span><h2>${esc(s.name)} 급식</h2><p class="muted">이번 주와 다음 주 식단입니다. 매일 새로 받아 옵니다.</p></div>
+    <div class="nx-meals" data-nx-meals><p class="muted">불러오는 중…</p></div>
+    ${src}
+  </div>
+</section>
+<section class="soft" id="timetable">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Timetable</span><h2>${esc(s.name)} 시간표</h2><p class="muted">학년과 반을 고르면 한 주 시간표가 나옵니다.</p></div>
+    <div class="nx-sel"><select data-nx-grade aria-label="학년"></select><select data-nx-class aria-label="반"></select><span class="muted small" data-nx-week></span></div>
+    <div class="nx-tt-wrap" data-nx-tt><p class="muted">불러오는 중…</p></div>
+    ${src}
+  </div>
+</section>
+<script>
+(function(){
+  var E=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var $=function(q){return document.querySelector(q);};
+  [].forEach.call(document.querySelectorAll('[data-nx-tabs] button'),function(b){b.onclick=function(){
+    [].forEach.call(document.querySelectorAll('[data-nx-tabs] button'),function(x){x.classList.toggle('on',x===b);});
+    [].forEach.call(document.querySelectorAll('[data-nx-g]'),function(x){x.hidden=x.getAttribute('data-nx-g')!==b.getAttribute('data-g');});};});
+  var W=['월','화','수','목','금','토','일'];
+  var dd=function(v){var d=new Date(+v.slice(0,4),+v.slice(4,6)-1,+v.slice(6));return (d.getMonth()+1)+'.'+d.getDate()+'('+W[(d.getDay()+6)%7]+')';};
+  var now=new Date(),today=''+now.getFullYear()+('0'+(now.getMonth()+1)).slice(-2)+('0'+now.getDate()).slice(-2);
+  fetch('../data/neis/${encodeURIComponent(s.name)}.json?d='+today).then(function(r){return r.json();}).then(function(N){
+    [].forEach.call(document.querySelectorAll('[data-nx-upd]'),function(x){x.textContent=N.updated;});
+    var sc=(N.schedule||[]).filter(function(x){return x[1]>=today;}).slice(0,10);
+    $('[data-nx-sch]').innerHTML=sc.length?sc.map(function(x){return '<li><time>'+dd(x[0])+(x[1]!==x[0]?' ~ '+dd(x[1]):'')+'</time><span>'+E(x[2])+'</span></li>';}).join(''):'<li class="muted">다가오는 일정이 없습니다.</li>';
+    var md=Object.keys(N.meals||{}).sort().filter(function(k){return k>=today;});
+    $('[data-nx-meals]').innerHTML=md.length?md.map(function(k){var m=N.meals[k];return '<div class="nx-meal'+(k===today?' today':'')+'"><h4>'+dd(k)+(k===today?' · 오늘':'')+'</h4>'+Object.keys(m).map(function(t){return '<b>'+E(t)+'</b><p>'+m[t].map(E).join(', ')+'</p>';}).join('')+'</div>';}).join(''):'<p class="muted">이번 주 급식 정보가 아직 없습니다(방학·휴일일 수 있어요).</p>';
+    var T=N.timetable,gs=T?Object.keys(T.grades).sort():[];
+    if(!gs.length){$('[data-nx-tt]').innerHTML='<p class="muted">시간표 정보가 아직 없습니다.</p>';return;}
+    var G=$('[data-nx-grade]'),C=$('[data-nx-class]');
+    G.innerHTML=gs.map(function(g){return '<option value="'+g+'">'+g+'학년</option>';}).join('');
+    $('[data-nx-week]').textContent=dd(T.week)+' 주';
+    var draw=function(){var t=T.grades[G.value][C.value],n=0;t.forEach(function(d){d.forEach(function(x,i){if(x)n=Math.max(n,i+1);});});
+      var h='<table class="nx-tt"><tr><th>교시</th>'+W.slice(0,5).map(function(w){return '<th>'+w+'</th>';}).join('')+'</tr>';
+      for(var p=0;p<n;p++){h+='<tr><th>'+(p+1)+'</th>'+t.map(function(d){return '<td>'+E(d[p]||'')+'</td>';}).join('')+'</tr>';}
+      $('[data-nx-tt]').innerHTML=h+'</table>';};
+    var fillC=function(){var cs=Object.keys(T.grades[G.value]).sort(function(a,b){return (parseInt(a,10)||0)-(parseInt(b,10)||0)||(a>b?1:-1);});C.innerHTML=cs.map(function(c){return '<option value="'+E(c)+'">'+E(c)+(/^[0-9]+$/.test(c)?'반':'')+'</option>';}).join('');draw();};
+    G.onchange=fillC;C.onchange=draw;fillC();
+  }).catch(function(){[].forEach.call(document.querySelectorAll('[data-nx-sch],[data-nx-meals],[data-nx-tt]'),function(x){x.innerHTML='<p class="muted">정보를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</p>';});});
+})();
+</script>`;
+}
 function specialSchoolPage(S, s) {
   const up = '../';
   const [kn, kl] = SP_KIND[s.kind];
@@ -542,10 +630,11 @@ function specialSchoolPage(S, s) {
       : [`${s.name} 내신은 어떻게 준비하나요?`, '과목마다 수업 자료와 평가 방식이 달라서, 학교 진도에 맞춰 개념 정리 → 서술형 연습 → 수행평가 준비 순서로 갑니다. 영어로 된 자료는 우리말 개념과 함께 정리합니다.'],
     ['수강료와 수업 횟수는 어떻게 되나요?', '20분 무료 테스트 수업 뒤 학년과 목표에 맞춰 안내해 드립니다.']
   ];
+  const N = neisData(s);
   return page(S, { path: spFile(s), up, active: 'special', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['국제고·국제중 과외', 'special.html'], [`${s.name} 과외`, spFile(s)]]), faqLd(faq)] },
-    title: `${s.name} 과외 — ${s.focus.slice(0, 2).join('·')} 1:1 화상 | ${S.brand}`,
-    desc: `${s.full}(${s.area}) 학생을 위한 1:1 화상 과외. ${s.focus.join(', ')}을 학교 진도에 맞춰 준비합니다. 20분 무료 테스트 수업, 상담 ${TEL}.`,
-    kw: `${s.name} 과외, ${s.full} 과외, ${s.name} 내신, ${s.name} 영어, ${s.name} 수학, ${kn} 과외, ${s.focus.slice(0, 2).map(f => `${s.name} ${f}`).join(', ')}` }, `
+    title: `${s.name} 과외 — ${N ? '개설 과목·급식·시간표·학사일정 · ' : ''}${s.focus.slice(0, 2).join('·')} 1:1 화상 | ${S.brand}`,
+    desc: `${s.full}(${s.area}) ${N ? '학년별 개설 과목, 이번 주 급식, 반별 시간표, 학사일정과 ' : ''}1:1 화상 과외. ${s.focus.join(', ')}을 학교 진도에 맞춰 준비합니다. 20분 무료 테스트 수업, 상담 ${TEL}.`,
+    kw: `${s.name} 과외, ${s.full} 과외, ${s.name} 내신, ${s.name} 급식, ${s.name} 시간표, ${s.name} 학사일정, ${s.name} 개설과목, ${s.name} 영어, ${s.name} 수학, ${kn} 과외` }, `
 <section class="page-hero">
   <div class="wrap">
     <div class="crumb"><a href="${up}index.html">홈</a> › <a href="${up}special.html">국제고·국제중 과외</a> › ${esc(s.name)}</div>
@@ -553,8 +642,10 @@ function specialSchoolPage(S, s) {
     <h1>${esc(s.name)} 과외<br><em>학교 진도 그대로, 1:1 화상으로</em></h1>
     <p class="lead">${esc(s.facts.join(' '))} ${esc(s.name)} 수업 자료와 평가 방식에 맞춰 준비합니다.</p>
     <div class="hero-cta" style="margin-top:18px"><a href="#apply" class="btn btn-primary">20분 무료 테스트 수업 신청</a><a href="tel:${TELRAW}" class="btn btn-ghost">📞 ${TEL}</a></div>
+    ${N ? `<div class="chips" style="margin-top:16px">${[['school-info', '학교 정보·일정'], ['subjects', '개설 과목'], ['meals', '급식'], ['timetable', '시간표']].map(([h, t]) => `<a class="chip" href="#${h}">${t}</a>`).join('')}</div>` : ''}
   </div>
 </section>
+${neisSections(s, N)}
 <section>
   <div class="wrap">
     <div class="sec-head center"><span class="eyebrow">Focus</span><h2>${esc(s.name)} 학생이 많이 찾는 수업</h2></div>
