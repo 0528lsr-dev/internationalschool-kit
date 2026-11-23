@@ -41,6 +41,15 @@ if '[카드 1]' not in body:
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import blog_cards
     body, own_cards = blog_cards.make(title, body, 'out/blog_cards', category)
+else:
+    # 국제학교 카드뉴스 날 — 카드는 사이트 것을 쓰고, 네이버 클립 영상만 글 내용으로 만든다 (2026-11-23)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import blog_cards
+    plain = '\n\n'.join(x for x in body.split('\n\n') if not x.startswith('[카드'))
+    try:
+        blog_cards.make(title, plain, 'out/blog_clip', category)
+    except Exception as e:
+        print('클립용 카드 실패:', e)
 if tags:
     body += '\n\n' + tags
 
@@ -49,6 +58,29 @@ def tg(method, params):
     data = urllib.parse.urlencode(params).encode()
     with urllib.request.urlopen(f'https://api.telegram.org/bot{TG}/{method}', data, timeout=60) as r:
         return json.loads(r.read())
+
+
+# 네이버 클립 세로 영상 + 클립 설명 (2026-11-23 사용자: "인스타 말고 네이버 클립으로 홈판에 뜨게")
+def send_clip():
+    import glob as _g
+    clips = [c for c in ('out/blog_cards/clip.mp4', 'out/blog_clip/clip.mp4') if os.path.exists(c)]
+    if not clips:
+        print('클립 영상 없음')
+        return
+    clip = clips[0]
+    tag_words = [t.strip() for t in tags.replace('태그:', '').split(',') if t.strip()][:8]
+    desc = f"{title}\n\n" + ' '.join('#' + t.replace(' ', '') for t in tag_words)
+    bnd = '----clip'
+    cap = f'🎬 네이버 클립용 영상 — 【{BLOG_ID}】\n① 영상 저장 → ② 그 블로그 아이디로 네이버 블로그 앱 → 클립 만들기 → ③ 음악 넣기 → ④ 아래 설명 붙여넣고, 이 글을 "관련 글"로 연결'
+    body_ = (f'--{bnd}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n{CHAT}\r\n'
+             f'--{bnd}\r\nContent-Disposition: form-data; name="caption"\r\n\r\n{cap}\r\n'
+             f'--{bnd}\r\nContent-Disposition: form-data; name="supports_streaming"\r\n\r\ntrue\r\n'
+             f'--{bnd}\r\nContent-Disposition: form-data; name="video"; filename="clip.mp4"\r\nContent-Type: video/mp4\r\n\r\n').encode() \
+        + open(clip, 'rb').read() + f'\r\n--{bnd}--\r\n'.encode()
+    req = urllib.request.Request(f'https://api.telegram.org/bot{TG}/sendVideo', body_, {'Content-Type': f'multipart/form-data; boundary={bnd}'})
+    urllib.request.urlopen(req, timeout=180).read()
+    tg('sendMessage', {'chat_id': CHAT, 'text': '📝 클립 설명(복사해서 붙여넣기)\n\n' + desc})
+    print('클립 영상 보냄', os.path.getsize(clip) // 1024, 'KB')
 
 
 # 자판기 글(sns/blog_vending)은 따로 만든 자판기 블로그에 올린다 (2026-11-13)
@@ -148,6 +180,7 @@ if own_cards:   # 직접 만든 카드 — 파일을 올려 보낸다(multipart)
                                          {'Content-Type': f'multipart/form-data; boundary={b}'})
             urllib.request.urlopen(req, timeout=120).read()
             print('말트임 랜딩 이미지', len(lp), '장 보냄')
+    send_clip()
     tg('sendMessage', {'chat_id': CHAT, 'text': END_LINE})
     sys.exit(0)
 
@@ -159,5 +192,6 @@ try:
     tg('sendMediaGroup', {'chat_id': CHAT, 'media': json.dumps(media, ensure_ascii=False)})
 except Exception as e:
     print('카드 이미지 안 보냄:', e)
+send_clip()
 tg('sendMessage', {'chat_id': CHAT, 'text': END_LINE})
 print('보냄:', title)

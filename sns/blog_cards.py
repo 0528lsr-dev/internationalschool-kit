@@ -2,7 +2,7 @@
 - 표지(제목) + 소제목('■ ')마다 한 장(최대 5장) + 마지막 안내 1장, 1080x1080 JPG.
 - 본문에 [카드 N] 자리를 넣어 돌려준다: [카드 1]은 첫 문단 뒤, 소제목 카드는 그 소제목 바로 위, 마지막 카드는 '👉' 줄 위.
 - 사진 없이 글자·색으로만 만든다(저작권 걱정 없음). 색은 브랜드마다 다르고(sns/style.py 팔레트), 날마다 배치가 바뀐다."""
-import os, re, urllib.request
+import os, re, shutil, subprocess, urllib.request
 from datetime import datetime, timedelta, timezone
 from PIL import Image, ImageDraw, ImageFont
 import style
@@ -180,4 +180,88 @@ def make(title, body, out_dir, category=''):
     out.insert(1, '[카드 1]')
     k = next((j for j, p in enumerate(out) if p.startswith('👉')), len(out))
     out.insert(k, f'[카드 {total}]')
+    # 네이버 클립용 세로 영상 (2026-11-23) — 실패해도 카드·글은 그대로 보낸다
+    if os.environ.get('CLIP', '1') == '1' and shutil.which('ffmpeg'):
+        try:
+            make_clip(title, heads, P, brand, OFFER, site, out_dir)
+        except Exception as e:
+            print('클립 영상 실패:', e)
     return '\n\n'.join(out), paths
+
+
+# ---------- 네이버 클립 세로 영상 (1080x1920, 약 25~30초, 무음) ----------
+# 블로그 3개(국제학교·티쳐포유 / 말트임 / 자판기) 초안마다 하나씩 만든다. 사용자가 네이버 블로그 앱 클립으로 올리고 음악을 넣는다.
+CW, CH = 1080, 1920
+
+
+def make_clip(title, heads, P, brand, OFFER, site, out_dir):
+    scenes = []
+    # 1. 표지 — 제목 크게, 아래 혜택 띠
+    im = Image.new('RGB', (CW, CH), P['dark'])
+    d = ImageDraw.Draw(im)
+    block(d, brand, font('Bold', 44), 230, CW - 160, P['soft'])
+    d.rectangle((CW / 2 - 60, 330, CW / 2 + 60, 340), fill=P['accent'])
+    block(d, title, font('ExtraBold', 96), 520, CW - 140, 'white', max_lines=5)
+    f = font('ExtraBold', 66)
+    t = OFFER[0]
+    tw = d.textlength(t, font=f)
+    d.rounded_rectangle(((CW - tw) / 2 - 60, CH - 470, (CW + tw) / 2 + 60, CH - 330), 70, fill=P['accent'])
+    d.text(((CW - tw) / 2, CH - 442), t, font=f, fill=P['dark'])
+    block(d, '끝까지 보고 저장해 두세요', font('Bold', 40), CH - 250, CW - 160, P['soft'])
+    scenes.append((im, 3.5))
+    # 2. 소제목마다 한 장
+    for n, (_, h, lines) in enumerate(heads, 1):
+        im = Image.new('RGB', (CW, CH), P['light'])
+        d = ImageDraw.Draw(im)
+        d.rectangle((0, 0, CW, 18), fill=P['dark'])
+        d.text((80, 230), f'{n:02d}', font=font('ExtraBold', 170), fill=P['accent'])
+        y = block(d, h, font('ExtraBold', 80), 470, CW - 160, P['ink'], x=80, max_lines=3)
+        d.rectangle((80, y + 30, 220, y + 40), fill=P['dark'])
+        y += 110
+        fb = font('Medium', 52)
+        for ln in [re.sub(r'^(·\s*|\d\)\s*)', '', l.strip()) for l in lines][:3]:
+            if y > CH - 420:
+                break
+            d.ellipse((84, y + 22, 106, y + 44), fill=P['accent'])
+            y = block(d, ln, fb, y, CW - 230, P['mute'], x=134, gap=1.4, max_lines=3) + 34
+        f = font('Bold', 40)
+        d.text((80, CH - 160), brand, font=f, fill=P['dark'])
+        t = f'{n} / {len(heads)}'
+        d.text((CW - 80 - d.textlength(t, font=f), CH - 160), t, font=f, fill=P['dark'])
+        scenes.append((im, 3.8))
+    # 3. 마지막 — 혜택을 가장 크게
+    im = Image.new('RGB', (CW, CH), P['dark'])
+    d = ImageDraw.Draw(im)
+    y = block(d, brand, font('Bold', 48), 330, CW - 160, P['soft'])
+    words = OFFER[0].split(' ')
+    y = block(d, words[0], font('ExtraBold', 200), y + 80, CW - 120, P['accent'])
+    y = block(d, ' '.join(words[1:]), font('ExtraBold', 150), y, CW - 100, 'white')
+    y = block(d, OFFER[1], font('Bold', 52), y + 40, CW - 160, P['soft'])
+    d.rounded_rectangle((120, y + 80, CW - 120, y + 230), 75, fill=P['light'])
+    f = font('ExtraBold', 60)
+    t = '상담 010-5577-3067'
+    d.text(((CW - d.textlength(t, font=f)) / 2, y + 120), t, font=f, fill=P['dark'])
+    block(d, '자세한 내용은 블로그 글에서', font('Bold', 44), y + 300, CW - 160, 'white')
+    block(d, site, font('Bold', 44), y + 370, CW - 160, P['soft'])
+    scenes.append((im, 4.5))
+
+    tmp = os.path.join(out_dir, 'clip_tmp')
+    os.makedirs(tmp, exist_ok=True)
+    parts = []
+    for k, (im, sec) in enumerate(scenes):
+        png, mp4 = os.path.join(tmp, f's{k}.png'), os.path.join(tmp, f's{k}.mp4')
+        im.save(png)
+        frames = int(sec * 30)
+        vf = (f"scale=1188:2112,zoompan=z='1+0.0006*on':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={frames}:s={CW}x{CH}:fps=30,"
+              f"fade=t=in:st=0:d=0.25,fade=t=out:st={sec - 0.25}:d=0.25,format=yuv420p")
+        subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-loop', '1', '-i', png, '-t', str(sec), '-vf', vf,
+                        '-c:v', 'libx264', '-preset', 'medium', '-crf', '21', '-r', '30', mp4], check=True)
+        parts.append(os.path.abspath(mp4).replace('\\', '/'))
+    lst = os.path.join(tmp, 'list.txt')
+    open(lst, 'w', encoding='utf-8').write(''.join(f"file '{p}'\n" for p in parts))
+    clip = os.path.join(out_dir, 'clip.mp4')
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', lst,
+                    '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=stereo', '-shortest', '-c:v', 'copy', '-c:a', 'aac',
+                    '-movflags', '+faststart', clip], check=True)
+    print('클립 영상:', clip, os.path.getsize(clip) // 1024, 'KB')
+    return clip

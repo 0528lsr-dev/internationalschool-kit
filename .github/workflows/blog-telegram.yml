@@ -24,6 +24,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -q pillow
+      # 네이버 클립 세로 영상 만들기 (2026-11-23)
+      - run: which ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)
       # 이번 push 로 새로 생긴 초안만 하나씩 보낸다 (교육 블로그 sns/blog, 자판기 블로그 sns/blog_vending — 2026-11-13)
       - name: 보낼 초안 고르기
         env:
@@ -44,6 +46,8 @@ jobs:
         if: always()
         with:
           name: blog-cards
-          path: out/blog_cards
+          path: |
+            out/blog_cards
+            out/blog_clip
           if-no-files-found: ignore
           retention-days: 7
