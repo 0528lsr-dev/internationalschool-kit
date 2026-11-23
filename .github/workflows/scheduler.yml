@@ -23,7 +23,8 @@ jobs:
           R="$GITHUB_REPOSITORY"
           # 이름 시각(KST) 워크플로 — 시각 순서대로
           # t4u1~3: 티쳐포유 스레드 (2026-11-13)
-          SLOTS="threads1 0727 threads.yml|t4u1 0907 threads-t4u.yml|threads2 1207 threads.yml|t4u2 1507 threads-t4u.yml|reel 1807 insta-reels.yml|threads3 2003 threads.yml|cards 2107 insta-cards.yml|t4u3 2137 threads-t4u.yml"
+          # 2026-11-23: 인스타 릴스(reel 1807) 중지 — 사용자가 영상은 네이버 클립으로(블로그 초안마다 클립 영상이 같이 감)
+          SLOTS="threads1 0727 threads.yml|t4u1 0907 threads-t4u.yml|threads2 1207 threads.yml|t4u2 1507 threads-t4u.yml|threads3 2003 threads.yml|cards 2107 insta-cards.yml|t4u3 2137 threads-t4u.yml"
           END=$(( $(date +%s) + 340*60 ))
           LAST=0
           while [ "$(date +%s)" -lt "$END" ]; do
