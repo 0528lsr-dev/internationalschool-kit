@@ -68,8 +68,12 @@ def send_clip():
         print('클립 영상 없음')
         return
     clip = clips[0]
-    tag_words = [t.strip() for t in tags.replace('태그:', '').split(',') if t.strip()][:8]
-    desc = f"{title}\n\n" + ' '.join('#' + t.replace(' ', '') for t in tag_words)
+    # 네이버 클립 해시태그는 5개까지 (2026-11-23 사용자) — 지역이 들어간 태그를 맨 앞에, 브랜드 이름 태그는 뒤로
+    tag_words = [t.strip().replace(' ', '') for t in tags.replace('태그:', '').split(',') if t.strip()]
+    region = title.split()[0] if title.split() else ''
+    tag_words.sort(key=lambda t: (0 if region and t.startswith(region) else 2 if t in ('자판기마켓', '말트임', '국제학교튜터', '티쳐포유') else 1))
+    tag_words = list(dict.fromkeys(tag_words))[:5]
+    desc = f"{title}\n\n" + ' '.join('#' + t for t in tag_words)
     bnd = '----clip'
     cap = f'🎬 네이버 클립용 영상 — 【{BLOG_ID}】\n① 영상 저장 → ② 그 블로그 아이디로 네이버 블로그 앱 → 클립 만들기 → ③ 음악 넣기 → ④ 아래 설명 붙여넣고, 이 글을 "관련 글"로 연결'
     body_ = (f'--{bnd}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n{CHAT}\r\n'
