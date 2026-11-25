@@ -11,8 +11,8 @@ W = H = 1080
 BRANDS = {   # 브랜드: (사이트, 팔레트 번호, 한 줄 소개)
     '티쳐포유': ('teacher4u.co.kr', 1, '중·고등 1:1 과외 · 수학 영어 국어 사회 과학'),
     '자판기마켓': ('mooinstore.kr', 'vending', '자판기 구매 · 렌탈 · 설치 상담'),
-    '말트임 영어회화': ('seochoedu.co.kr', 2, '성인 1:1 전화·화상 영어 · 비즈니스 · 시험 대비'),
-    '말트임 1:1 회화': ('seochoedu.co.kr', 2, '성인 1:1 전화·화상 회화 · 영어 중국어 일본어 스페인어 프랑스어'),   # 말트임 블로그 외국어 글 (2026-11-13, 스페인어·프랑스어 11-23)
+    '말트임 영어회화': ('seochoedu.co.kr', 'maltuim', '성인 1:1 전화·화상 영어 · 비즈니스 · 시험 대비'),
+    '말트임 1:1 회화': ('seochoedu.co.kr', 'maltuim', '성인 1:1 전화·화상 회화 · 영어 중국어 일본어 스페인어 프랑스어'),   # 말트임 블로그 외국어 글 (2026-11-13, 스페인어·프랑스어 11-23)
     '국제학교튜터': ('internationalschool.kr', 0, '국제학교 1:1 화상 과외 · IB AP IGCSE A-Level'),
     # 공부 길잡이 블로그는 인사를 하나로 통일(2026-11-15) — 사이트는 글 끝 👉 링크에서 읽는다
     '공부 길잡이': ('', 4, '중고등 내신·수능 · 국제학교 · 유학'),
@@ -32,6 +32,8 @@ GILJABI_PALS = [
     ('공지', 0),
     ('중고등', 'blue'),        # 중고등 내신·수능 — 파랑
 ]
+# 말트임: 사이트·블로그 타이틀·프로필과 같은 파랑 + 주황 (2026-11-25, 예전 초록에서 변경)
+MALTUIM_PAL = {'name': '말트임 블루', 'dark': (30, 64, 175), 'accent': (245, 158, 11), 'light': (245, 248, 255), 'ink': (22, 36, 77), 'mute': (90, 104, 130), 'soft': (205, 220, 252)}
 BLUE_PAL = {'name': '블루', 'dark': (22, 92, 160), 'accent': (255, 196, 60), 'light': (244, 248, 253), 'ink': (20, 32, 48), 'mute': (85, 100, 120), 'soft': (200, 225, 250)}
 FONT = {k: f'out/Pretendard-{k}.otf' for k in ('Bold', 'ExtraBold', 'Medium')}
 
@@ -90,7 +92,7 @@ def make(title, body, out_dir, category=''):
     day = (datetime.now(timezone.utc) + timedelta(hours=9)).toordinal()
     if brand == '공부 길잡이' and category:
         pal_i = next((p for k, p in GILJABI_PALS if k in category), pal_i)
-    P = VENDING_PALS[day % len(VENDING_PALS)] if pal_i == 'vending' else BLUE_PAL if pal_i == 'blue' else style.PALETTES[pal_i]
+    P = VENDING_PALS[day % len(VENDING_PALS)] if pal_i == 'vending' else BLUE_PAL if pal_i == 'blue' else MALTUIM_PAL if pal_i == 'maltuim' else style.PALETTES[pal_i]
     layout = day % 2
     os.makedirs(out_dir, exist_ok=True)
 
