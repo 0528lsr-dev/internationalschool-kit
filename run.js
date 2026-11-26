@@ -500,6 +500,7 @@ function buildSite(S) {
   full && W(path.join(dir, 'contact.html'), B.contactPage(S)); add('main', 'contact.html');
   full && W(path.join(dir, 'price.html'), B.pricePage(S)); add('main', 'price.html');
   full && W(path.join(dir, 'winter.html'), B.winterPage(S)); add('main', 'winter.html');
+  for (const T of B.WINTER_TOPICS) { full && W(path.join(dir, `winter/${T.key}.html`), B.winterTopicPage(S, T)); add('main', `winter/${T.key}.html`); }   /* 겨울방학 단기특강 (2026-11-26) */
   full && W(path.join(dir, 'parents.html'), B.parentsPage(S)); add('main', 'parents.html');
   for (const T of B.PARENT_TOPICS) { full && W(path.join(dir, `parents/${T.key}.html`), B.parentTopicPage(S, T)); add('main', `parents/${T.key}.html`); }   /* 국제학교 학부모 영어 자체 페이지 (2026-11-18) */   /* 겨울방학 집중 과외 (2026-11-15) */
   full && W(path.join(dir, 'special.html'), B.specialHubPage(S)); add('main', 'special.html');   /* 국제고·국제중 (2026-11-19) */
