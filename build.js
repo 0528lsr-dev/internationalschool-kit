@@ -402,7 +402,7 @@ function winterPage(S) {
 <section class="page-hero">
   <div class="wrap">
     <div class="crumb"><a href="index.html">홈</a> › 겨울방학 집중 과외</div>
-    <h1>국제학교 겨울방학 과외<br><em>3~4주, 다음 학기를 바꾸는 시간</em></h1>
+    <h1>국제학교 겨울방학 과외<br><em>1~2달, 다음 학기를 바꾸는 시간</em></h1>
     <p class="lead">학교 수업이 쉬는 방학은 부족한 단원을 채우고 다음 학기를 미리 준비하기 가장 좋은 때입니다. 아이 학교 커리큘럼에 맞춰 1:1로 집중합니다.</p>
     <div class="hero-cta" style="margin-top:18px"><a href="#f_winter" class="btn btn-primary">겨울방학 상담 신청</a><a href="price.html" class="btn btn-ghost">기본 수강료 보기</a></div>
   </div>
