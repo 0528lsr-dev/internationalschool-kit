@@ -416,7 +416,7 @@ function winterPage(S) {
 <section class="soft">
   <div class="wrap">
     <div class="sec-head center"><span class="eyebrow">Short Courses</span><h2>과목별 겨울방학 단기특강</h2><p class="muted">필요한 과목·시험을 골라 자세히 보세요.</p></div>
-    <div class="grid g3">${WINTER_TOPICS.map(x => `<a class="card" href="winter/${x.key}.html" style="color:inherit"><span class="ico">${x.ico}</span><h3>${esc(x.name)}</h3><p class="small" style="color:var(--primary);font-weight:700;margin-top:8px">자세히 보기 →</p></a>`).join('')}</div>
+    <div class="grid g3">${WINTER_TOPICS.map(x => `<a class="card" href="winter/${x.key}.html" style="color:inherit${x.event ? ';border:2px solid var(--primary)' : ''}"><span class="ico">${x.ico}</span>${x.event ? '<span class="small" style="display:inline-block;background:var(--primary);color:#fff;border-radius:99px;padding:2px 10px;margin-left:8px;font-weight:700">EVENT</span>' : ''}<h3>${esc(x.name)}</h3><p class="small" style="color:var(--primary);font-weight:700;margin-top:8px">자세히 보기 →</p></a>`).join('')}</div>
     <p class="center small" style="margin-top:18px">👩‍👧 부모님도 방학에 학교 상담·이메일 영어를 준비하고 싶다면 → <a href="parents.html">국제학교 학부모 영어</a></p>
   </div>
 </section>
@@ -1500,7 +1500,7 @@ function indexPage(S, D, blog) {
     /* 2026-11-11 offer — 휴대폰 첫 화면에 "무엇을·얼마에·어떻게 신청" 이 다 보이게 (사용자: 사진 정신없고 신청 충동이 안 든다).
        버건디 단색 배경, 약속 4개, 버튼 2개(무료 테스트·카톡), 수강료 카드, 그 아래 학교 찾기. */
     offer: () => `<div class="in">
-      <span class="offer-pill">국내·해외 국제학교 학생 1:1 화상 과외</span>${WINTER_ON ? `<a class="offer-season" href="winter.html">❄ 겨울방학 집중 과외 상담 중 →</a>` : ''}
+      <span class="offer-pill">국내·해외 국제학교 학생 1:1 화상 과외</span>${WINTER_ON ? `<a class="offer-season" href="winter.html">❄ 겨울방학 단기특강 상담 중 →</a><a class="offer-season" href="winter/speaking.html">🔥 영어회화 바짝 올리기 이벤트 →</a>` : ''}
       ${h1}
       <p class="lead">IB·AP·IGCSE·A-Level, 아이 학교의 과제와 시험 일정에 맞춰<br class="pc"> 선생님과 실시간 1:1로 수업합니다.</p>
       <ul class="offer-checks">${['IB · AP · IGCSE · A-Level · SAT', '학교 과제 · 시험 일정 맞춤', '국내 · 해외 시차 맞춰 수업', '수업마다 학습 리포트'].map(x => `<li>${x}</li>`).join('')}</ul>
