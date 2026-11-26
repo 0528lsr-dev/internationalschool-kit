@@ -3,7 +3,7 @@
   그 초안과 그날 카드뉴스 이미지를 텔레그램 "방문알림" 방으로 보낸다. 사용자가 네이버 블로그 앱에 붙여 넣어 올린다.
 - 초안 형식: 첫 줄 '# 제목', 본문, 마지막 줄 '태그: a, b, c'. 본문의 [카드 N] 자리는 N번 카드 이미지를 넣을 곳.
 - 네이버는 블로그 자동 글쓰기 공식 기능이 없고 매크로는 저품질 위험이 있어, 올리기는 사람이 한다."""
-import glob, json, os, re, sys, urllib.parse, urllib.request
+import datetime, glob, json, os, re, sys, urllib.parse, urllib.request
 
 TG = os.environ['TG_TOKEN']
 CHAT = os.environ.get('TG_CHAT') or '-5447586522'   # 'SNS 콘텐츠' 방(상담·방문 알림 방과 따로, 2026-11-10). 없으면 방문알림 방
@@ -186,6 +186,18 @@ if own_cards:   # 직접 만든 카드 — 파일을 올려 보낸다(multipart)
                                          {'Content-Type': f'multipart/form-data; boundary={b}'})
             urllib.request.urlopen(req, timeout=120).read()
             print('말트임 랜딩 이미지', len(lp), '장 보냄')
+    # 자판기 글에는 실제 자판기 사진 3장도 같이 — 사이트(mooinstore.kr) 사진을 날마다 돌려 가며 (2026-11-26 사용자 요청)
+    if 'blog_vending' in path:
+        pics = ['hero-machine', 'case-cafe-sokcho', 'case-hotel-jeju', 'case-school', 'case-cafe', 'case-cafe-andong', 'case-adventure']
+        d = datetime.date.today().toordinal()
+        pick = [pics[(d * 3 + k) % len(pics)] for k in range(3)]
+        media = [{'type': 'photo', 'media': f'https://mooinstore.kr/img/{p}.jpg',
+                  **({'caption': f'【{BLOG_ID}】 자판기 사진 3장 — 글 첫머리·중간에 넣으세요'} if k == 0 else {})} for k, p in enumerate(pick)]
+        try:
+            tg('sendMediaGroup', {'chat_id': CHAT, 'media': json.dumps(media, ensure_ascii=False)})
+            print('자판기 사진 3장 보냄', pick)
+        except Exception as ex:
+            print('자판기 사진 실패:', ex)
     send_clip()
     tg('sendMessage', {'chat_id': CHAT, 'text': END_LINE})
     sys.exit(0)
