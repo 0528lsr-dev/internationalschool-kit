@@ -459,6 +459,8 @@ function loadPosts(dir, kind, seeds) {
     if (!f.endsWith(".json")) continue;
     try {
       const p = JSON.parse(fs.readFileSync(path.join(d, f), "utf8").replace(/^﻿/, ""));
+      /* 2026-11-26 사용자: 국제학교는 학기 체계가 학교마다 달라 "2학기" 대신 "다음 학기" */
+      for (const k of ["title", "desc", "body", "keywords"]) if (typeof p[k] === "string") p[k] = p[k].replace(/2학기\(Semester 2\)/g, "다음 학기").replace(/2학기/g, "다음 학기");
       if (p.slug && p.title && p.body && p.date && p.desc) m.set(p.slug, p); else console.log("  ⚠ 글 데이터에 빠진 칸(slug·date·title·desc·body):", kind + "/" + f);
     } catch (e) { console.log("  ⚠ 글 데이터 JSON 오류:", kind + "/" + f, e.message); }
   }
@@ -499,8 +501,10 @@ function buildSite(S) {
   for (const p of adm) { W(path.join(dir, `admissions/${p.slug}.html`), B.postPage(S, 'admissions', p, adm)); add('main', `admissions/${p.slug}.html`); }
   full && W(path.join(dir, 'contact.html'), B.contactPage(S)); add('main', 'contact.html');
   full && W(path.join(dir, 'price.html'), B.pricePage(S)); add('main', 'price.html');
-  full && W(path.join(dir, 'winter.html'), B.winterPage(S)); add('main', 'winter.html');
-  for (const T of B.WINTER_TOPICS) { full && W(path.join(dir, `winter/${T.key}.html`), B.winterTopicPage(S, T)); add('main', `winter/${T.key}.html`); }   /* 겨울방학 단기특강 (2026-11-26) */
+  full && W(path.join(dir, 'winter.html'), B.winterPage(S, D)); add('main', 'winter.html');
+  { const winPosts = [...blog.map(p => ({ ...p, kind: 'blog' })), ...adm.map(p => ({ ...p, kind: 'admissions' }))].filter(p => /겨울|방학|winter/i.test(p.title + ' ' + p.slug + ' ' + (p.keywords || '')));
+    for (const T of B.WINTER_TOPICS) { full && W(path.join(dir, `winter/${T.key}.html`), B.winterTopicPage(S, T, D, winPosts)); add('main', `winter/${T.key}.html`); }
+    for (const rg of D.regions) { full && W(path.join(dir, B.winterRegionFile(rg)), B.winterRegionPage(S, D, rg)); add('main', B.winterRegionFile(rg)); } }   /* 지역별 겨울방학 (2026-11-26) */   /* 겨울방학 단기특강 (2026-11-26) */
   full && W(path.join(dir, 'parents.html'), B.parentsPage(S)); add('main', 'parents.html');
   for (const T of B.PARENT_TOPICS) { full && W(path.join(dir, `parents/${T.key}.html`), B.parentTopicPage(S, T)); add('main', `parents/${T.key}.html`); }   /* 국제학교 학부모 영어 자체 페이지 (2026-11-18) */   /* 겨울방학 집중 과외 (2026-11-15) */
   full && W(path.join(dir, 'special.html'), B.specialHubPage(S)); add('main', 'special.html');   /* 국제고·국제중 (2026-11-19) */

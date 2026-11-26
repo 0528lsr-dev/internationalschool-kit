@@ -345,10 +345,118 @@ const WINTER_TRACKS = [
   ['🎯', 'IB · AP · SAT 집중', 'IA · EE 같은 과제 마감, 봄 학기 시험과 SAT를 앞두고 약한 단원을 방학 동안 집중해서 채웁니다.']
 ];
 const WINTER_TOPICS = require('./winter-intl.js');
-/* 겨울방학 단기특강 상세 (2026-11-26) — winter/<key>.html */
-function winterTopicPage(S, T) {
+/* 겨울방학 상세 페이지를 풍성하게 (2026-11-26 사용자: "세부 카테고리 들어가면 빈약해, 페이지 더 많이·유입 늘게") */
+const WINTER_CUR = { ib: c => /IB/.test(c), ap: c => /미국식|AP|캐나다식/.test(c), igcse: c => /GCSE|A-Level|영국식/.test(c) };
+const winterRegionFile = r => `winter/region/${r.key}.html`;
+function winterTopicFor(s) { const t = track(s); return t.sen === 'ib' || t.sen === 'apib' ? 'ib' : t.sen === 'alevel' ? 'igcse' : t.sen === 'au' ? 'math' : 'ap'; }
+function winterRichSections(S, T, D, posts) {
   const up = '../';
-  const tabs = `<div class="lang-tabs">${WINTER_TOPICS.map(x => `<a href="${x.key}.html"${x.key === T.key ? ' class="active"' : ''}>${esc(x.name)}</a>`).join('')}</div>`;
+  const grades = T.grades ? `<section class="soft">
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">By Grade</span><h2>학년별로 이렇게 달라요</h2></div>
+    <div class="grid g3">${T.grades.map(([h, p]) => `<div class="card"><h3>${esc(h)}</h3><p>${esc(p)}</p></div>`).join('')}</div>
+  </div>
+</section>` : '';
+  const weeks = T.weeks ? `<section>
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">8 Weeks</span><h2>${esc(T.name.replace(' 이벤트', ''))} 8주 계획 예시</h2><p class="muted">아이 수준과 방학 기간에 맞춰 상담 때 조정합니다.</p></div>
+    <div style="max-width:820px;margin:0 auto;overflow-x:auto"><table style="width:100%;border-collapse:collapse">${T.weeks.map(([w, t]) => `<tr><th style="text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap;color:var(--primary)">${esc(w)}</th><td style="padding:12px 14px;border-bottom:1px solid var(--line)">${esc(t)}</td></tr>`).join('')}</table></div>
+  </div>
+</section>` : '';
+  let schoolsH = '';
+  if (D && T.schools) {
+    const pickFn = WINTER_CUR[T.schools] || (T.schools === 'abroad' ? (c, s) => s.t === '해외' : () => true);
+    const list = D.schools.filter(s => pickFn(s.c || '', s));
+    const kr = list.filter(s => s.t === '국내').slice(0, 12), ab = list.filter(s => s.t === '해외').slice(0, 18);
+    const chips = arr => `<div class="sgrid">${arr.map(s => `<a href="${up}${hubFile(s)}"><b>${esc(s.sn)}</b> <span>겨울방학</span></a>`).join('')}</div>`;
+    schoolsH = `<section class="soft">
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">Schools</span><h2>학교별 겨울방학 과외</h2><p class="muted">학교 이름을 누르면 그 학교 커리큘럼에 맞춘 과외 안내로 갑니다. 목록에 없는 학교도 수업할 수 있습니다.</p></div>
+    ${kr.length ? `<h3 style="margin:10px 0">국내 국제학교</h3>${chips(kr)}` : ''}
+    ${ab.length ? `<h3 style="margin:22px 0 10px">해외 국제학교</h3>${chips(ab)}` : ''}
+  </div>
+</section>`;
+  }
+  const regions = D ? `<section>
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">By Region</span><h2>지역별 국제학교 겨울방학 과외</h2></div>
+    <div class="rgrid">${D.regions.slice(0, 40).map(r => `<a href="${up}${winterRegionFile(r)}"><b>${esc(r.label)}</b></a>`).join('')}</div>
+  </div>
+</section>` : '';
+  const rel = (posts || []).filter(p => (T.postKw || []).some(k => (p.title + ' ' + (p.keywords || '')).includes(k))).slice(0, 6);
+  const relH = rel.length ? `<section class="soft">
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">Read More</span><h2>함께 읽으면 좋은 글</h2></div>
+    <div class="grid g3">${rel.map(p => `<a class="card" href="${up}${p.kind}/${p.slug}.html" style="color:inherit"><h3 style="font-size:1.02rem">${esc(p.title)}</h3><p class="small muted">${esc((p.desc || '').slice(0, 70))}…</p></a>`).join('')}</div>
+  </div>
+</section>` : '';
+  return grades + weeks + schoolsH + regions + relH;
+}
+/* 지역별 겨울방학 과외 (2026-11-26) — winter/region/<지역키>.html */
+function winterRegionPage(S, D, r) {
+  const up = '../../';
+  const curs = [...new Set(r.schools.map(winterTopicFor))];
+  const topics = WINTER_TOPICS.filter(t => curs.includes(t.key) || ['speaking', 'math', 'science', 'essay', 'sat', 'admission'].includes(t.key) || (r.abroad && t.key === 'returnee'));
+  const curName = { ib: 'IB', ap: 'AP·미국식', igcse: 'IGCSE·A-Level', math: '호주식' };
+  const faq = [
+    [`${r.label}에서도 수업을 받을 수 있나요?`, `네. 모든 수업은 1:1 실시간 화상 수업이라 ${r.label}을 포함해 전 세계 어디서든 가능합니다.${r.abroad ? ' 시차에 맞춰 수업 시간을 정합니다.' : ' 이동 없이 집에서 수업합니다.'}`],
+    ['겨울방학은 언제 시작하나요?', '학교마다 다릅니다. 아이 학교의 방학 날짜를 알려 주시면 그 기간에 맞춰 1~2달 계획을 세웁니다.'],
+    ['방학 동안만 수업해도 되나요?', '네. 방학에만 집중하고 끝낼 수도 있고, 개학 뒤에도 학교 진도에 맞춰 이어 갈 수도 있습니다.']
+  ];
+  const sib = D.regions.filter(x => x !== r && x.abroad === r.abroad).slice(0, 24);
+  return page(S, { path: winterRegionFile(r), up, active: 'winter', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['겨울방학 특강', 'winter.html'], [`${r.label} 겨울방학 과외`, winterRegionFile(r)]]), faqLd(faq)] },
+    title: `${r.label} 국제학교 겨울방학 과외 — 단기특강 1:1 화상 | ${S.brand}`,
+    desc: `${r.full} 국제학교 학생 겨울방학 과외. ${r.schools.slice(0, 4).map(s => s.sn).join('·')}${r.schools.length > 4 ? ' 등' : ''} 학교별 커리큘럼(${curs.map(c => curName[c]).join('·')})에 맞춘 1~2달 단기특강, 전 세계 어디서든 1:1 화상. 20분 무료 테스트 수업.`,
+    kw: `${r.label} 국제학교 겨울방학 과외, ${r.city} 국제학교 겨울방학, ${r.city} 겨울방학 과외, ${r.city} 국제학교 과외, 국제학교 겨울방학 단기특강` }, `
+<section class="page-hero">
+  <div class="wrap">
+    <div class="crumb"><a href="${up}index.html">홈</a> › <a href="${up}winter.html">겨울방학 특강</a> › ${esc(r.label)}</div>
+    <h1>${r.flag ? r.flag + ' ' : ''}${esc(r.label)} 국제학교 겨울방학 과외</h1>
+    <p class="lead">${esc(r.full)} 국제학교 학생을 위한 1~2달 겨울방학 단기특강입니다. 학교 커리큘럼(${curs.map(c => curName[c]).join('·')})에 맞춰 지난 학기 빈 곳을 메우고 다음 학기를 미리 준비합니다. 1:1 화상 수업이라 ${r.abroad ? '현지에 있어도, 방학에 한국에 들어와 있어도' : '이동 없이 집에서'} 같은 선생님과 수업합니다.</p>
+    <div class="hero-cta" style="margin-top:18px"><a href="#apply" class="btn btn-primary">겨울방학 상담 · 20분 무료 테스트 수업</a><a href="tel:${TELRAW}" class="btn btn-ghost">📞 ${TEL}</a></div>
+    <div class="ev-banner"><div><span class="ev-tag">WINTER EVENT</span><h3>🔥 겨울방학 영어회화 바짝 올리기</h3><p>방학 동안 매일 말하는 시간 — 개학 첫 수업부터 손을 들 수 있게</p></div><a class="ev-btn" href="${up}winter/speaking.html">이벤트 보기 →</a></div>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">Schools</span><h2>${esc(r.label)} 국제학교별 겨울방학 과외</h2></div>
+    <div class="sgrid">${r.schools.map(s => `<a href="${up}${hubFile(s)}"><b>${esc(s.sn)}</b> <span>${esc(s.c)}</span></a>`).join('')}</div>
+    <p class="center small muted" style="margin-top:12px">목록에 없는 학교도 수업할 수 있습니다. 상담 때 학교 이름과 커리큘럼을 알려 주세요.</p>
+  </div>
+</section>
+<section class="soft">
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">Short Courses</span><h2>${esc(r.label)} 학생에게 맞는 단기특강</h2></div>
+    <div class="grid g3">${topics.map(x => `<a class="card${x.event ? ' card-event' : ''}" href="${up}winter/${x.key}.html" style="color:inherit"><span class="ico">${x.ico}</span><h3>${esc(x.name)}</h3><p class="small">${esc(x.lead.split('. ')[0])}.</p></a>`).join('')}</div>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">8 Weeks</span><h2>겨울방학 1~2달 계획 예시</h2></div>
+    <div class="steps" style="max-width:820px;margin:0 auto">${[['1~2주', '진단 · 지난 학기 빈 단원 정리'], ['3~4주', '약한 과목 집중'], ['5~6주', '다음 학기 단원 선행'], ['7~8주', '학교 형식 연습 · 개학 준비']].map(([w, t]) => `<div><b>${w}</b><span>${t}</span></div>`).join('')}</div>
+  </div>
+</section>
+<section class="soft">
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">FAQ</span><h2>${esc(r.label)} 겨울방학 과외 자주 묻는 질문</h2></div>
+    <div class="faq-list" style="max-width:820px;margin:0 auto">${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <h2 class="center">다른 지역 겨울방학 과외</h2>
+    <div class="rgrid" style="margin-top:14px">${sib.map(x => `<a href="${up}${winterRegionFile(x)}"><b>${esc(x.label)}</b></a>`).join('')}</div>
+    <p class="center small" style="margin-top:18px">👩‍👧 방학에 부모님 학교 영어도 준비하고 싶다면 → <a href="${up}parents.html">국제학교 학부모 영어</a></p>
+  </div>
+</section>
+${formSection(S, 'f_winter', { title: `${r.label} 겨울방학 상담 신청`, lead: '과목에서 "겨울방학 집중"을 골라 주세요. 20분 무료 테스트 수업으로 아이 수준을 먼저 확인합니다.' })}`);
+}
+/* 겨울방학 단기특강 상세 (2026-11-26) — winter/<key>.html */
+function winterTopicPage(S, T, D, posts = []) {
+  const up = '../';
+  const tabs = `<div class="lang-tabs">${WINTER_TOPICS.map(x => `<a href="${x.key}.html" class="${[x.event ? 'tab-event' : '', x.key === T.key ? 'active' : ''].join(' ').trim()}">${x.event ? '🔥 ' : ''}${esc(x.name)}</a>`).join('')}</div>`;
+  const ev = WINTER_TOPICS.find(x => x.event);
+  const evBanner = ev && ev.key !== T.key ? `<div class="ev-banner"><div><span class="ev-tag">WINTER EVENT</span><h3>🔥 겨울방학 영어회화 바짝 올리기</h3><p>방학 동안 매일 말하는 시간 — 개학 첫 수업부터 손을 들 수 있게</p></div><a class="ev-btn" href="${ev.key}.html">이벤트 보기 →</a></div>` : '';
   const others = WINTER_TOPICS.filter(x => x.key !== T.key).slice(0, 6);
   return page(S, { path: `winter/${T.key}.html`, up, active: 'winter', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['겨울방학 특강', 'winter.html'], [T.name, `winter/${T.key}.html`]]), faqLd(T.faq)] },
     title: `${T.title} | ${S.brand}`, desc: T.lead.slice(0, 150), kw: T.kw }, `
@@ -359,6 +467,7 @@ function winterTopicPage(S, T) {
     <p class="lead">${esc(T.lead)}</p>
     ${tabs}
     <div class="hero-cta" style="margin-top:18px"><a href="#apply" class="btn btn-primary">겨울방학 상담 · 20분 무료 테스트 수업</a><a href="tel:${TELRAW}" class="btn btn-ghost">📞 ${TEL}</a></div>
+    ${evBanner}
   </div>
 </section>
 <section>
@@ -367,6 +476,7 @@ function winterTopicPage(S, T) {
     <div class="grid g2">${T.points.map(([h, p], k) => `<div class="card"><span class="ico">0${k + 1}</span><h3>${esc(h)}</h3><p>${esc(p)}</p></div>`).join('')}</div>
   </div>
 </section>
+${winterRichSections(S, T, D, posts)}
 <section class="soft">
   <div class="wrap">
     <div class="sec-head center"><span class="eyebrow">Schedule</span><h2>방학 일정은 이렇게 잡아요</h2><p class="muted">방학 날짜는 학교마다 다릅니다. 아이 학교 일정을 알려 주시면 거기에 맞춰 짭니다.</p></div>
@@ -388,7 +498,7 @@ function winterTopicPage(S, T) {
 </section>
 ${formSection(S, 'f_winter', { title: `${T.name} 상담 신청`, lead: '과목에서 "겨울방학 집중"을 골라 주세요. 20분 무료 테스트 수업으로 아이 수준을 먼저 확인합니다.' })}`);
 }
-function winterPage(S) {
+function winterPage(S, D) {
   const faq = [
     ['겨울방학 과외는 언제 시작하면 좋나요?', '대부분의 국제학교는 12월 중순에 방학을 시작합니다. 12월 초에 상담과 20분 무료 테스트 수업을 마치고 계획을 세워 두면, 방학 첫 주부터 바로 수업을 시작할 수 있습니다.'],
     ['방학 동안만 수업할 수도 있나요?', '네. 방학 기간에만 집중해서 수업하고 개학 후에는 정리할 수도 있고, 개학 후에도 학교 진도에 맞춰 이어 갈 수도 있습니다.'],
@@ -405,6 +515,7 @@ function winterPage(S) {
     <h1>국제학교 겨울방학 과외<br><em>1~2달, 다음 학기를 바꾸는 시간</em></h1>
     <p class="lead">학교 수업이 쉬는 방학은 부족한 단원을 채우고 다음 학기를 미리 준비하기 가장 좋은 때입니다. 아이 학교 커리큘럼에 맞춰 1:1로 집중합니다.</p>
     <div class="hero-cta" style="margin-top:18px"><a href="#f_winter" class="btn btn-primary">겨울방학 상담 신청</a><a href="price.html" class="btn btn-ghost">기본 수강료 보기</a></div>
+    <div class="ev-banner"><div><span class="ev-tag">WINTER EVENT</span><h3>🔥 겨울방학 영어회화 바짝 올리기</h3><p>방학 동안 매일 말하는 시간 — 개학 첫 수업부터 손을 들 수 있게. 20분 무료 테스트 수업으로 말하기 수준부터 확인해요.</p></div><a class="ev-btn" href="winter/speaking.html">이벤트 보기 →</a></div>
   </div>
 </section>
 <section>
@@ -416,10 +527,16 @@ function winterPage(S) {
 <section class="soft">
   <div class="wrap">
     <div class="sec-head center"><span class="eyebrow">Short Courses</span><h2>과목별 겨울방학 단기특강</h2><p class="muted">필요한 과목·시험을 골라 자세히 보세요.</p></div>
-    <div class="grid g3">${WINTER_TOPICS.map(x => `<a class="card" href="winter/${x.key}.html" style="color:inherit${x.event ? ';border:2px solid var(--primary)' : ''}"><span class="ico">${x.ico}</span>${x.event ? '<span class="small" style="display:inline-block;background:var(--primary);color:#fff;border-radius:99px;padding:2px 10px;margin-left:8px;font-weight:700">EVENT</span>' : ''}<h3>${esc(x.name)}</h3><p class="small" style="color:var(--primary);font-weight:700;margin-top:8px">자세히 보기 →</p></a>`).join('')}</div>
+    <div class="grid g3">${WINTER_TOPICS.map(x => `<a class="card${x.event ? ' card-event' : ''}" href="winter/${x.key}.html" style="color:inherit"><span class="ico">${x.ico}</span>${x.event ? '<span class="small" style="display:inline-block;background:#fff;color:#ff3d6e;border-radius:99px;padding:2px 10px;margin-left:8px;font-weight:900">EVENT</span>' : ''}<h3>${esc(x.name)}</h3><p class="small" style="color:var(--primary);font-weight:700;margin-top:8px">자세히 보기 →</p></a>`).join('')}</div>
     <p class="center small" style="margin-top:18px">👩‍👧 부모님도 방학에 학교 상담·이메일 영어를 준비하고 싶다면 → <a href="parents.html">국제학교 학부모 영어</a></p>
   </div>
 </section>
+${D ? `<section>
+  <div class="wrap">
+    <div class="sec-head center"><span class="eyebrow">By Region</span><h2>지역별 국제학교 겨울방학 과외</h2><p class="muted">국내·해외 어디서든 1:1 화상 수업 — 지역을 고르면 그 지역 학교별 안내가 나옵니다.</p></div>
+    <div class="rgrid">${D.regions.map(r => `<a href="${winterRegionFile(r)}"><b>${r.flag ? r.flag + ' ' : ''}${esc(r.label)}</b></a>`).join('')}</div>
+  </div>
+</section>` : ''}
 <section>
   <div class="wrap">
     <div class="sec-head center"><span class="eyebrow">Schedule</span><h2>겨울방학 준비 일정</h2><p class="muted">방학이 시작되기 전에 계획을 세워 두면 첫 주부터 바로 수업할 수 있습니다.</p></div>
@@ -914,6 +1031,7 @@ function hubPage(S, D, s, region) {
     <div class="crumb"><a href="${up}index.html">홈</a> › <a href="${FINDER[s.t][0]}.html">${LEVEL[s.t]}</a> › <a href="${regionLink(region.key)}">${esc(region.label)}</a> › ${esc(sn)}</div>
     <h1>${esc(sn)} 과외 — ${esc(s.n)} 1:1 맞춤 수업</h1>
     <p class="lead">${esc(s.e)} · ${esc(s.area)} · ${esc(s.c)} · ${MODE(s)}</p>
+    ${WINTER_ON ? `<div class="ev-banner" style="background:linear-gradient(100deg,#1f3b73,#7a1f3d)"><div><span class="ev-tag" style="color:#7a1f3d">WINTER</span><h3>❄ ${esc(sn)} 겨울방학 단기특강</h3><p>1~2달 동안 지난 학기 빈 곳 메우기 + 다음 학기 선행 · 전 세계 어디서든 1:1 화상</p></div><a class="ev-btn" style="color:#7a1f3d" href="${up}winter/${winterTopicFor(s)}.html">겨울방학 특강 보기 →</a></div>` : ''}
   </div>
 </section>${(() => { const X = NEIS_INTL[s.sn]; if (!X) return '';   /* 국내 국제학교 나이스 기본 정보 (2026-11-19) */
   const rows = [['정식 이름', X.full], ['구분', [X.fond, X.kind].filter(Boolean).join(' · ')], ['주소', X.addr], ['대표 전화', X.tel], ['홈페이지', X.home]].filter(r => r[1]);
@@ -1500,7 +1618,7 @@ function indexPage(S, D, blog) {
     /* 2026-11-11 offer — 휴대폰 첫 화면에 "무엇을·얼마에·어떻게 신청" 이 다 보이게 (사용자: 사진 정신없고 신청 충동이 안 든다).
        버건디 단색 배경, 약속 4개, 버튼 2개(무료 테스트·카톡), 수강료 카드, 그 아래 학교 찾기. */
     offer: () => `<div class="in">
-      <span class="offer-pill">국내·해외 국제학교 학생 1:1 화상 과외</span>${WINTER_ON ? `<a class="offer-season" href="winter.html">❄ 겨울방학 단기특강 상담 중 →</a><a class="offer-season" href="winter/speaking.html">🔥 영어회화 바짝 올리기 이벤트 →</a>` : ''}
+      <span class="offer-pill">국내·해외 국제학교 학생 1:1 화상 과외</span>${WINTER_ON ? `<a class="offer-season" href="winter.html">❄ 겨울방학 단기특강 상담 중 →</a><a class="offer-season offer-event" href="winter/speaking.html">🔥 EVENT · 겨울방학 영어회화 바짝 올리기 →</a>` : ''}
       ${h1}
       <p class="lead">IB·AP·IGCSE·A-Level, 아이 학교의 과제와 시험 일정에 맞춰<br class="pc"> 선생님과 실시간 1:1로 수업합니다.</p>
       <ul class="offer-checks">${['IB · AP · IGCSE · A-Level · SAT', '학교 과제 · 시험 일정 맞춤', '국내 · 해외 시차 맞춰 수업', '수업마다 학습 리포트'].map(x => `<li>${x}</li>`).join('')}</ul>
@@ -1713,5 +1831,5 @@ ${schoolsH}${examsH}
 ${formSection(S, 'f_spec', { title: `${L.name} 무료 상담 신청`, lead: '전문 선생님이 곧 연락드립니다.' })}`);
 }
 
-module.exports = { winterTopicPage, WINTER_TOPICS, specialHubPage, specialSchoolPage, SPECIAL, spFile, parentsPage, parentTopicPage, PARENT_TOPICS, winterPage, choosePage, faqPage, studyPage, studyProgramPage, PROGRAMS, hubPage, subjectPage, regionPage, schoolFinderPage, subjectIndexPage, regionsIndexPage, teachersPage, teacherPage, specIndexPage, specPage, FINDER, listPage, postPage, contactPage, pricePage, indexPage, notFoundPage,
+module.exports = { winterTopicPage, winterRegionPage, winterRegionFile, WINTER_TOPICS, specialHubPage, specialSchoolPage, SPECIAL, spFile, parentsPage, parentTopicPage, PARENT_TOPICS, winterPage, choosePage, faqPage, studyPage, studyProgramPage, PROGRAMS, hubPage, subjectPage, regionPage, schoolFinderPage, subjectIndexPage, regionsIndexPage, teachersPage, teacherPage, specIndexPage, specPage, FINDER, listPage, postPage, contactPage, pricePage, indexPage, notFoundPage,
   hubFile, subFile, regionFile, subjIndexFile, encPath, TODAY, BLOG, ADMISSIONS };

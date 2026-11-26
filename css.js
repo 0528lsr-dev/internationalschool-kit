@@ -107,6 +107,19 @@ function buildCss(S) {
 .offer-pill{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:6px 14px;border-radius:999px;font-size:.84rem;font-weight:600}
 .offer-season{display:inline-block;margin-left:8px;background:#fff;color:var(--primary);padding:6px 14px;border-radius:999px;font-size:.84rem;font-weight:800;text-decoration:none}
 .offer-season:hover{background:#f3c9b8}
+/* 겨울 영어회화 이벤트 강조 (2026-11-26 사용자: "너무 특색없다") */
+.offer-event{background:linear-gradient(90deg,#ff7a18,#ff3d6e)!important;color:#fff!important;box-shadow:0 6px 18px rgba(255,90,60,.35);animation:evPulse 2.2s ease-in-out infinite}
+@keyframes evPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.lang-tabs a.tab-event{background:linear-gradient(90deg,#ff7a18,#ff3d6e);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(255,90,60,.3)}
+.lang-tabs a.tab-event.active{outline:3px solid #ffd2c2}
+.ev-banner{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:space-between;background:linear-gradient(100deg,#ff7a18 0%,#ff3d6e 60%,#c2185b 100%);color:#fff;border-radius:22px;padding:26px 30px;margin:26px 0 0;box-shadow:0 18px 40px -18px rgba(255,61,110,.7)}
+.ev-banner .ev-tag{display:inline-block;background:#fff;color:#ff3d6e;font-weight:900;font-size:.78rem;letter-spacing:.08em;border-radius:99px;padding:4px 12px;margin-bottom:8px}
+.ev-banner h3{color:#fff;font-size:1.6rem;margin:0 0 6px}
+.ev-banner p{margin:0;opacity:.95}
+.ev-banner a.ev-btn{background:#fff;color:#ff3d6e;font-weight:900;border-radius:99px;padding:14px 26px;text-decoration:none;white-space:nowrap}
+.ev-banner a.ev-btn:hover{background:#ffe9e0}
+.card.card-event{background:linear-gradient(135deg,#ff7a18,#ff3d6e);color:#fff!important;border:0}
+.card.card-event h3,.card.card-event p{color:#fff!important}
 @media (max-width:640px){.offer-season{margin:8px 0 0}}
 .offer-checks{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .offer-checks li{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 14px;font-size:.88rem;font-weight:600}
