@@ -189,8 +189,8 @@ def make(title, body, out_dir, category=''):
     return '\n\n'.join(out), paths
 
 
-# ---------- 네이버 클립 세로 영상 (1080x1920, 약 25~30초, 무음) ----------
-# 블로그 3개(국제학교·티쳐포유 / 말트임 / 자판기) 초안마다 하나씩 만든다. 사용자가 네이버 블로그 앱 클립으로 올리고 음악을 넣는다.
+# ---------- 네이버 클립 세로 영상 (1080x1920, 약 25~30초, 배경음악 포함 — 2026-11-26) ----------
+# 블로그 3개(국제학교·티쳐포유 / 말트임 / 자판기) 초안마다 하나씩 만든다. 사용자가 PC Clip Creators 로 블로그 글을 연결해 올린다(휴대폰 앱엔 블로그 연결이 없음).
 CW, CH = 1080, 1920
 
 
@@ -260,8 +260,18 @@ def make_clip(title, heads, P, brand, OFFER, site, out_dir):
     lst = os.path.join(tmp, 'list.txt')
     open(lst, 'w', encoding='utf-8').write(''.join(f"file '{p}'\n" for p in parts))
     clip = os.path.join(out_dir, 'clip.mp4')
-    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', lst,
-                    '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=stereo', '-shortest', '-c:v', 'copy', '-c:a', 'aac',
+    # 배경음악 (2026-11-26 사용자: "음악 넣어서 보내 주라, 앞으론") — sns/clip_music.py 가 직접 합성(저작권 없음), 날짜마다 다른 곡
+    total = sum(sec for _, sec in scenes)
+    music = os.path.join(tmp, 'music.wav')
+    try:
+        import clip_music
+        clip_music.make(music, total + 0.5, datetime.now(timezone(timedelta(hours=9))).toordinal())
+        audio = ['-i', music]
+    except Exception as e:
+        print('배경음악 실패(무음으로):', e)
+        audio = ['-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=stereo']
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', lst, *audio,
+                    '-map', '0:v', '-map', '1:a', '-shortest', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k', '-ar', '44100', '-ac', '2',
                     '-movflags', '+faststart', clip], check=True)
     print('클립 영상:', clip, os.path.getsize(clip) // 1024, 'KB')
     return clip
