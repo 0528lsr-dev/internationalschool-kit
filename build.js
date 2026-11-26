@@ -464,7 +464,7 @@ function winterTopicPage(S, T, D, posts = []) {
   <div class="wrap">
     <div class="crumb"><a href="${up}index.html">홈</a> › <a href="${up}winter.html">겨울방학 특강</a> › ${esc(T.name)}</div>
     <h1>${T.ico} ${esc(T.h1)}</h1>
-    <p class="lead">${esc(T.lead)}</p>
+    <p class="lead">${esc(T.lead).replace(/([.!?]) (?=\S)/g, "$1<br>")}</p>
     ${tabs}
     <div class="hero-cta" style="margin-top:18px"><a href="#apply" class="btn btn-primary">겨울방학 상담 · 20분 무료 테스트 수업</a><a href="tel:${TELRAW}" class="btn btn-ghost">📞 ${TEL}</a></div>
     ${evBanner}
@@ -581,7 +581,7 @@ function parentTopicPage(S, T) {
   <div class="wrap">
     <div class="crumb"><a href="${up}index.html">홈</a> › <a href="${up}parents.html">국제학교 학부모 영어</a> › ${esc(T.name)}</div>
     <h1>${T.ico} ${esc(T.h1)}</h1>
-    <p class="lead">${esc(T.lead)}</p>
+    <p class="lead">${esc(T.lead).replace(/([.!?]) (?=\S)/g, "$1<br>")}</p>
     ${tabs}
     <div class="hero-cta" style="margin-top:18px"><a href="#apply" class="btn btn-primary">20분 무료 테스트 수업 신청</a><a href="tel:${TELRAW}" class="btn btn-ghost">📞 ${TEL}</a></div>
   </div>

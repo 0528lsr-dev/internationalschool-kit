@@ -224,6 +224,8 @@ em{font-style:normal}
 .wrap{width:min(1160px,92vw);margin:0 auto}
 section{padding:clamp(60px,7vw,100px) 0}
 .lead{font-size:1.08rem;color:var(--ink-soft);max-width:660px}
+/* 2026-11-26 사용자: 소개 문장이 어중간하게 끊겨 내려옴 → 페이지 맨 위 소개는 넓게, 줄 길이를 고르게 */
+.page-hero .lead{max-width:780px;text-wrap:balance}
 .center{text-align:center}
 .center .lead,.lead.center{margin-left:auto;margin-right:auto}
 .muted{color:var(--ink-soft)}
