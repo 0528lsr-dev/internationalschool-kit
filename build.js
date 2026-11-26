@@ -414,7 +414,7 @@ function winterRegionPage(S, D, r) {
     <h1>${r.flag ? r.flag + ' ' : ''}${esc(r.label)} 국제학교 겨울방학 과외</h1>
     <p class="lead">${esc(r.full)} 국제학교 학생을 위한 1~2달 겨울방학 단기특강입니다. 학교 커리큘럼(${curs.map(c => curName[c]).join('·')})에 맞춰 지난 학기 빈 곳을 메우고 다음 학기를 미리 준비합니다. 1:1 화상 수업이라 ${r.abroad ? '현지에 있어도, 방학에 한국에 들어와 있어도' : '이동 없이 집에서'} 같은 선생님과 수업합니다.</p>
     <div class="hero-cta" style="margin-top:18px"><a href="#apply" class="btn btn-primary">겨울방학 상담 · 20분 무료 테스트 수업</a><a href="tel:${TELRAW}" class="btn btn-ghost">📞 ${TEL}</a></div>
-    <div class="ev-banner"><div><span class="ev-tag">WINTER EVENT</span><h3>🔥 겨울방학 영어회화 바짝 올리기</h3><p>방학 동안 매일 말하는 시간 — 개학 첫 수업부터 손을 들 수 있게</p></div><a class="ev-btn" href="${up}winter/speaking.html">이벤트 보기 →</a></div>
+    <div class="ev-banner"><div><span class="ev-tag">WINTER EVENT</span><h3>🔥 겨울방학 영어회화 바짝 올리기</h3><p><b>선착순 30명</b> · 형제·친구와 <b>함께 등록하면 상품권 5만원</b> 🎁 — 방학 동안 말하기 바짝 올리기</p></div><a class="ev-btn" href="${up}winter/speaking.html">이벤트 보기 →</a></div>
   </div>
 </section>
 <section>
@@ -456,7 +456,7 @@ function winterTopicPage(S, T, D, posts = []) {
   const up = '../';
   const tabs = `<div class="lang-tabs">${WINTER_TOPICS.map(x => `<a href="${x.key}.html" class="${[x.event ? 'tab-event' : '', x.key === T.key ? 'active' : ''].join(' ').trim()}">${x.event ? '🔥 ' : ''}${esc(x.name)}</a>`).join('')}</div>`;
   const ev = WINTER_TOPICS.find(x => x.event);
-  const evBanner = ev && ev.key !== T.key ? `<div class="ev-banner"><div><span class="ev-tag">WINTER EVENT</span><h3>🔥 겨울방학 영어회화 바짝 올리기</h3><p>방학 동안 매일 말하는 시간 — 개학 첫 수업부터 손을 들 수 있게</p></div><a class="ev-btn" href="${ev.key}.html">이벤트 보기 →</a></div>` : '';
+  const evBanner = ev && ev.key !== T.key ? `<div class="ev-banner"><div><span class="ev-tag">WINTER EVENT</span><h3>🔥 겨울방학 영어회화 바짝 올리기</h3><p><b>선착순 30명</b> · 형제·친구와 <b>함께 등록하면 상품권 5만원</b> 🎁 — 방학 동안 말하기 바짝 올리기</p></div><a class="ev-btn" href="${ev.key}.html">이벤트 보기 →</a></div>` : '';
   const others = WINTER_TOPICS.filter(x => x.key !== T.key).slice(0, 6);
   return page(S, { path: `winter/${T.key}.html`, up, active: 'winter', ld: { '@context': 'https://schema.org', '@graph': [crumbLd(S, [['홈', 'index.html'], ['겨울방학 특강', 'winter.html'], [T.name, `winter/${T.key}.html`]]), faqLd(T.faq)] },
     title: `${T.title} | ${S.brand}`, desc: T.lead.slice(0, 150), kw: T.kw }, `
@@ -470,6 +470,17 @@ function winterTopicPage(S, T, D, posts = []) {
     ${evBanner}
   </div>
 </section>
+${T.benefits ? `<section style="padding-bottom:0">
+  <div class="wrap">
+    <div class="ev-banner" style="display:block;margin:0">
+      <span class="ev-tag">WINTER EVENT · 선착순 30명</span>
+      <h3 style="font-size:1.9rem">🔥 겨울방학 영어회화 바짝 올리기 이벤트</h3>
+      <div class="grid g3" style="margin-top:16px">${T.benefits.map(([i, h, p]) => `<div style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:16px;padding:18px"><div style="font-size:2rem">${i}</div><h4 style="color:#fff;margin:6px 0;font-size:1.15rem">${esc(h)}</h4><p style="margin:0;font-size:.95rem">${esc(p)}</p></div>`).join('')}</div>
+      <p style="margin:18px 0 0;text-align:center"><a class="ev-btn" href="#apply">지금 이벤트 신청하기 →</a></p>
+      <p class="small" style="margin:12px 0 0;text-align:center;opacity:.85">상품권 지급 방법과 자세한 조건은 상담 때 안내해 드립니다. 선착순 마감 시 이벤트가 끝납니다.</p>
+    </div>
+  </div>
+</section>` : ''}
 <section>
   <div class="wrap">
     <div class="sec-head center"><span class="eyebrow">This Winter</span><h2>이번 겨울방학, 이렇게 준비합니다</h2></div>
@@ -515,7 +526,7 @@ function winterPage(S, D) {
     <h1>국제학교 겨울방학 과외<br><em>1~2달, 다음 학기를 바꾸는 시간</em></h1>
     <p class="lead">학교 수업이 쉬는 방학은 부족한 단원을 채우고 다음 학기를 미리 준비하기 가장 좋은 때입니다. 아이 학교 커리큘럼에 맞춰 1:1로 집중합니다.</p>
     <div class="hero-cta" style="margin-top:18px"><a href="#f_winter" class="btn btn-primary">겨울방학 상담 신청</a><a href="price.html" class="btn btn-ghost">기본 수강료 보기</a></div>
-    <div class="ev-banner"><div><span class="ev-tag">WINTER EVENT</span><h3>🔥 겨울방학 영어회화 바짝 올리기</h3><p>방학 동안 매일 말하는 시간 — 개학 첫 수업부터 손을 들 수 있게. 20분 무료 테스트 수업으로 말하기 수준부터 확인해요.</p></div><a class="ev-btn" href="winter/speaking.html">이벤트 보기 →</a></div>
+    <div class="ev-banner"><div><span class="ev-tag">WINTER EVENT</span><h3>🔥 겨울방학 영어회화 바짝 올리기</h3><p><b>선착순 30명</b> · 형제·친구와 <b>함께 등록하면 상품권 5만원</b> 🎁 · 20분 무료 테스트 수업으로 말하기 수준부터 확인해요.</p></div><a class="ev-btn" href="winter/speaking.html">이벤트 보기 →</a></div>
   </div>
 </section>
 <section>
@@ -1618,7 +1629,7 @@ function indexPage(S, D, blog) {
     /* 2026-11-11 offer — 휴대폰 첫 화면에 "무엇을·얼마에·어떻게 신청" 이 다 보이게 (사용자: 사진 정신없고 신청 충동이 안 든다).
        버건디 단색 배경, 약속 4개, 버튼 2개(무료 테스트·카톡), 수강료 카드, 그 아래 학교 찾기. */
     offer: () => `<div class="in">
-      <span class="offer-pill">국내·해외 국제학교 학생 1:1 화상 과외</span>${WINTER_ON ? `<a class="offer-season" href="winter.html">❄ 겨울방학 단기특강 상담 중 →</a><a class="offer-season offer-event" href="winter/speaking.html">🔥 EVENT · 겨울방학 영어회화 바짝 올리기 →</a>` : ''}
+      <span class="offer-pill">국내·해외 국제학교 학생 1:1 화상 과외</span>${WINTER_ON ? `<a class="offer-season" href="winter.html">❄ 겨울방학 단기특강 상담 중 →</a><a class="offer-season offer-event" href="winter/speaking.html">🔥 EVENT · 선착순 30명 · 함께 등록 시 상품권 5만원 →</a>` : ''}
       ${h1}
       <p class="lead">IB·AP·IGCSE·A-Level, 아이 학교의 과제와 시험 일정에 맞춰<br class="pc"> 선생님과 실시간 1:1로 수업합니다.</p>
       <ul class="offer-checks">${['IB · AP · IGCSE · A-Level · SAT', '학교 과제 · 시험 일정 맞춤', '국내 · 해외 시차 맞춰 수업', '수업마다 학습 리포트'].map(x => `<li>${x}</li>`).join('')}</ul>
